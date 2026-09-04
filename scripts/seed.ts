@@ -256,9 +256,9 @@ async function main() {
   const announcements: TablesInsert<"announcements">[] = [
     { title: "Welcome to the new MUN year", body: "Sessions run every Wednesday at 15:45 in B204. Bring a notebook, your placard and a printed copy of the rules.", author_id: id("exec"), pinned: true },
     { title: "Position papers due before the clinic", body: "Every delegate in UNSC and WHO uploads a one-page position paper before the Position Paper Clinic. Use the template in Materials.", author_id: id("exec"), pinned: true, target_session_id: sid(4) },
-    { title: "UNSC: speakers' list opens at 15:40", body: "Arrive five minutes early. Delegates of Ghana and Japan open the general speakers' list.", author_id: id("chair_unsc"), target_committee_id: cid("unsc") },
-    { title: "Chairs: placards and rules cards", body: "Collect placards from the Secretariat desk before your committee time.", author_id: id("exec"), target_role: "chair" },
-    { title: "WHO: background guide updated", body: "Section 3 now covers the 2024 AWaRe classification. Reread before the next debate.", author_id: id("chair_who"), target_committee_id: cid("who") },
+    { title: "UNSC: speakers' list opens at 15:40", body: "Arrive five minutes early. Delegates of Ghana and Japan open the general speakers' list.", author_id: id("chair_unsc"), pinned: false, target_committee_id: cid("unsc") },
+    { title: "Chairs: placards and rules cards", body: "Collect placards from the Secretariat desk before your committee time.", author_id: id("exec"), pinned: false, target_role: "chair" },
+    { title: "WHO: background guide updated", body: "Section 3 now covers the 2024 AWaRe classification. Reread before the next debate.", author_id: id("chair_who"), pinned: false, target_committee_id: cid("who") },
   ];
   {
     const { error } = await db.from("announcements").insert(announcements);

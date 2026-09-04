@@ -48,7 +48,10 @@ export async function requestLoginCode(_prev: ActionResult | null, formData: For
   if (!isAllowedSchoolEmail(email)) return fail(`Only school addresses can sign in. Use your ${domainList()} email.`);
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: false, emailRedirectTo: `${siteUrl}/auth/callback?next=/dashboard` },
+  });
   if (error) {
     if (/signups not allowed|not found/i.test(error.message)) {
       return fail("No account exists for this email yet. Use “First time here?” to set one up.");

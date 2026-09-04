@@ -184,7 +184,9 @@ Any Node 20.9+ host works the same way (`npm run build && npm start`).
 
 ## Email templates
 
-Supabase's default templates send a link only. For the code-based flows, include `{{ .Token }}` in:
+On hosted Supabase, email templates can only be edited once **custom SMTP** is configured (Authentication → Emails → SMTP Settings). Until then Supabase's default templates are used: they carry a sign-in link and no code. The link lands on `/auth/callback`, which completes setup, sign-in or password reset, so every flow still works; just open the link in the same browser you started from. The built-in email service is also rate-limited to a few messages per hour, which is fine for testing but not for a whole programme.
+
+Once custom SMTP is set up, include `{{ .Token }}` in these templates so the six-digit code flows work too:
 
 - **Magic Link** (used by first-time setup and code sign-in)
 - **Reset password** (recovery code)
@@ -194,6 +196,6 @@ Reference templates are in `supabase/templates/`. Links keep working too: they l
 ## Troubleshooting
 
 - **"Database error saving new user"** when requesting a code: the email's domain is not in the `allowed_email_domains` table. Add it in Admin → School domains (or re-run the seed) and to `ALLOWED_SCHOOL_DOMAINS`.
-- **The code email has no code**: the Magic Link template has not been customized with `{{ .Token }}`. Clicking the link still works.
+- **The code email has no code**: the default template is in use (custom SMTP is required to edit templates). Clicking the link still works and completes the same flow.
 - **Downloads return 404**: the viewer cannot see the row (RLS), or the object was removed from storage.
 - **Chair notes missing**: only chairs of that committee and staff can read them; the column is hidden at database level and served through `session_chair_notes()`.

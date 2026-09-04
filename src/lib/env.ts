@@ -1,0 +1,17 @@
+/**
+ * Central place for reading configuration. Anything not prefixed with
+ * NEXT_PUBLIC_ is only ever read on the server.
+ */
+
+export function getAllowedSchoolDomains(source: string | undefined = process.env.ALLOWED_SCHOOL_DOMAINS): string[] {
+  return (source ?? "")
+    .split(",")
+    .map((d) => d.trim().toLowerCase().replace(/^@/, ""))
+    .filter((d) => d.length > 0);
+}
+
+export const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "MUN Session Hub";
+export const schoolName = process.env.NEXT_PUBLIC_SCHOOL_NAME ?? "the school";
+export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
+export const MAX_UPLOAD_BYTES = Number(process.env.MAX_UPLOAD_BYTES ?? 15 * 1024 * 1024);

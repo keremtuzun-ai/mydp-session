@@ -196,6 +196,10 @@ The app is a standard Next.js application. On any Vercel project:
 
 Any Node 20.9+ host works the same way (`npm run build && npm start`).
 
+## Email delivery
+
+Production sends every auth email through the app itself: Supabase's **Send Email** auth hook posts to `/api/auth/send-email`, which verifies the Standard Webhooks signature and sends the branded MUNDP template (code + link) through Resend. That bypasses the built-in mailer and its hourly quota. Configure `RESEND_API_KEY`, `EMAIL_FROM` (an address on a domain verified in Resend) and `SEND_EMAIL_HOOK_SECRET` (from Authentication → Auth Hooks → Send Email), then enable the hook with the production URL.
+
 ## Email templates
 
 Branded MUNDP templates live in `supabase/templates/` (magic link / code, confirm signup, password reset, email change, invite). They carry the logo, the six-digit `{{ .Token }}` and the `{{ .ConfirmationURL }}` button. The local stack loads them from `config.toml`. On hosted Supabase, paste each one into Authentication → Emails → Templates once custom SMTP is enabled (Authentication → Emails → SMTP Settings): Supabase's built-in mailer is limited to a handful of emails per hour and does not allow template edits.

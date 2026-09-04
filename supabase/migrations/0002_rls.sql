@@ -201,3 +201,5 @@ create policy "feedback_insert" on public.session_feedback for insert to authent
   with check (author_id = auth.uid() and (public.is_staff() or public.chairs_member(profile_id)));
 create policy "feedback_delete" on public.session_feedback for delete to authenticated
   using (author_id = auth.uid() or public.is_staff());
+
+-- NOTE: the tasks_select policy above is superseded by 0006_tasks_select_policy.sql.

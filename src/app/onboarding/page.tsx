@@ -13,7 +13,7 @@ export default async function OnboardingPage() {
   const { user, profile } = await getAuthState();
   if (!user) redirect("/welcome");
   if (profile?.onboarding_completed_at) redirect("/dashboard");
-  if (!user.email || !user.email_confirmed_at || !isAllowedSchoolEmail(user.email)) redirect("/login?error=domain");
+  if (!user.email || !isAllowedSchoolEmail(user.email)) redirect("/login?error=domain");
 
   return (
     <>
@@ -38,9 +38,9 @@ export default async function OnboardingPage() {
       <main className="main-area">
         <div className="main-inner main-inner-auth">
           <section className="auth-card !max-w-[680px]">
-            <span className="page-kicker">First-time setup · step 2 of 2</span>
+            <span className="page-kicker">Step 2 of 2 · profile</span>
             <h1>Complete your profile</h1>
-            <p className="muted mt-[-0.5rem] mb-5">Your school email is verified. Choose a username and password for everyday sign-in, and tell us who you are.</p>
+            <p className="muted mt-[-0.5rem] mb-5">Your account is ready. Tell us who you are and pick a username; your school email and password are what you sign in with.</p>
             <OnboardingForm />
           </section>
         </div>

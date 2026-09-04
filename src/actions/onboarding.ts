@@ -29,9 +29,7 @@ export async function completeOnboarding(_prev: ActionResult | null, formData: F
   } = await supabase.auth.getUser();
   if (!user) redirect("/welcome");
 
-  // Server-side proof of school-email verification.
-  if (!user.email || !user.email_confirmed_at) return fail("Verify your school email before continuing.");
-  if (!isAllowedSchoolEmail(user.email)) return fail("Your email is not from an approved school domain.");
+  if (!user.email || !isAllowedSchoolEmail(user.email)) return fail("Your email is not from an approved school domain.");
 
   const { data: profile } = await supabase.from("profiles").select("onboarding_completed_at").eq("id", user.id).maybeSingle();
   if (profile?.onboarding_completed_at) redirect("/dashboard");
@@ -41,8 +39,6 @@ export async function completeOnboarding(_prev: ActionResult | null, formData: F
     grade: formData.get("grade"),
     phone: formData.get("phone") ?? "",
     username: formData.get("username"),
-    password: formData.get("password"),
-    confirm_password: formData.get("confirm_password"),
   });
   if (!parsed.success) return fail("Check the highlighted fields.", fieldErrors(parsed.error.issues));
   const input = parsed.data;
@@ -62,9 +58,6 @@ export async function completeOnboarding(_prev: ActionResult | null, formData: F
     if (upErr) return fail(`Could not upload the photo: ${upErr.message}`);
     avatar_url = supabase.storage.from("avatars").getPublicUrl(path).data.publicUrl;
   }
-
-  const { error: pwErr } = await supabase.auth.updateUser({ password: input.password });
-  if (pwErr) return fail(`Could not set the password: ${pwErr.message}`);
 
   const { error } = await supabase
     .from("profiles")

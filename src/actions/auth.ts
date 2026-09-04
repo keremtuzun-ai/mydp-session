@@ -1,149 +1,71 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { z } from "zod";
-import { createClient, createOtpClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAllowedSchoolEmail, normalizeEmail } from "@/lib/auth/domains";
-import { getAllowedSchoolDomains, siteUrl } from "@/lib/env";
-import { emailSchema, otpSchema, passwordLoginSchema, passwordSchema } from "@/lib/validation/schemas";
-import { fail, ok, type ActionResult } from "@/lib/action-result";
+import { getAllowedSchoolDomains } from "@/lib/env";
+import { signUpSchema, emailPasswordLoginSchema } from "@/lib/validation/schemas";
+import { fail, type ActionResult } from "@/lib/action-result";
 import { logAudit } from "@/lib/audit";
-
-const RATE_LIMIT_MESSAGE =
-  "The email service has sent its hourly quota. Wait about an hour and try again, or sign in with your username and password if you already have one.";
 
 function domainList() {
   const d = getAllowedSchoolDomains();
   return d.length ? d.map((x) => `@${x}`).join(", ") : "the school's domains";
 }
 
-/** Step 1 of first-time setup: send a one-time code to a school address. */
-export async function startFirstTimeSetup(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
-  const parsed = emailSchema.safeParse(formData.get("email"));
-  if (!parsed.success) return fail("Enter a valid email address.");
-  const email = normalizeEmail(parsed.data);
-  if (!isAllowedSchoolEmail(email)) {
-    return fail(`Only school addresses can join. Use your ${domainList()} email.`);
-  }
-
-  // If this address already finished onboarding, guide them to sign in instead.
-  const admin = createAdminClient();
-  const { data: existing } = await admin.from("profiles").select("onboarding_completed_at").eq("school_email", email).maybeSingle();
-  if (existing?.onboarding_completed_at) {
-    return fail("An account already exists for this email. Use “Already have an account” to sign in.");
-  }
-
-  const supabase = await createOtpClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { shouldCreateUser: true, emailRedirectTo: `${siteUrl}/auth/callback` },
-  });
-  if (error) return fail(/rate limit/i.test(error.message) ? RATE_LIMIT_MESSAGE : error.message);
-  redirect(`/verify?email=${encodeURIComponent(email)}&flow=setup`);
+function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
+  const out: Record<string, string[]> = {};
+  for (const i of issues) (out[String(i.path[0] ?? "form")] ??= []).push(i.message);
+  return out;
 }
 
-/** Send a sign-in code to an existing account. Never creates accounts. */
-export async function requestLoginCode(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
-  const parsed = emailSchema.safeParse(formData.get("email"));
-  if (!parsed.success) return fail("Enter a valid email address.");
-  const email = normalizeEmail(parsed.data);
-  if (!isAllowedSchoolEmail(email)) return fail(`Only school addresses can sign in. Use your ${domainList()} email.`);
-
-  const supabase = await createOtpClient();
-  const { error } = await supabase.auth.signInWithOtp({
-    email,
-    options: { shouldCreateUser: false, emailRedirectTo: `${siteUrl}/auth/callback` },
-  });
-  if (error) {
-    if (/signups not allowed|not found/i.test(error.message)) {
-      return fail("No account exists for this email yet. Use “First time here?” to set one up.");
-    }
-    return fail(/rate limit/i.test(error.message) ? RATE_LIMIT_MESSAGE : error.message);
-  }
-  redirect(`/verify?email=${encodeURIComponent(email)}&flow=login`);
-}
-
-/** Exchange the emailed 6-digit code for a session. */
-export async function verifyEmailCode(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
-  const parsed = otpSchema.safeParse({ email: formData.get("email"), token: formData.get("token") });
-  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Check the code and try again.");
-  const email = normalizeEmail(parsed.data.email);
-  if (!isAllowedSchoolEmail(email)) return fail("This email is not from an approved school domain.");
-
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.verifyOtp({ email, token: parsed.data.token, type: "email" });
-  if (error || !data.user) return fail("That code is invalid or has expired. Request a new one.");
-
-  const { data: profile } = await supabase.from("profiles").select("onboarding_completed_at").eq("id", data.user.id).maybeSingle();
-  redirect(profile?.onboarding_completed_at ? "/dashboard" : "/onboarding");
+function safeNext(value: FormDataEntryValue | null) {
+  const next = typeof value === "string" ? value : "";
+  return next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
 }
 
 /**
- * Username + password sign-in. The username is resolved to the verified
- * school email on the server with the service-role client; the email is never
- * sent to the browser. A username alone can never authenticate.
+ * Create an account with a school email and a password. No verification
+ * email: the account is created server-side (already confirmed) as long as
+ * the domain is on the school allow-list, then the member is signed in and
+ * sent to onboarding.
  */
-export async function signInWithPassword(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
-  const parsed = passwordLoginSchema.safeParse({ username: formData.get("username"), password: formData.get("password") });
-  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Enter your username and password.");
-  const next = typeof formData.get("next") === "string" ? String(formData.get("next")) : "/dashboard";
+export async function signUpWithPassword(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  const parsed = signUpSchema.safeParse({ email: formData.get("email"), password: formData.get("password"), confirm_password: formData.get("confirm_password") });
+  if (!parsed.success) return fail("Check the highlighted fields.", fieldErrors(parsed.error.issues));
+  const email = normalizeEmail(parsed.data.email);
+  if (!isAllowedSchoolEmail(email)) return fail("Check the highlighted fields.", { email: [`Only school addresses can join. Use your ${domainList()} email.`] });
 
   const admin = createAdminClient();
-  const { data: profile } = await admin
-    .from("profiles")
-    .select("school_email, onboarding_completed_at")
-    .eq("username", parsed.data.username)
-    .maybeSingle();
+  const { data: existing } = await admin.from("profiles").select("id, onboarding_completed_at").eq("school_email", email).maybeSingle();
+  if (existing) {
+    return fail("An account already exists for this email. Sign in instead.", { email: ["Already registered"] });
+  }
 
-  const invalid = fail("Incorrect username or password.");
-  if (!profile) return invalid;
-
-  const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email: profile.school_email, password: parsed.data.password });
-  if (error) return invalid;
-  redirect(next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard");
-}
-
-/** Password reset only through the verified school email. */
-export async function requestPasswordReset(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
-  const parsed = emailSchema.safeParse(formData.get("email"));
-  if (!parsed.success) return fail("Enter a valid email address.");
-  const email = normalizeEmail(parsed.data);
-  if (!isAllowedSchoolEmail(email)) return fail(`Only school addresses can reset a password. Use your ${domainList()} email.`);
-
-  const supabase = await createOtpClient();
-  await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${siteUrl}/auth/callback` });
-  // Same message whether or not the account exists, to avoid enumeration.
-  return ok(undefined, "If an account exists for that email, a reset link and code are on the way.");
-}
-
-/** Used by the reset flow after the recovery link/code established a session. */
-export async function updatePasswordFromRecovery(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
-  const schema = z.object({ password: passwordSchema, confirm_password: z.string() }).refine((v) => v.password === v.confirm_password, {
-    path: ["confirm_password"],
-    message: "Passwords do not match",
-  });
-  const parsed = schema.safeParse({ password: formData.get("password"), confirm_password: formData.get("confirm_password") });
-  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Check the password fields.");
+  const { data: created, error } = await admin.auth.admin.createUser({ email, password: parsed.data.password, email_confirm: true });
+  if (error || !created.user) {
+    const msg = error?.message ?? "Could not create the account.";
+    return fail(/already|exists/i.test(msg) ? "An account already exists for this email. Sign in instead." : msg);
+  }
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return fail("Your reset link has expired. Request a new one.");
-  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
-  if (error) return fail(error.message);
-  await logAudit({ actorId: user.id, action: "password.reset", entityType: "profile", entityId: user.id });
-  redirect("/dashboard?reset=1");
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password: parsed.data.password });
+  if (signInError) return fail("Account created, but sign-in failed. Go to the sign-in page and use your email and password.");
+  await logAudit({ actorId: created.user.id, action: "account.created", entityType: "profile", entityId: created.user.id });
+  redirect("/onboarding");
 }
 
-/** Verify a recovery code typed by hand (when the email includes {{ .Token }}). */
-export async function verifyRecoveryCode(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
-  const parsed = otpSchema.safeParse({ email: formData.get("email"), token: formData.get("token") });
-  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Check the code and try again.");
+/** Everyday sign-in: school email + password, required on every visit. */
+export async function signInWithEmailPassword(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  const parsed = emailPasswordLoginSchema.safeParse({ email: formData.get("email"), password: formData.get("password") });
+  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Enter your email and password.");
+  const email = normalizeEmail(parsed.data.email);
+  const next = safeNext(formData.get("next"));
+
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({ email: normalizeEmail(parsed.data.email), token: parsed.data.token, type: "recovery" });
-  if (error) return fail("That code is invalid or has expired.");
-  redirect("/reset-password/update");
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: parsed.data.password });
+  if (error || !data.user) return fail("Incorrect email or password.");
+  const { data: profile } = await supabase.from("profiles").select("onboarding_completed_at").eq("id", data.user.id).maybeSingle();
+  redirect(profile?.onboarding_completed_at ? next : "/onboarding");
 }

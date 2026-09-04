@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/lib/types/database";
+import { sessionOnly } from "@/lib/supabase/cookies";
 
 /** Refreshes the auth cookie on every request and returns the user (if any). */
 export async function refreshSession(request: NextRequest) {
@@ -16,7 +17,7 @@ export async function refreshSession(request: NextRequest) {
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, sessionOnly(options)));
         },
       },
     },

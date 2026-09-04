@@ -50,13 +50,11 @@ tests/                        unit tests + opt-in live RLS tests
 
 ## Authentication flow
 
-1. **First time**: `/welcome` takes a school email. The server rejects anything outside `ALLOWED_SCHOOL_DOMAINS` (`lib/auth/domains.ts`), refuses addresses that already finished onboarding, then calls `signInWithOtp({ shouldCreateUser: true })`. A `before insert` trigger on `auth.users` refuses domains missing from `allowed_email_domains`, so the rule also holds for direct API calls.
-2. **Verify**: `/verify` submits the six-digit code (`verifyOtp type=email`). Emailed links land on `/auth/callback`, which also re-checks the domain.
-3. **Onboarding**: `/onboarding` is reachable only with a session whose profile has `onboarding_completed_at IS NULL`. The page and the `completeOnboarding` action both require `email_confirmed_at` and an allowed domain. The username is validated (`^[a-z0-9-]{3,24}$`, no edge hyphens, not reserved), checked live via `/api/username-available` and again server-side via `username_available()`, and protected by a unique index. The password is set with `auth.updateUser`. The profile trigger refuses to set `onboarding_completed_at` without username, name and grade.
-4. **Gate**: `lib/auth/gate.ts` is a pure function used by `proxy.ts` and by `getViewer()`. Signed out → `/login?next=`; signed in but not onboarded → `/onboarding` (everything else redirects there); onboarded → cannot revisit onboarding or the sign-in pages.
-5. **Everyday sign-in**: username + password (username resolved server-side to the email; a username alone never authenticates) or a code at the school email (`shouldCreateUser: false`).
-6. **Reset**: `resetPasswordForEmail` restricted to allowed domains; the link or recovery code lands the user on `/reset-password/update`.
-7. **Sessions**: sign-out route (`scope: local`), "sign out other devices" (`scope: others`).
+1. **Create account** (`/welcome`): school email + password. The server rejects domains outside `ALLOWED_SCHOOL_DOMAINS`, refuses duplicates, and creates the user with the service-role admin API already confirmed, so no verification email is needed. A `before insert` trigger on `auth.users` refuses domains missing from `allowed_email_domains`, so the rule also holds for direct API calls.
+2. **Onboarding** (`/onboarding`): reachable only with a session whose profile has `onboarding_completed_at IS NULL`; collects name, grade, phone, unique username (live check via `/api/username-available`, unique index) and photo.
+3. **Gate**: `lib/auth/gate.ts` is a pure function used by `proxy.ts` and by `getViewer()`. Signed out → `/login?next=`; signed in but not onboarded → `/onboarding`; onboarded → cannot revisit onboarding or the sign-in pages.
+4. **Every visit**: auth cookies are session cookies (`lib/supabase/cookies.ts` strips max-age/expires in the server, proxy and browser clients), so closing the browser ends the session and members sign in again with email + password. All progress lives in Postgres, never in the cookie.
+5. **Forgotten passwords**: executives and admins set a temporary password from the admin console (`setTemporaryPassword`, audited); members change it in Settings.
 
 ## Permission model
 

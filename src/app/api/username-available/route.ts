@@ -2,13 +2,13 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { usernameSchema } from "@/lib/auth/username";
 
-/** Live username check during onboarding. Requires a verified session. */
+/** Live username check during onboarding. Requires a session. */
 export async function GET(request: NextRequest) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user || !user.email_confirmed_at) return NextResponse.json({ error: "Verify your email first" }, { status: 401 });
+  if (!user) return NextResponse.json({ error: "Sign in first" }, { status: 401 });
 
   const raw = request.nextUrl.searchParams.get("u") ?? "";
   const parsed = usernameSchema.safeParse(raw);

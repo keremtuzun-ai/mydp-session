@@ -32,7 +32,7 @@ export default async function SettingsPage() {
           <Card id="security">
             <CardHeader>
               <CardTitle>Password</CardTitle>
-              <CardDescription>Used together with your username to sign in. You can always sign in with an emailed code instead.</CardDescription>
+              <CardDescription>Used together with your school email to sign in. If you forget it, an executive or admin can set a temporary one.</CardDescription>
             </CardHeader>
             <CardContent>
               <PasswordForm />

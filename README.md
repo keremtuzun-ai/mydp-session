@@ -96,7 +96,7 @@ supabase gen types typescript --local > src/lib/types/database.ts
 
 ## Test accounts (local development only)
 
-Created by the seed under the first domain in `ALLOWED_SCHOOL_DOMAINS` (shown here as `school.edu`). Password for all: the value of `SEED_PASSWORD` (default `MunHub!2026`). Sign in with **username + password** or request a code at the email.
+Created by the seed under the first domain in `ALLOWED_SCHOOL_DOMAINS` (shown here as `school.edu`). Password for all: the value of `SEED_PASSWORD` (default `MunHub!2026`). Sign in with **school email + password**.
 
 | Role | Username | Email | Committees |
 | --- | --- | --- | --- |
@@ -129,10 +129,9 @@ Authorization is enforced in the database (RLS + triggers) and again in server a
 | Route | Purpose |
 | --- | --- |
 | `/` | Landing page with "First-time setup" and "Sign in" |
-| `/welcome` | First-time: school email → one-time code |
-| `/verify` | Enter the six-digit code (setup or code sign-in) |
-| `/login` | Username + password, or school-email code; reset link |
-| `/reset-password`, `/reset-password/update` | Password reset by verified school email |
+| `/welcome` | Create an account: school email + password (no verification email) |
+| `/login` | School email + password, required on every visit (session ends when the browser closes) |
+| `/reset-password` | Explains that executives/admins set temporary passwords from the admin console |
 | `/onboarding` | Name, grade, phone, unique username, password, photo (only after email verification) |
 | `/dashboard` | Next session, committee, upcoming tasks, announcements, attendance, quick links |
 | `/sessions`, `/sessions/new`, `/sessions/[id]`, `/sessions/[id]/edit` | Weekly session archive, detail with committee blocks, tasks, resources, feedback |
@@ -145,7 +144,6 @@ Authorization is enforced in the database (RLS + triggers) and again in server a
 | `/analytics` | Staff-only metrics and charts |
 | `/settings` | Profile, photo, password, sessions; read-only email, username, role |
 | `/admin`, `/admin/committees`, `/admin/sessions`, `/admin/templates`, `/admin/domains`, `/admin/audit` | Admin console |
-| `/auth/callback` | Email link landing (magic link, recovery) |
 | `/auth/signout` (POST) | Sign out |
 | `/api/username-available` | Live username check (requires verified session) |
 | `/api/files/[kind]/[id]` | RLS-checked redirect to a short-lived signed download URL |
@@ -196,22 +194,9 @@ The app is a standard Next.js application. On any Vercel project:
 
 Any Node 20.9+ host works the same way (`npm run build && npm start`).
 
-## Email delivery
+## Email
 
-Production sends every auth email through the app itself: Supabase's **Send Email** auth hook posts to `/api/auth/send-email`, which verifies the Standard Webhooks signature and sends the branded MUNDP template (code + link) through Resend. That bypasses the built-in mailer and its hourly quota. Configure `RESEND_API_KEY`, `EMAIL_FROM` (an address on a domain verified in Resend) and `SEND_EMAIL_HOOK_SECRET` (from Authentication → Auth Hooks → Send Email), then enable the hook with the production URL. The live project has this enabled; the sender is currently on the `frcrams.com` domain until `modelundp.org` is verified in Resend.
-
-## Email templates
-
-Branded MUNDP templates live in `supabase/templates/` (magic link / code, confirm signup, password reset, email change, invite). They carry the logo, the six-digit `{{ .Token }}` and the `{{ .ConfirmationURL }}` button. The local stack loads them from `config.toml`. On hosted Supabase, paste each one into Authentication → Emails → Templates once custom SMTP is enabled (Authentication → Emails → SMTP Settings): Supabase's built-in mailer is limited to a handful of emails per hour and does not allow template edits.
-
-On hosted Supabase, email templates can only be edited once **custom SMTP** is configured (Authentication → Emails → SMTP Settings). Until then Supabase's default templates are used: they carry a sign-in link and no code. The link lands on `/auth/callback`, which completes setup, sign-in or password reset, so every flow still works; just open the link in the same browser you started from. The built-in email service is also rate-limited to a few messages per hour, which is fine for testing but not for a whole programme.
-
-Once custom SMTP is set up, include `{{ .Token }}` in these templates so the six-digit code flows work too:
-
-- **Magic Link** (used by first-time setup and code sign-in)
-- **Reset password** (recovery code)
-
-Reference templates are in `supabase/templates/`. Links keep working too: they land on `/auth/callback`, which exchanges the code and routes the user to onboarding, the reset page, or the dashboard.
+No emails are sent. Accounts are created directly with a school email and password (the domain allow-list is still enforced by the app and by the database trigger), and forgotten passwords are reset by executives or admins from Admin → Users & roles, which generates a temporary password shown once. The branded templates in `supabase/templates/` are kept for a future email-based flow.
 
 ## Troubleshooting
 

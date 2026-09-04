@@ -26,6 +26,7 @@ describe("auth + onboarding gate", () => {
   it("onboarded users cannot re-enter onboarding or the sign-in pages", () => {
     expect(decideGate("/onboarding", verified, complete)).toMatchObject({ kind: "redirect", to: "/dashboard", reason: "already-onboarded" });
     expect(decideGate("/login", verified, complete)).toMatchObject({ kind: "redirect", to: "/dashboard" });
+    expect(decideGate("/welcome", verified, complete)).toMatchObject({ kind: "redirect", to: "/dashboard" });
     expect(decideGate("/dashboard", verified, complete)).toEqual({ kind: "allow" });
     expect(decideGate("/admin", verified, complete)).toEqual({ kind: "allow" }); // role is checked in the page, not the gate
   });

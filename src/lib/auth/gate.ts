@@ -6,7 +6,7 @@
 export type GateUser = { id: string; email: string | null; emailConfirmed: boolean } | null;
 export type GateProfile = { onboardingCompletedAt: string | null } | null;
 
-export const PUBLIC_PATHS = ["/", "/login", "/welcome", "/verify", "/reset-password", "/auth", "/api/auth"];
+export const PUBLIC_PATHS = ["/", "/login", "/welcome", "/reset-password", "/auth"];
 export const ONBOARDING_PATH = "/onboarding";
 
 export function isPublicPath(pathname: string) {

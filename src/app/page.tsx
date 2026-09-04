@@ -57,7 +57,7 @@ export default function LandingPage() {
               </p>
               <div className="front-hero-actions">
                 <Link href="/welcome" className="btn btn-lg">
-                  First-time setup
+                  Create account
                 </Link>
                 <Link href="/login" className="btn btn-outline btn-lg">
                   Already have an account
@@ -72,7 +72,7 @@ export default function LandingPage() {
               ["Sessions", "Two every Tuesday, 10:55 and 15:10: each with a room, an agenda and a committee line-up."],
               ["Calendar", "Position papers, speeches and research briefs assigned, tracked and reviewed by your chair."],
               ["Committees", "Topic, background guide, chair team, members, resources and submissions in one workspace."],
-              ["School accounts", "Access starts with a verified school email. Chairs see their committee; delegates see their own work."],
+              ["School accounts", "Only school email addresses can register. Chairs see their committee; delegates see their own work."],
             ].map(([t, b]) => (
               <div key={t} className="card-rule bg-surface border border-line">
                 <span className="section-label">{t}</span>

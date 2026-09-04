@@ -12,7 +12,9 @@ import { SubmitButton } from "@/components/forms/submit-button";
 import { ActionButton } from "@/components/forms/action-button";
 import { RoleBadge } from "@/components/mun/role-badge";
 import { UserChip } from "@/components/mun/user-chip";
-import { setUserRole, deleteUser } from "@/actions/admin";
+import { setUserRole, deleteUser, setTemporaryPassword } from "@/actions/admin";
+import { toast } from "sonner";
+import { KeyRound } from "lucide-react";
 import { upsertMembership } from "@/actions/committees";
 import { useActionFeedback } from "@/hooks/use-action-feedback";
 import { USER_ROLES, ROLE_LABEL } from "@/lib/auth/roles";
@@ -98,6 +100,22 @@ export function UsersTable({ rows, selfId, committees }: { rows: Row[]; selfId: 
                 {!r.onboarding_completed_at ? <Badge variant="warning" dot className="ml-1">Pending</Badge> : null}
               </TableCell>
               <TableCell className="text-right">
+                <ActionButton
+                  size="icon"
+                  variant="ghost"
+                  aria-label={`Set a temporary password for ${r.display_name ?? r.school_email}`}
+                  action={async () => {
+                    const result = await setTemporaryPassword(r.id);
+                    if (result.ok) {
+                      toast.message(`Temporary password for ${r.display_name ?? r.school_email}`, { description: result.data.password, duration: 60000 });
+                      window.prompt("Temporary password (copy it now; it is not shown again):", result.data.password);
+                    }
+                    return result;
+                  }}
+                  confirm={{ title: `Reset ${r.display_name ?? r.school_email}'s password?`, description: "A temporary password is generated and shown to you once. Their current password stops working immediately.", confirmLabel: "Set temporary password", destructive: false }}
+                >
+                  <KeyRound className="size-4" aria-hidden />
+                </ActionButton>
                 <ActionButton
                   size="icon"
                   variant="ghost"

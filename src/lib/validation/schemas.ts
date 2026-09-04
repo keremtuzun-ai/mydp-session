@@ -21,21 +21,23 @@ export const passwordLoginSchema = z.object({
 
 export const GRADES = ["9", "10", "11", "12"] as const;
 
-export const onboardingSchema = z
-  .object({
-    display_name: z.string().trim().min(2, "Enter your full name").max(80),
-    grade: z.enum(GRADES, { message: "Select your grade" }),
-    phone: z
-      .string()
-      .trim()
-      .regex(/^[+\d][\d\s()-]{6,20}$/, "Enter a valid phone number")
-      .optional()
-      .or(z.literal("")),
-    username: usernameSchema,
-    password: passwordSchema,
-    confirm_password: z.string(),
-  })
+export const signUpSchema = z
+  .object({ email: emailSchema, password: passwordSchema, confirm_password: z.string() })
   .refine((v) => v.password === v.confirm_password, { path: ["confirm_password"], message: "Passwords do not match" });
+
+export const emailPasswordLoginSchema = z.object({ email: emailSchema, password: z.string().min(1, "Enter your password") });
+
+export const onboardingSchema = z.object({
+  display_name: z.string().trim().min(2, "Enter your full name").max(80),
+  grade: z.enum(GRADES, { message: "Select your grade" }),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^[+\d][\d\s()-]{6,20}$/, "Enter a valid phone number")
+    .optional()
+    .or(z.literal("")),
+  username: usernameSchema,
+});
 
 export const profileUpdateSchema = z.object({
   display_name: z.string().trim().min(2).max(80),

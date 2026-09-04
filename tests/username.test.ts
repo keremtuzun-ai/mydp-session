@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { usernameSchema, isValidUsernameFormat, RESERVED_USERNAMES } from "@/lib/auth/username";
-import { onboardingSchema } from "@/lib/validation/schemas";
+import { onboardingSchema, signUpSchema } from "@/lib/validation/schemas";
 
 describe("username rules", () => {
   it("accepts lowercase letters, numbers and hyphens between 3 and 24 chars", () => {
@@ -23,11 +23,17 @@ describe("username rules", () => {
     expect(usernameSchema.parse("  ayse  ")).toBe("ayse");
   });
 
-  it("onboarding cannot be completed with a bad username or mismatched passwords", () => {
-    const base = { display_name: "Ayşe Demir", grade: "11", phone: "", password: "Delegate2026", confirm_password: "Delegate2026" };
+  it("onboarding cannot be completed with a bad username", () => {
+    const base = { display_name: "Ayşe Demir", grade: "11", phone: "" };
     expect(onboardingSchema.safeParse({ ...base, username: "ayse-demir" }).success).toBe(true);
     expect(onboardingSchema.safeParse({ ...base, username: "Ayse Demir" }).success).toBe(false);
-    expect(onboardingSchema.safeParse({ ...base, username: "ayse", confirm_password: "other" }).success).toBe(false);
-    expect(onboardingSchema.safeParse({ ...base, username: "ayse", password: "short" }).success).toBe(false);
+    expect(onboardingSchema.safeParse({ ...base, username: "" }).success).toBe(false);
+  });
+
+  it("sign-up requires a strong, confirmed password", () => {
+    expect(signUpSchema.safeParse({ email: "a@school.edu", password: "Delegate2026", confirm_password: "Delegate2026" }).success).toBe(true);
+    expect(signUpSchema.safeParse({ email: "a@school.edu", password: "Delegate2026", confirm_password: "other" }).success).toBe(false);
+    expect(signUpSchema.safeParse({ email: "a@school.edu", password: "short", confirm_password: "short" }).success).toBe(false);
+    expect(signUpSchema.safeParse({ email: "not-an-email", password: "Delegate2026", confirm_password: "Delegate2026" }).success).toBe(false);
   });
 });

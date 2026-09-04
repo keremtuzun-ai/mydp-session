@@ -21,7 +21,7 @@ export function OnboardingForm() {
   const form = useForm<FormValues>({
     resolver: zodResolver(onboardingSchema),
     mode: "onBlur",
-    defaultValues: { display_name: "", grade: "10", phone: "", username: "", password: "", confirm_password: "" },
+    defaultValues: { display_name: "", grade: "10", phone: "", username: "" },
   });
   const { formRef, onSubmit } = useRhfAction(form.handleSubmit, dispatch);
   const { register, formState: { errors }, control } = form;
@@ -86,15 +86,6 @@ export function OnboardingForm() {
           </span>
         </div>
       </Field>
-
-      <div className="form-grid">
-        <Field label="Password" htmlFor="password" error={err("password")} hint="At least 10 characters, with a letter and a number.">
-          <Input id="password" type="password" autoComplete="new-password" aria-invalid={Boolean(err("password"))} {...register("password")} />
-        </Field>
-        <Field label="Confirm password" htmlFor="confirm_password" error={err("confirm_password")}>
-          <Input id="confirm_password" type="password" autoComplete="new-password" aria-invalid={Boolean(err("confirm_password"))} {...register("confirm_password")} />
-        </Field>
-      </div>
 
       <Field label="Profile photo" htmlFor="avatar" optional error={err("avatar")} hint="PNG, JPG or WebP, under 2 MB.">
         <Input id="avatar" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" />

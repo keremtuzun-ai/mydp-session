@@ -31,6 +31,24 @@ export async function setUserRole(_prev: ActionResult | null, formData: FormData
   return ok(undefined, "Role updated.");
 }
 
+/** Sets a temporary password for a member who forgot theirs. Staff only; shown once to the admin. */
+export async function setTemporaryPassword(profileId: string): Promise<ActionResult<{ password: string }>> {
+  const { actor } = await getActor();
+  if (!isStaff(actor)) return fail("Only executives and admins can reset passwords.");
+  if (!uuid.safeParse(profileId).success) return fail("Invalid member.");
+  const supabase = await createClient();
+  const { data: target } = await supabase.from("profiles").select("school_email, display_name").eq("id", profileId).maybeSingle();
+  if (!target) return fail("Member not found.");
+  const words = ["delegate", "caucus", "motion", "gavel", "quorum", "amend", "summit", "placard", "resolve", "chair"];
+  const pick = () => words[Math.floor(Math.random() * words.length)]!;
+  const password = `${pick()}-${pick()}-${Math.floor(1000 + Math.random() * 9000)}`;
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.updateUserById(profileId, { password });
+  if (error) return fail(error.message);
+  await logAudit({ actorId: actor.id, action: "user.password_reset", entityType: "profile", entityId: profileId });
+  return ok({ password }, `Temporary password set for ${target.display_name ?? target.school_email}.`);
+}
+
 /** Removes the auth user (profile cascades). Admin only, service-role required. */
 export async function deleteUser(profileId: string): Promise<ActionResult> {
   const { actor } = await getActor();

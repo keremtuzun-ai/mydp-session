@@ -198,6 +198,8 @@ Any Node 20.9+ host works the same way (`npm run build && npm start`).
 
 ## Email templates
 
+Branded MUNDP templates live in `supabase/templates/` (magic link / code, confirm signup, password reset, email change, invite). They carry the logo, the six-digit `{{ .Token }}` and the `{{ .ConfirmationURL }}` button. The local stack loads them from `config.toml`. On hosted Supabase, paste each one into Authentication → Emails → Templates once custom SMTP is enabled (Authentication → Emails → SMTP Settings): Supabase's built-in mailer is limited to a handful of emails per hour and does not allow template edits.
+
 On hosted Supabase, email templates can only be edited once **custom SMTP** is configured (Authentication → Emails → SMTP Settings). Until then Supabase's default templates are used: they carry a sign-in link and no code. The link lands on `/auth/callback`, which completes setup, sign-in or password reset, so every flow still works; just open the link in the same browser you started from. The built-in email service is also rate-limited to a few messages per hour, which is fine for testing but not for a whole programme.
 
 Once custom SMTP is set up, include `{{ .Token }}` in these templates so the six-digit code flows work too:

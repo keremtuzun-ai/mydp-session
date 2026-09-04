@@ -10,6 +10,9 @@ import { emailSchema, otpSchema, passwordLoginSchema, passwordSchema } from "@/l
 import { fail, ok, type ActionResult } from "@/lib/action-result";
 import { logAudit } from "@/lib/audit";
 
+const RATE_LIMIT_MESSAGE =
+  "The email service has sent its hourly quota. Wait about an hour and try again, or sign in with your username and password if you already have one.";
+
 function domainList() {
   const d = getAllowedSchoolDomains();
   return d.length ? d.map((x) => `@${x}`).join(", ") : "the school's domains";
@@ -36,7 +39,7 @@ export async function startFirstTimeSetup(_prev: ActionResult | null, formData: 
     email,
     options: { shouldCreateUser: true, emailRedirectTo: `${siteUrl}/auth/callback` },
   });
-  if (error) return fail(error.message.includes("rate") ? "Too many requests. Wait a minute and try again." : error.message);
+  if (error) return fail(/rate limit/i.test(error.message) ? RATE_LIMIT_MESSAGE : error.message);
   redirect(`/verify?email=${encodeURIComponent(email)}&flow=setup`);
 }
 
@@ -56,7 +59,7 @@ export async function requestLoginCode(_prev: ActionResult | null, formData: For
     if (/signups not allowed|not found/i.test(error.message)) {
       return fail("No account exists for this email yet. Use “First time here?” to set one up.");
     }
-    return fail(error.message);
+    return fail(/rate limit/i.test(error.message) ? RATE_LIMIT_MESSAGE : error.message);
   }
   redirect(`/verify?email=${encodeURIComponent(email)}&flow=login`);
 }

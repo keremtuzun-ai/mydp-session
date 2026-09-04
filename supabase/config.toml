@@ -43,9 +43,21 @@ otp_expiry = 600
 max_frequency = "10s"
 
 [auth.email.template.magic_link]
-subject = "Your MUN Session Hub sign-in code"
+subject = "Your MUNDP sign-in code"
 content_path = "./supabase/templates/magic_link.html"
 
+[auth.email.template.confirmation]
+subject = "Confirm your school email · MUNDP"
+content_path = "./supabase/templates/confirmation.html"
+
 [auth.email.template.recovery]
-subject = "Reset your MUN Session Hub password"
+subject = "Reset your MUNDP password"
 content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.email_change]
+subject = "Confirm your new email · MUNDP"
+content_path = "./supabase/templates/email_change.html"
+
+[auth.email.template.invite]
+subject = "You are invited to MUNDP"
+content_path = "./supabase/templates/invite.html"

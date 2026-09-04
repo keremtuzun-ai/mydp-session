@@ -166,3 +166,24 @@ export const adminUserSchema = z.object({
   profile_id: uuid,
   role: z.enum(USER_ROLE_VALUES),
 });
+
+export const RESOLUTION_KINDS = ["position_paper", "working_paper", "draft_resolution", "amendment", "other"] as const;
+export const RESOLUTION_KIND_LABEL: Record<(typeof RESOLUTION_KINDS)[number], string> = {
+  position_paper: "Position paper",
+  working_paper: "Working paper",
+  draft_resolution: "Draft resolution",
+  amendment: "Amendment",
+  other: "Other document",
+};
+
+export const resolutionLinkSchema = z.object({
+  committee_id: uuid,
+  title: z.string().trim().min(2, "Give the document a title").max(140),
+  url: z
+    .string()
+    .trim()
+    .url("Paste the full link, starting with https://")
+    .refine((v) => v.startsWith("https://"), "Links must start with https://"),
+  kind: z.enum(RESOLUTION_KINDS),
+  notes: optionalText(1000),
+});

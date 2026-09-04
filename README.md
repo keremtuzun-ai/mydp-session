@@ -137,6 +137,7 @@ Authorization is enforced in the database (RLS + triggers) and again in server a
 | `/dashboard` | Next session, committee, upcoming tasks, announcements, attendance, quick links |
 | `/sessions`, `/sessions/new`, `/sessions/[id]`, `/sessions/[id]/edit` | Weekly session archive, detail with committee blocks, tasks, resources, feedback |
 | `/committees`, `/committees/new`, `/committees/[slug]` | Directory and committee workspace (topic, chairs, members, work, resources, submissions, announcements) |
+| `/resolutions` | Document links (Google Docs etc.) delegates share with their committee; chairs review them |
 | `/calendar`, `/calendar/new`, `/calendar/[id]`, `/calendar/[id]/edit` | Task list (table on desktop, cards on mobile), task detail with status, evidence uploads, activity log |
 | `/materials` | Searchable library with committee / session / category / type filters |
 | `/announcements` | Notice board with audience targeting, pinning and read status |

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canViewTask, canManageTask, canCreateTask, canDelegateSetStatus, canUploadEvidence, canRecordAttendance,
-  canPostAnnouncement, canManageCommittee, canSubmitToCommittee, type Actor,
+  canPostAnnouncement, canManageCommittee, canSubmitToCommittee, canPostResolution, canManageResolution, type Actor,
 } from "@/lib/policy";
 
 const UNSC = "c-unsc";
@@ -101,5 +101,23 @@ describe("task upload permissions", () => {
     expect(canSubmitToCommittee(ayse, { id: UNSC, submissions_enabled: true })).toBe(true);
     expect(canSubmitToCommittee(zeynep, { id: UNSC, submissions_enabled: true })).toBe(false);
     expect(canSubmitToCommittee(ayse, { id: UNSC, submissions_enabled: false })).toBe(false);
+  });
+});
+
+describe("resolution document links", () => {
+  const ayseDoc = { profile_id: "ayse", committee_id: UNSC };
+  it("members, chairs and staff may share into a committee; outsiders may not", () => {
+    expect(canPostResolution(ayse, UNSC)).toBe(true);
+    expect(canPostResolution(zeynep, UNSC)).toBe(false);
+    expect(canPostResolution(unscChair, UNSC)).toBe(true);
+    expect(canPostResolution(whoChair, UNSC)).toBe(false);
+    expect(canPostResolution(exec, UNSC)).toBe(true);
+  });
+  it("only the author, the committee's chairs or staff may edit or remove a link", () => {
+    expect(canManageResolution(ayse, ayseDoc)).toBe(true);
+    expect(canManageResolution(mehmet, ayseDoc)).toBe(false);
+    expect(canManageResolution(unscChair, ayseDoc)).toBe(true);
+    expect(canManageResolution(whoChair, ayseDoc)).toBe(false);
+    expect(canManageResolution(admin, ayseDoc)).toBe(true);
   });
 });

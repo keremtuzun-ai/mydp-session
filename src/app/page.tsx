@@ -5,15 +5,26 @@ import { appName, schoolName } from "@/lib/env";
 import { fmt, zonedNow, zonedInstant } from "@/lib/utils";
 import { Countdown } from "./countdown";
 
-function nextWednesday() {
+/** Sessions meet every Tuesday at 10:50 and 15:05 (programme timezone). */
+const SLOTS: [number, number][] = [
+  [10, 50],
+  [15, 5],
+];
+function nextSessionStart() {
   const z = zonedNow();
-  const delta = (3 - z.getDay() + 7) % 7 || 7;
-  const day = new Date(z.getFullYear(), z.getMonth(), z.getDate() + delta);
-  return zonedInstant(day.getFullYear(), day.getMonth(), day.getDate(), 15, 45);
+  for (let offset = 0; offset < 8; offset++) {
+    const day = new Date(z.getFullYear(), z.getMonth(), z.getDate() + offset);
+    if (day.getDay() !== 2) continue;
+    for (const [h, m] of SLOTS) {
+      const at = zonedInstant(day.getFullYear(), day.getMonth(), day.getDate(), h, m);
+      if (at.getTime() > Date.now()) return at;
+    }
+  }
+  return zonedInstant(z.getFullYear(), z.getMonth(), z.getDate() + 7, 10, 50);
 }
 
 export default function LandingPage() {
-  const next = nextWednesday();
+  const next = nextSessionStart();
   return (
     <>
       <header className="masthead masthead-auth">
@@ -58,7 +69,7 @@ export default function LandingPage() {
 
           <section className="grid gap-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              ["Sessions", "Every week has a date, a room, an agenda and a committee line-up."],
+              ["Sessions", "Two every Tuesday, 10:50 and 15:05: each with a room, an agenda and a committee line-up."],
               ["Calendar", "Position papers, speeches and research briefs assigned, tracked and reviewed by your chair."],
               ["Committees", "Topic, background guide, chair team, members, resources and submissions in one workspace."],
               ["School accounts", "Access starts with a verified school email. Chairs see their committee; delegates see their own work."],

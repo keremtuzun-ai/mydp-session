@@ -91,6 +91,15 @@ export function canSubmitToCommittee(a: Actor, c: Pick<Committee, "id" | "submis
   return c.submissions_enabled && memberOf(a, c.id);
 }
 
+/** Sharing a resolution document with a committee: members, its chairs and staff. */
+export function canPostResolution(a: Actor, committeeId: string): boolean {
+  return isStaff(a) || chairs(a, committeeId) || memberOf(a, committeeId);
+}
+
+export function canManageResolution(a: Actor, r: { profile_id: string; committee_id: string }): boolean {
+  return r.profile_id === a.id || isStaff(a) || chairs(a, r.committee_id);
+}
+
 export class PermissionError extends Error {
   readonly code = "PERMISSION_DENIED";
   constructor(message = "You do not have permission to do that.") {

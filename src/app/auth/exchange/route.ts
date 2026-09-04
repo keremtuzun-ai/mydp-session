@@ -4,9 +4,11 @@ import { createClient } from "@/lib/supabase/server";
 import { isAllowedSchoolEmail } from "@/lib/auth/domains";
 
 /**
- * Landing point for emailed links: PKCE `code` (magic link / recovery) or
- * `token_hash` + `type` (custom templates). After exchanging, the domain is
- * re-checked and the user is routed to onboarding, the reset page, or `next`.
+ * Server-side half of the email landing: exchanges a PKCE `code` or a
+ * `token_hash` + `type` (custom templates), re-checks the domain and routes to
+ * onboarding, the reset page, or `next`. Fragment tokens from implicit-flow
+ * links are handled by /auth/callback (a client page) which then comes here
+ * with `?established=1`.
  */
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
@@ -17,7 +19,7 @@ export async function GET(request: NextRequest) {
   const next = rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/dashboard";
 
   const supabase = await createClient();
-  let ok = false;
+  let ok = url.searchParams.get("established") === "1";
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     ok = !error;
@@ -25,14 +27,14 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type });
     ok = !error;
   }
-  if (!ok) return NextResponse.redirect(new URL("/login?error=link", url.origin));
+  if (!ok) return NextResponse.redirect(new URL("/welcome?error=link", url.origin));
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user?.email || !isAllowedSchoolEmail(user.email)) {
     await supabase.auth.signOut();
-    return NextResponse.redirect(new URL("/login?error=domain", url.origin));
+    return NextResponse.redirect(new URL("/welcome?error=domain", url.origin));
   }
   if (type === "recovery" || next.startsWith("/reset-password")) {
     return NextResponse.redirect(new URL("/reset-password/update", url.origin));

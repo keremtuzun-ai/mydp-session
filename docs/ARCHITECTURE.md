@@ -80,6 +80,7 @@ SQL helpers (`SECURITY DEFINER`, pinned `search_path`): `is_admin()`, `is_staff(
 | attendance_records | own; staff; chairs for their members | staff; chairs for their members |
 | session_feedback | subject; author; staff; chairs for their members | staff; chairs for their members |
 | committee_submissions | own; staff; chairs of the committee | members while `submissions_enabled` |
+| resolution_links | own; committee members; chairs of the committee; staff | members insert their own; owner, chairs or staff update/delete |
 | audit_logs | admin | staff (also written with the service role) |
 | allowed_email_domains | all members | admin |
 

@@ -17,6 +17,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatDateTime, relativeDue, humanize } from "@/lib/utils";
 import { CommitteeManagePanel, AddMember, RemoveMember, SubmissionForm, DeleteSubmissionButton } from "./committee-controls";
+import { ResolutionLedger } from "@/components/mun/resolution-ledger";
+import { ResolutionForm } from "@/components/mun/resolution-form";
+import { toActor } from "@/lib/auth/actor";
+import { canManageResolution } from "@/lib/policy";
 
 export const metadata: Metadata = { title: "Committee" };
 
@@ -31,13 +35,14 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
   const canManage = viewer.isStaff || viewer.chairedCommitteeIds.includes(committee.id);
   const now = new Date().toISOString();
 
-  const [{ data: memberships }, { data: upcomingBlocks }, { data: tasks }, { data: materials }, { data: announcements }, { data: submissions }] = await Promise.all([
+  const [{ data: memberships }, { data: upcomingBlocks }, { data: tasks }, { data: materials }, { data: announcements }, { data: submissions }, { data: resolutions }] = await Promise.all([
     supabase.from("committee_memberships").select("*").eq("committee_id", committee.id).order("membership_role").order("created_at"),
     supabase.from("session_committees").select(`${SESSION_COMMITTEE_COLUMNS}, weekly_sessions!inner ( id, title, starts_at, ends_at, status )`).eq("committee_id", committee.id).gte("weekly_sessions.starts_at", now).order("created_at"),
     supabase.from("tasks").select("*").eq("assigned_committee_id", committee.id).not("status", "in", "(completed)").order("due_at", { ascending: true, nullsFirst: false }).limit(12),
     supabase.from("materials").select("*").eq("committee_id", committee.id).order("created_at", { ascending: false }),
     supabase.from("announcements").select("*").eq("target_committee_id", committee.id).order("pinned", { ascending: false }).order("published_at", { ascending: false }).limit(6),
     supabase.from("committee_submissions").select("*").eq("committee_id", committee.id).order("created_at", { ascending: false }),
+    supabase.from("resolution_links").select("*").eq("committee_id", committee.id).order("updated_at", { ascending: false }),
   ]);
 
   const memberList = memberships ?? [];
@@ -46,7 +51,20 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
     ...(tasks ?? []).map((t) => t.assigned_to_profile_id),
     ...(announcements ?? []).map((a) => a.author_id),
     ...(submissions ?? []).map((s) => s.profile_id),
+    ...(resolutions ?? []).map((r) => r.profile_id),
   ]);
+  const actor = toActor(viewer);
+  const resolutionRows = (resolutions ?? []).map((r) => ({
+    id: r.id,
+    title: r.title,
+    url: r.url,
+    kind: r.kind,
+    notes: r.notes,
+    updated_at: r.updated_at,
+    authorName: nameOf(names, r.profile_id),
+    delegation: memberList.find((m) => m.profile_id === r.profile_id)?.delegation ?? null,
+    canManage: canManageResolution(actor, r),
+  }));
   const uploadCounts = await getUploadCounts(supabase, (tasks ?? []).map((t) => t.id));
   const chairTeam = memberList.filter((m) => m.membership_role === "chair" || m.membership_role === "co_chair" || m.membership_role === "executive");
   const delegates = memberList.filter((m) => m.membership_role === "delegate");
@@ -227,6 +245,19 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
           ) : null}
         </section>
       </div>
+
+      {isMember || canManage ? (
+        <section aria-labelledby="resolutions">
+          <div className="section-head">
+            <h2 id="resolutions">Resolutions and working papers</h2>
+            <span className="tab-count">{resolutionRows.length}</span>
+          </div>
+          <div className="two-col-wide grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+            <ResolutionLedger rows={resolutionRows} emptyDescription="Delegates share the link to their Google Doc here so the committee and chairs can read it." />
+            <ResolutionForm committees={[{ id: committee.id, acronym: committee.acronym }]} defaultCommitteeId={committee.id} />
+          </div>
+        </section>
+      ) : null}
 
       {committee.submissions_enabled && (isMember || canManage) ? (
         <section aria-labelledby="submissions">

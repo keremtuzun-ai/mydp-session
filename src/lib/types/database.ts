@@ -584,6 +584,46 @@ export type Database = {
           { foreignKeyName: "session_feedback_author_id_fkey"; columns: ["author_id"]; isOneToOne: false; referencedRelation: "public_profiles"; referencedColumns: ["id"] },
         ];
       };
+      resolution_links: {
+        Row: {
+          id: string;
+          committee_id: string;
+          profile_id: string;
+          title: string;
+          url: string;
+          kind: string;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          committee_id: string;
+          profile_id: string;
+          title: string;
+          url: string;
+          kind?: string;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          committee_id?: string;
+          profile_id?: string;
+          title?: string;
+          url?: string;
+          kind?: string;
+          notes?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          { foreignKeyName: "resolution_links_committee_id_fkey"; columns: ["committee_id"]; isOneToOne: false; referencedRelation: "committees"; referencedColumns: ["id"] },
+          { foreignKeyName: "resolution_links_profile_id_fkey"; columns: ["profile_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+          { foreignKeyName: "resolution_links_profile_id_fkey"; columns: ["profile_id"]; isOneToOne: false; referencedRelation: "public_profiles"; referencedColumns: ["id"] },
+        ];
+      };
       audit_logs: {
         Row: {
           id: string;
@@ -687,6 +727,7 @@ export type AuditLog = Tables<"audit_logs">;
 export type CommitteeSubmission = Tables<"committee_submissions">;
 export type TaskTemplate = Tables<"task_templates">;
 export type SessionFeedback = Tables<"session_feedback">;
+export type ResolutionLink = Tables<"resolution_links">;
 
 // Unused helper kept for parity with generated files.
 export type { Timestamps as _Timestamps };

@@ -29,3 +29,26 @@ export async function createClient() {
     },
   );
 }
+
+/**
+ * Client used ONLY to request emailed links and codes. It uses the implicit
+ * flow so the link Supabase mails works from any device or mail app: the
+ * verified session comes back in the URL fragment and /auth/callback stores
+ * it, instead of needing a PKCE verifier cookie from the original browser.
+ */
+export async function createOtpClient() {
+  const cookieStore = await cookies();
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: { flowType: "implicit" },
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll() {},
+      },
+    },
+  );
+}

@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createOtpClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAllowedSchoolEmail, normalizeEmail } from "@/lib/auth/domains";
 import { getAllowedSchoolDomains, siteUrl } from "@/lib/env";
@@ -31,7 +31,7 @@ export async function startFirstTimeSetup(_prev: ActionResult | null, formData: 
     return fail("An account already exists for this email. Use “Already have an account” to sign in.");
   }
 
-  const supabase = await createClient();
+  const supabase = await createOtpClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: { shouldCreateUser: true, emailRedirectTo: `${siteUrl}/auth/callback?next=/onboarding` },
@@ -47,7 +47,7 @@ export async function requestLoginCode(_prev: ActionResult | null, formData: For
   const email = normalizeEmail(parsed.data);
   if (!isAllowedSchoolEmail(email)) return fail(`Only school addresses can sign in. Use your ${domainList()} email.`);
 
-  const supabase = await createClient();
+  const supabase = await createOtpClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: { shouldCreateUser: false, emailRedirectTo: `${siteUrl}/auth/callback?next=/dashboard` },
@@ -109,7 +109,7 @@ export async function requestPasswordReset(_prev: ActionResult | null, formData:
   const email = normalizeEmail(parsed.data);
   if (!isAllowedSchoolEmail(email)) return fail(`Only school addresses can reset a password. Use your ${domainList()} email.`);
 
-  const supabase = await createClient();
+  const supabase = await createOtpClient();
   await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${siteUrl}/auth/callback?next=/reset-password/update` });
   // Same message whether or not the account exists, to avoid enumeration.
   return ok(undefined, "If an account exists for that email, a reset link and code are on the way.");

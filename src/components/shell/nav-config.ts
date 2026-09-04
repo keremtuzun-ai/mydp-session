@@ -1,12 +1,13 @@
 import type { UserRole } from "@/lib/auth/roles";
 
 /** Icon names are resolved inside the client nav component (components cannot cross the server/client boundary). */
-export type NavIcon = "dashboard" | "tasks" | "sessions" | "committees" | "materials" | "announcements" | "attendance" | "analytics" | "admin" | "settings";
+export type NavIcon = "dashboard" | "resolutions" | "tasks" | "sessions" | "committees" | "materials" | "announcements" | "attendance" | "analytics" | "admin" | "settings";
 export type NavItem = { href: string; label: string; icon: NavIcon; roles?: UserRole[] };
 
 export const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
-  { href: "/calendar", label: "My tasks", icon: "tasks" },
+  { href: "/resolutions", label: "Resolutions", icon: "resolutions" },
+  { href: "/calendar", label: "Calendar", icon: "tasks" },
   { href: "/sessions", label: "Sessions", icon: "sessions" },
   { href: "/committees", label: "Committees", icon: "committees" },
   { href: "/materials", label: "Materials", icon: "materials" },

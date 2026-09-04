@@ -41,7 +41,7 @@ export default function AuthCallbackPage() {
           return;
         }
         window.history.replaceState(null, "", url.pathname + url.search);
-        forward({ established: "1", type: hash.get("type") ?? "" });
+        forward({ established: "1", established_type: hash.get("type") ?? "" });
         return;
       }
 

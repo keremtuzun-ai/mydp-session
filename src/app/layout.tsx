@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ThemeProvider } from "@/components/shell/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthHashForwarder } from "@/components/shell/auth-hash-forwarder";
 import { appName, schoolName } from "@/lib/env";
 import "./globals.css";
 
@@ -14,6 +15,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" suppressHydrationWarning className="h-full">
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange value={{ light: "light", dark: "dark" }}>
+          <AuthHashForwarder />
           <div className="ambient-waves" aria-hidden />
           {children}
           <Toaster />

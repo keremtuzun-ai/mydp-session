@@ -34,7 +34,7 @@ export async function startFirstTimeSetup(_prev: ActionResult | null, formData: 
   const supabase = await createOtpClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { shouldCreateUser: true, emailRedirectTo: `${siteUrl}/auth/callback?next=/onboarding` },
+    options: { shouldCreateUser: true, emailRedirectTo: `${siteUrl}/auth/callback` },
   });
   if (error) return fail(error.message.includes("rate") ? "Too many requests. Wait a minute and try again." : error.message);
   redirect(`/verify?email=${encodeURIComponent(email)}&flow=setup`);
@@ -50,7 +50,7 @@ export async function requestLoginCode(_prev: ActionResult | null, formData: For
   const supabase = await createOtpClient();
   const { error } = await supabase.auth.signInWithOtp({
     email,
-    options: { shouldCreateUser: false, emailRedirectTo: `${siteUrl}/auth/callback?next=/dashboard` },
+    options: { shouldCreateUser: false, emailRedirectTo: `${siteUrl}/auth/callback` },
   });
   if (error) {
     if (/signups not allowed|not found/i.test(error.message)) {
@@ -110,7 +110,7 @@ export async function requestPasswordReset(_prev: ActionResult | null, formData:
   if (!isAllowedSchoolEmail(email)) return fail(`Only school addresses can reset a password. Use your ${domainList()} email.`);
 
   const supabase = await createOtpClient();
-  await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${siteUrl}/auth/callback?next=/reset-password/update` });
+  await supabase.auth.resetPasswordForEmail(email, { redirectTo: `${siteUrl}/auth/callback` });
   // Same message whether or not the account exists, to avoid enumeration.
   return ok(undefined, "If an account exists for that email, a reset link and code are on the way.");
 }

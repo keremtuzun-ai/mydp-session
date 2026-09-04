@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     await supabase.auth.signOut();
     return NextResponse.redirect(new URL("/welcome?error=domain", url.origin));
   }
-  if (type === "recovery" || next.startsWith("/reset-password")) {
+  if (type === "recovery" || url.searchParams.get("established_type") === "recovery" || next.startsWith("/reset-password")) {
     return NextResponse.redirect(new URL("/reset-password/update", url.origin));
   }
   const { data: profile } = await supabase.from("profiles").select("onboarding_completed_at").eq("id", user.id).maybeSingle();

@@ -5,10 +5,10 @@ import { appName, schoolName } from "@/lib/env";
 import { fmt, zonedNow, zonedInstant } from "@/lib/utils";
 import { Countdown } from "./countdown";
 
-/** Sessions meet every Tuesday at 10:50 and 15:05 (programme timezone). */
+/** Sessions meet every Tuesday at 10:55 and 15:10 (programme timezone). */
 const SLOTS: [number, number][] = [
-  [10, 50],
-  [15, 5],
+  [10, 55],
+  [15, 10],
 ];
 function nextSessionStart() {
   const z = zonedNow();
@@ -20,7 +20,7 @@ function nextSessionStart() {
       if (at.getTime() > Date.now()) return at;
     }
   }
-  return zonedInstant(z.getFullYear(), z.getMonth(), z.getDate() + 7, 10, 50);
+  return zonedInstant(z.getFullYear(), z.getMonth(), z.getDate() + 7, 10, 55);
 }
 
 export default function LandingPage() {
@@ -69,7 +69,7 @@ export default function LandingPage() {
 
           <section className="grid gap-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
             {[
-              ["Sessions", "Two every Tuesday, 10:50 and 15:05: each with a room, an agenda and a committee line-up."],
+              ["Sessions", "Two every Tuesday, 10:55 and 15:10: each with a room, an agenda and a committee line-up."],
               ["Calendar", "Position papers, speeches and research briefs assigned, tracked and reviewed by your chair."],
               ["Committees", "Topic, background guide, chair team, members, resources and submissions in one workspace."],
               ["School accounts", "Access starts with a verified school email. Chairs see their committee; delegates see their own work."],

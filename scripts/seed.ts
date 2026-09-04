@@ -55,10 +55,10 @@ function daysFromNow(days: number, hour = 16, minute = 0) {
   d.setHours(hour, minute, 0, 0);
   return d;
 }
-/** Sessions meet twice every Tuesday: 10:50 and 15:05 (school periods, 45 min). */
+/** Sessions meet twice every Tuesday: 10:55 and 15:10 (school periods, 45 min). */
 const SLOTS: [number, number][] = [
-  [10, 50],
-  [15, 5],
+  [10, 55],
+  [15, 10],
 ];
 /** Tuesday of the given week offset (0 = the next Tuesday from today), at the given slot. */
 function tuesday(weekOffset: number, slot: number) {
@@ -151,7 +151,7 @@ async function main() {
   }
   console.log(`✓ ${memberships.length} memberships`);
 
-  // Sessions: 4 past, 4 upcoming (two every Tuesday: 10:50 and 15:05)
+  // Sessions: 4 past, 4 upcoming (two every Tuesday: 10:55 and 15:10)
   const sessionDefs = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
     const w = Math.floor(i / 2) - 2;
     const start = tuesday(w, i % 2);
@@ -261,7 +261,7 @@ async function main() {
 
   // Announcements
   const announcements: TablesInsert<"announcements">[] = [
-    { title: "Welcome to the new MUN year", body: "Sessions run every Tuesday at 10:50 and 15:05 in B204. Bring a notebook, your placard and a printed copy of the rules.", author_id: id("exec"), pinned: true },
+    { title: "Welcome to the new MUN year", body: "Sessions run every Tuesday at 10:55 and 15:10 in B204. Bring a notebook, your placard and a printed copy of the rules.", author_id: id("exec"), pinned: true },
     { title: "Position papers due before the clinic", body: "Every delegate in UNSC and WHO uploads a one-page position paper before the Position Paper Clinic. Use the template in Materials.", author_id: id("exec"), pinned: true, target_session_id: sid(4) },
     { title: "UNSC: speakers' list opens at 15:40", body: "Arrive five minutes early. Delegates of Ghana and Japan open the general speakers' list.", author_id: id("chair_unsc"), pinned: false, target_committee_id: cid("unsc") },
     { title: "Chairs: placards and rules cards", body: "Collect placards from the Secretariat desk before your committee time.", author_id: id("exec"), pinned: false, target_role: "chair" },

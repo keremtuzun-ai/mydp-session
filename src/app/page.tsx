@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { format } from "date-fns";
-import { Brand, BrandMark } from "@/components/shell/brand";
+import { Brand, BrandLogo } from "@/components/shell/brand";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { appName, schoolName } from "@/lib/env";
 import { Countdown } from "./countdown";
@@ -54,7 +54,7 @@ export default function LandingPage() {
                 </Link>
               </div>
             </div>
-            <BrandMark className="front-hero-logo !h-auto" />
+            <div className="front-hero-logo"><BrandLogo height={110} className="w-full" /></div>
           </section>
 
           <section className="grid gap-4 py-10 sm:grid-cols-2 lg:grid-cols-4">

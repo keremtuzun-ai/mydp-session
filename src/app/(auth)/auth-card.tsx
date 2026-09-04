@@ -8,7 +8,7 @@ export function AuthCard({ eyebrow, title, description, children }: { eyebrow?: 
       {description ? <p className="muted mt-[-0.5rem] mb-5">{description}</p> : null}
       {children}
       <div className="auth-logo">
-        <BrandMark className="!h-[52px] opacity-85" />
+        <BrandMark className="opacity-85" />
       </div>
     </section>
   );

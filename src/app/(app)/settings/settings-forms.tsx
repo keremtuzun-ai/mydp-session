@@ -49,7 +49,7 @@ export function AvatarForm({ avatarUrl, name }: { avatarUrl: string | null; name
   const [state, action] = useActionState(updateAvatar, null);
   useActionFeedback(state);
   return (
-    <form action={action} className="space-y-3" encType="multipart/form-data">
+    <form action={action} className="space-y-3">
       <div className="flex items-center gap-4">
         <Avatar className="size-16">
           {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}

@@ -57,7 +57,7 @@ export function OnboardingForm() {
   const err = (name: keyof FormValues | "avatar") => (name === "avatar" ? fieldError(state, "avatar") : errors[name]?.message ?? fieldError(state, name));
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="space-y-5" noValidate encType="multipart/form-data">
+    <form ref={formRef} onSubmit={onSubmit} className="space-y-5" noValidate>
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Full name" htmlFor="display_name" error={err("display_name")} className="sm:col-span-2">
           <Input id="display_name" autoComplete="name" aria-invalid={Boolean(err("display_name"))} {...register("display_name")} />

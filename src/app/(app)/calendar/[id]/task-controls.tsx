@@ -92,7 +92,7 @@ export function EvidenceUploadForm({ taskId }: { taskId: string }) {
   useActionFeedback(state);
   return (
     <Card className="p-4">
-      <form action={action} className="space-y-3" encType="multipart/form-data">
+      <form action={action} className="space-y-3">
         <input type="hidden" name="task_id" value={taskId} />
         <p className="text-sm font-medium">Upload evidence</p>
         <Field label="Title" htmlFor="up-title">

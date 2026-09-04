@@ -108,7 +108,7 @@ export function SubmissionForm({ committeeId }: { committeeId: string }) {
   useActionFeedback(state);
   return (
     <Card className="p-4">
-      <form action={action} className="space-y-3" encType="multipart/form-data">
+      <form action={action} className="space-y-3">
         <input type="hidden" name="committee_id" value={committeeId} />
         <p className="text-sm font-medium">Submit a position paper</p>
         <Field label="Title" htmlFor="sub-title">

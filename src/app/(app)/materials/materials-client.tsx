@@ -184,7 +184,7 @@ export function NewMaterialDialog({ committees, sessions, isStaff }: { committee
           <DialogTitle>Add a material</DialogTitle>
           <DialogDescription>Attach a file or link a source. Committee-only materials are visible to that committee&apos;s members.</DialogDescription>
         </DialogHeader>
-        <form action={action} className="space-y-4" encType="multipart/form-data">
+        <form action={action} className="space-y-4">
           <Field label="Title" htmlFor="m-title" error={fieldError(state, "title")}>
             <Input id="m-title" name="title" required />
           </Field>

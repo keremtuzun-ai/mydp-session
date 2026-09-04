@@ -61,14 +61,14 @@ export function AnnouncementCard({ announcement: a, authorName, audience, isRead
 
 type Ref = { id: string; acronym?: string; title?: string };
 
-export function NewAnnouncementForm({ committees, sessions, isStaff, defaultCommittee }: { committees: Ref[]; sessions: Ref[]; isStaff: boolean; defaultCommittee: string }) {
+export function NewAnnouncementForm({ sessions, defaultCommittee }: { committees?: Ref[]; sessions: Ref[]; isStaff?: boolean; defaultCommittee: string }) {
   const [state, action] = useActionState(createAnnouncement, null);
   const formRef = useRef<HTMLFormElement>(null);
   useActionFeedback(state, () => formRef.current?.reset());
   return (
     <Card>
       <div className="section-head"><h2>Post an announcement</h2></div>
-      <p className="mb-4 small muted">{isStaff ? "Target everyone, a role or a session." : ""}</p>
+      <p className="mb-4 small muted">Target everyone, a role or a session.</p>
       <form ref={formRef} action={action} className="flex flex-col gap-4">
         <Field label="Title" htmlFor="a-title" error={fieldError(state, "title")}>
           <Input id="a-title" name="title" required />
@@ -76,8 +76,7 @@ export function NewAnnouncementForm({ committees, sessions, isStaff, defaultComm
         <Field label="Message" htmlFor="a-body" error={fieldError(state, "body")}>
           <Textarea id="a-body" name="body" rows={5} required />
         </Field>
-        {isStaff ? (
-          <Field label="Audience role" htmlFor="a-role" optional>
+        <Field label="Audience role" htmlFor="a-role" optional>
             <NativeSelect id="a-role" name="target_role" defaultValue="">
               <option value="">Everyone</option>
               <option value="delegate">Delegates</option>
@@ -85,10 +84,8 @@ export function NewAnnouncementForm({ committees, sessions, isStaff, defaultComm
               <option value="executive">Executives</option>
             </NativeSelect>
           </Field>
-        ) : null}
-        <input type="hidden" name="target_committee_id" value={defaultCommittee || (committees[0]?.id ?? "")} />
-        {isStaff ? (
-          <Field label="Session" htmlFor="a-session" optional>
+        <input type="hidden" name="target_committee_id" value={defaultCommittee} />
+        <Field label="Session" htmlFor="a-session" optional>
             <NativeSelect id="a-session" name="target_session_id" defaultValue="">
               <option value="">Not tied to a session</option>
               {sessions.map((s) => (
@@ -98,13 +95,10 @@ export function NewAnnouncementForm({ committees, sessions, isStaff, defaultComm
               ))}
             </NativeSelect>
           </Field>
-        ) : null}
-        {isStaff ? (
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2">
             <Checkbox id="a-pinned" name="pinned" />
             <Label htmlFor="a-pinned" className="normal-case tracking-normal text-[0.88rem] font-medium text-ink">Pin to the top</Label>
           </div>
-        ) : null}
         <FormError message={state && !state.ok && !state.fieldErrors ? state.error : null} />
         <div className="form-actions">
           <SubmitButton pendingText="Posting…">Publish</SubmitButton>

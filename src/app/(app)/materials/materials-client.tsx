@@ -155,7 +155,7 @@ export function MaterialsBrowser({ items, committees, sessions, initial }: { ite
   );
 }
 
-export function NewMaterialDialog({ committees, sessions, isStaff }: { committees: Ref[]; sessions: Ref[]; isStaff: boolean }) {
+export function NewMaterialDialog({ sessions }: { committees?: Ref[]; sessions: Ref[]; isStaff?: boolean }) {
   const [open, setOpen] = useState(false);
   const [state, action] = useActionState(createMaterial, null);
   useActionFeedback(state, () => setOpen(false));

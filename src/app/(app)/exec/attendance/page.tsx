@@ -9,6 +9,10 @@ import type { Enums } from "@/lib/types/database";
 
 export const metadata: Metadata = { title: "Attendance" };
 
+function isPast(startsAt: string) {
+  return new Date(startsAt).getTime() <= Date.now();
+}
+
 export default async function ExecAttendancePage({ searchParams }: PageProps<"/exec/attendance">) {
   const sp = await searchParams;
   const supabase = await createClient();
@@ -20,12 +24,12 @@ export default async function ExecAttendancePage({ searchParams }: PageProps<"/e
   const sessionList = sessions ?? [];
   const everyone = (people ?? []).filter((p) => p.role !== "admin");
   const names = await getNameMap(supabase, everyone.map((p) => p.id));
-  const selected = typeof sp.session === "string" ? sp.session : sessionList.find((s) => new Date(s.starts_at).getTime() <= Date.now())?.id ?? sessionList[0]?.id ?? "";
+  const selected = typeof sp.session === "string" ? sp.session : sessionList.find((s) => isPast(s.starts_at))?.id ?? sessionList[0]?.id ?? "";
   const recs = records ?? [];
   const forSelected = new Map(recs.filter((r) => r.session_id === selected).map((r) => [r.profile_id, r]));
 
   const members = everyone.map((p) => ({ profileId: p.id, name: nameOf(names, p.id), role: p.role, status: (forSelected.get(p.id)?.status ?? null) as Enums<"attendance_status"> | null, note: forSelected.get(p.id)?.note ?? null }));
-  const pastSessions = sessionList.filter((s) => new Date(s.starts_at).getTime() <= Date.now()).slice(0, 12);
+  const pastSessions = sessionList.filter((s) => isPast(s.starts_at)).slice(0, 12);
 
   return (
     <div className="flex flex-col gap-5">

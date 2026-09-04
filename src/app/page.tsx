@@ -1,16 +1,15 @@
 import Link from "next/link";
-import { format } from "date-fns";
 import { Brand, BrandLogo } from "@/components/shell/brand";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { appName, schoolName } from "@/lib/env";
+import { fmt, zonedNow, zonedInstant } from "@/lib/utils";
 import { Countdown } from "./countdown";
 
 function nextWednesday() {
-  const d = new Date();
-  const delta = (3 - d.getDay() + 7) % 7 || 7;
-  d.setDate(d.getDate() + delta);
-  d.setHours(15, 45, 0, 0);
-  return d;
+  const z = zonedNow();
+  const delta = (3 - z.getDay() + 7) % 7 || 7;
+  const day = new Date(z.getFullYear(), z.getMonth(), z.getDate() + delta);
+  return zonedInstant(day.getFullYear(), day.getMonth(), day.getDate(), 15, 45);
 }
 
 export default function LandingPage() {
@@ -22,7 +21,7 @@ export default function LandingPage() {
           <Brand />
           <div className="masthead-side">
             <div className="masthead-meta">
-              <span>{format(new Date(), "EEEE, d MMMM yyyy")}</span>
+              <span>{fmt(new Date(), "EEEE, d MMMM yyyy")}</span>
               <br />
               <span className="masthead-user">{schoolName}</span>
             </div>
@@ -72,7 +71,7 @@ export default function LandingPage() {
           </section>
 
           <section className="front-countdown">
-            <p className="countdown-label">Next weekly session · {format(next, "EEEE d MMMM, HH:mm")}</p>
+            <p className="countdown-label">Next weekly session · {fmt(next, "EEEE d MMMM, HH:mm")}</p>
             <Countdown target={next.toISOString()} />
           </section>
         </div>

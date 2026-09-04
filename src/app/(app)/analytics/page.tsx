@@ -7,8 +7,7 @@ import { StatTile } from "@/components/mun/stat-tile";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AttendanceByWeekChart, AttendanceByCommitteeChart, TaskStatusChart } from "./charts";
-import { format } from "date-fns";
-import { humanize } from "@/lib/utils";
+import { humanize, fmt } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Analytics" };
 
@@ -38,7 +37,7 @@ export default async function AnalyticsPage() {
   const byWeek = sessionList.map((s) => {
     const rows = att.filter((a) => a.session_id === s.id);
     const yes = rows.filter((a) => attended(a.status)).length;
-    return { week: format(new Date(s.starts_at), "d MMM"), title: s.title, rate: rows.length ? Math.round((yes / rows.length) * 100) : 0, present: yes, total: rows.length };
+    return { week: fmt(s.starts_at, "d MMM"), title: s.title, rate: rows.length ? Math.round((yes / rows.length) * 100) : 0, present: yes, total: rows.length };
   });
 
   // Attendance by committee (members' records across completed sessions)

@@ -1,6 +1,27 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { format, formatDistanceToNowStrict, isPast, isToday, isTomorrow } from "date-fns";
+import { formatDistanceToNowStrict, isPast } from "date-fns";
+import { formatInTimeZone, toZonedTime, fromZonedTime } from "date-fns-tz";
+import { APP_TIMEZONE } from "@/lib/env";
+
+/** Format a date in the programme's timezone, wherever the server runs. */
+export function fmt(value: string | Date, pattern: string) {
+  return formatInTimeZone(new Date(value), APP_TIMEZONE, pattern);
+}
+
+/** Same calendar day in the programme's timezone. */
+function sameZonedDay(a: Date, b: Date) {
+  return fmt(a, "yyyy-MM-dd") === fmt(b, "yyyy-MM-dd");
+}
+
+/** A wall-clock time (in the programme's timezone) on a given day, as an instant. */
+export function zonedInstant(year: number, monthIndex: number, day: number, hour: number, minute: number) {
+  return fromZonedTime(new Date(year, monthIndex, day, hour, minute, 0, 0), APP_TIMEZONE);
+}
+
+export function zonedNow() {
+  return toZonedTime(new Date(), APP_TIMEZONE);
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -8,25 +29,26 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatDateTime(value: string | Date | null | undefined) {
   if (!value) return "—";
-  return format(new Date(value), "EEE d MMM yyyy, HH:mm");
+  return fmt(value, "EEE d MMM yyyy, HH:mm");
 }
 
 export function formatDate(value: string | Date | null | undefined) {
   if (!value) return "—";
-  return format(new Date(value), "EEE d MMM yyyy");
+  return fmt(value, "EEE d MMM yyyy");
 }
 
 export function formatTimeRange(start: string | Date, end: string | Date | null | undefined) {
-  const s = new Date(start);
-  if (!end) return format(s, "HH:mm");
-  return `${format(s, "HH:mm")} – ${format(new Date(end), "HH:mm")}`;
+  if (!end) return fmt(start, "HH:mm");
+  return `${fmt(start, "HH:mm")} – ${fmt(end, "HH:mm")}`;
 }
 
 export function relativeDue(value: string | Date | null | undefined) {
   if (!value) return "No due date";
   const d = new Date(value);
-  if (isToday(d)) return `Today, ${format(d, "HH:mm")}`;
-  if (isTomorrow(d)) return `Tomorrow, ${format(d, "HH:mm")}`;
+  const now = new Date();
+  const tomorrow = new Date(now.getTime() + 86400000);
+  if (sameZonedDay(d, now)) return `Today, ${fmt(d, "HH:mm")}`;
+  if (sameZonedDay(d, tomorrow)) return `Tomorrow, ${fmt(d, "HH:mm")}`;
   const distance = formatDistanceToNowStrict(d, { addSuffix: true });
   return isPast(d) ? `Due ${distance}` : `Due ${distance}`;
 }

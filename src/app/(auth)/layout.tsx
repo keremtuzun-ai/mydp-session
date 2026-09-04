@@ -1,7 +1,7 @@
+import { fmt } from "@/lib/utils";
 import { Brand } from "@/components/shell/brand";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { schoolName } from "@/lib/env";
-import { format } from "date-fns";
 
 export default function AuthLayout({ children }: LayoutProps<"/">) {
   return (
@@ -11,7 +11,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           <Brand />
           <div className="masthead-side">
             <div className="masthead-meta">
-              <span>{format(new Date(), "EEEE, d MMMM yyyy")}</span>
+              <span>{fmt(new Date(), "EEEE, d MMMM yyyy")}</span>
               <br />
               <span className="masthead-user">{schoolName}</span>
             </div>

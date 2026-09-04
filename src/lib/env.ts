@@ -14,4 +14,7 @@ export const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "MUN Session Hub";
 export const schoolName = process.env.NEXT_PUBLIC_SCHOOL_NAME ?? "the school";
 export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
+/** IANA zone used for every server-rendered date; Vercel renders in UTC otherwise. */
+export const APP_TIMEZONE = process.env.NEXT_PUBLIC_TIMEZONE ?? "Europe/Istanbul";
+
 export const MAX_UPLOAD_BYTES = Number(process.env.MAX_UPLOAD_BYTES ?? 15 * 1024 * 1024);

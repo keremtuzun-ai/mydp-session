@@ -1,6 +1,6 @@
+import { fmt } from "@/lib/utils";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { format } from "date-fns";
 import { getAuthState } from "@/lib/auth/session";
 import { isAllowedSchoolEmail } from "@/lib/auth/domains";
 import { Brand } from "@/components/shell/brand";
@@ -22,7 +22,7 @@ export default async function OnboardingPage() {
           <Brand />
           <div className="masthead-side">
             <div className="masthead-meta">
-              <span>{format(new Date(), "EEEE, d MMMM yyyy")}</span>
+              <span>{fmt(new Date(), "EEEE, d MMMM yyyy")}</span>
               <br />
               <span className="masthead-user">{user.email}</span>
             </div>

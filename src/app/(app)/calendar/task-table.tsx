@@ -8,8 +8,7 @@ import { TaskStatusBadge, TASK_STATUS_LABEL } from "@/components/mun/task-status
 import { PriorityBadge } from "@/components/mun/priority-badge";
 import { EmptyState } from "@/components/mun/empty-state";
 import { setTaskStatus } from "@/actions/tasks";
-import { cn, formatDateTime } from "@/lib/utils";
-import { format } from "date-fns";
+import { cn, formatDateTime, fmt } from "@/lib/utils";
 import type { Task } from "@/lib/types/database";
 
 export type TaskRow = Task & {
@@ -24,9 +23,8 @@ export type TaskRow = Task & {
 
 function dueText(due: string | null) {
   if (!due) return "—";
-  const d = new Date(due);
-  const time = format(d, "HH:mm");
-  return time === "00:00" ? format(d, "yyyy-MM-dd") : `${format(d, "yyyy-MM-dd")} · ${time}`;
+  const time = fmt(due, "HH:mm");
+  return time === "00:00" ? fmt(due, "yyyy-MM-dd") : `${fmt(due, "yyyy-MM-dd")} · ${time}`;
 }
 
 function RowAction({ row }: { row: TaskRow }) {
@@ -172,7 +170,7 @@ function Row({ row: t }: { row: TaskRow }) {
                       </a>
                       <span className="muted small mono">{u.file_name}</span>
                       <div className="muted small">
-                        Submitted {format(new Date(u.created_at), "dd MMM HH:mm")} · {u.authorName}
+                        Submitted {fmt(u.created_at, "dd MMM HH:mm")} · {u.authorName}
                       </div>
                     </div>
                   </li>

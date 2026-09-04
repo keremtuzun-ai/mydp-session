@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { fmt } from "@/lib/utils";
 import { Brand } from "@/components/shell/brand";
 import { RailNav } from "@/components/shell/rail-nav";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
@@ -10,7 +10,7 @@ import { ROLE_LABEL } from "@/lib/auth/roles";
 export function AppShell({ viewer, children }: { viewer: Viewer; children: React.ReactNode }) {
   const items = navForRole(viewer.role);
   const who = `${ROLE_LABEL[viewer.role]} · ${viewer.profile.username ?? viewer.profile.display_name ?? ""}`;
-  const today = format(new Date(), "EEEE, d MMMM yyyy");
+  const today = fmt(new Date(), "EEEE, d MMMM yyyy");
   return (
     <>
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[300] focus:rounded-md focus:bg-card focus:px-3 focus:py-2">

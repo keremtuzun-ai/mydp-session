@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { format } from "date-fns";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { listSessionsWithCoverage, getUploadCounts, getNameMap, nameOf, SESSION_COMMITTEE_COLUMNS } from "@/lib/data/queries";
@@ -12,7 +11,7 @@ import { PriorityBadge } from "@/components/mun/priority-badge";
 import { MembershipBadge } from "@/components/mun/role-badge";
 import { StatTile } from "@/components/mun/stat-tile";
 import { FormSuccess } from "@/components/ui/field";
-import { relativeDue, formatDate } from "@/lib/utils";
+import { relativeDue, formatDate, fmt } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -50,7 +49,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
   return (
     <>
       <PageHeader
-        eyebrow={format(new Date(), "EEEE, d MMMM yyyy")}
+        eyebrow={fmt(new Date(), "EEEE, d MMMM yyyy")}
         title={`Good to see you, ${firstName}.`}
         description="Your next session, your responsibilities and your committee, at a glance."
         actions={

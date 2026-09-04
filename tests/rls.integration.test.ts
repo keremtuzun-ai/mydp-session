@@ -80,6 +80,15 @@ describe.skipIf(!enabled)("Row Level Security (live)", () => {
     expect(error).toBeTruthy();
   });
 
+  it("an executive can create a task and read it back in the same call", async () => {
+    const exec = await signIn(`leyla.sahin@${domain}`);
+    const execId = (await exec.auth.getUser()).data.user!.id;
+    const { data, error } = await exec.from("tasks").insert({ title: "rls returning check", committee_label: "TEST", assigned_role: "delegate", created_by: execId }).select("id").single();
+    expect(error).toBeNull();
+    expect(data?.id).toBeTruthy();
+    if (data?.id) await exec.from("tasks").delete().eq("id", data.id);
+  });
+
   it("a delegate cannot promote themselves", async () => {
     const ayseId = (await ayse.auth.getUser()).data.user!.id;
     const { error } = await ayse.from("profiles").update({ role: "admin" }).eq("id", ayseId);

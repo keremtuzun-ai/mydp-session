@@ -52,7 +52,7 @@ export function CommitteeManagePanel({ committee, canRename, canDelete }: { comm
   );
 }
 
-function AddMember({ committeeId, canAppointChairs }: { committeeId: string; canAppointChairs: boolean }) {
+export function AddMember({ committeeId, canAppointChairs }: { committeeId: string; canAppointChairs: boolean }) {
   const [state, action] = useActionState(upsertMembership, null);
   useActionFeedback(state);
   return (
@@ -89,7 +89,7 @@ function AddMember({ committeeId, canAppointChairs }: { committeeId: string; can
   );
 }
 
-function RemoveMember({ membershipId, name }: { membershipId: string; name: string }) {
+export function RemoveMember({ membershipId, name }: { membershipId: string; name: string }) {
   return (
     <ActionButton
       size="icon"
@@ -102,8 +102,6 @@ function RemoveMember({ membershipId, name }: { membershipId: string; name: stri
     </ActionButton>
   );
 }
-
-export const MembershipManager = { Add: AddMember, Remove: RemoveMember };
 
 export function SubmissionForm({ committeeId }: { committeeId: string }) {
   const [state, action] = useActionState(submitToCommittee, null);

@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatDate, formatDateTime, relativeDue, humanize } from "@/lib/utils";
-import { CommitteeManagePanel, MembershipManager, SubmissionForm, DeleteSubmissionButton } from "./committee-controls";
+import { CommitteeManagePanel, AddMember, RemoveMember, SubmissionForm, DeleteSubmissionButton } from "./committee-controls";
 
 export const metadata: Metadata = { title: "Committee" };
 
@@ -127,7 +127,7 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
                   <UserChip name={nameOf(names, m.profile_id)} username={names.get(m.profile_id)?.username} avatarUrl={names.get(m.profile_id)?.avatar_url} />
                   <div className="flex items-center gap-2">
                     {m.delegation ? <span className="text-xs text-muted-foreground">{m.delegation}</span> : null}
-                    {canManage ? <MembershipManager.Remove membershipId={m.id} name={nameOf(names, m.profile_id)} /> : null}
+                    {canManage ? <RemoveMember membershipId={m.id} name={nameOf(names, m.profile_id)} /> : null}
                   </div>
                 </li>
               ))}
@@ -135,7 +135,7 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
           ) : (
             <EmptyState icon={Users} title="No delegates yet" className="py-8" />
           )}
-          {canManage ? <MembershipManager.Add committeeId={committee.id} canAppointChairs={viewer.isStaff} /> : null}
+          {canManage ? <AddMember committeeId={committee.id} canAppointChairs={viewer.isStaff} /> : null}
         </section>
 
         <section aria-labelledby="upcoming">

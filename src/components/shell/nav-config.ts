@@ -1,22 +1,20 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  LayoutDashboard, CalendarDays, Landmark, ListChecks, Library, Megaphone, ClipboardCheck, BarChart3, Settings, ShieldCheck,
-} from "lucide-react";
 import type { UserRole } from "@/lib/auth/roles";
 
-export type NavItem = { href: string; label: string; icon: LucideIcon; roles?: UserRole[] };
+/** Icon names are resolved inside the client nav component (components cannot cross the server/client boundary). */
+export type NavIcon = "dashboard" | "tasks" | "sessions" | "committees" | "materials" | "announcements" | "attendance" | "analytics" | "admin" | "settings";
+export type NavItem = { href: string; label: string; icon: NavIcon; roles?: UserRole[] };
 
 export const NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/calendar", label: "My tasks", icon: ListChecks },
-  { href: "/sessions", label: "Sessions", icon: CalendarDays },
-  { href: "/committees", label: "Committees", icon: Landmark },
-  { href: "/materials", label: "Materials", icon: Library },
-  { href: "/announcements", label: "Announcements", icon: Megaphone },
-  { href: "/attendance", label: "Attendance", icon: ClipboardCheck },
-  { href: "/analytics", label: "Analytics", icon: BarChart3, roles: ["admin", "executive"] },
-  { href: "/admin", label: "Administration", icon: ShieldCheck, roles: ["admin"] },
-  { href: "/settings", label: "Settings", icon: Settings },
+  { href: "/dashboard", label: "Dashboard", icon: "dashboard" },
+  { href: "/calendar", label: "My tasks", icon: "tasks" },
+  { href: "/sessions", label: "Sessions", icon: "sessions" },
+  { href: "/committees", label: "Committees", icon: "committees" },
+  { href: "/materials", label: "Materials", icon: "materials" },
+  { href: "/announcements", label: "Announcements", icon: "announcements" },
+  { href: "/attendance", label: "Attendance", icon: "attendance" },
+  { href: "/analytics", label: "Analytics", icon: "analytics", roles: ["admin", "executive"] },
+  { href: "/admin", label: "Administration", icon: "admin", roles: ["admin"] },
+  { href: "/settings", label: "Settings", icon: "settings" },
 ];
 
 export function navForRole(role: UserRole) {

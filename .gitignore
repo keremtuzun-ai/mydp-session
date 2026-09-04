@@ -13,3 +13,4 @@ supabase/.branches
 supabase/.temp
 tsconfig.tsbuildinfo
 .claude/
+.env*

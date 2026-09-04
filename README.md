@@ -172,7 +172,20 @@ RUN_RLS_TESTS=1 npx tsx --env-file=.env.local node_modules/vitest/vitest.mjs run
 
 ## Deployment
 
-The app is a standard Next.js application. On Vercel:
+**Live:** https://mun-session-hub.vercel.app (Vercel project `mun-session-hub` in the `keremtuzuns-projects` team, Supabase project `tdrfieisbhhiymopulwj`).
+
+The GitHub repository lives under the `keremtuzun-ai` account, which the Vercel GitHub app is not installed on, so pushes do not auto-deploy yet. Ship from a checkout instead:
+
+```bash
+npx vercel deploy --prod --yes          # build + deploy the working tree
+scripts/vercel-env.sh production        # re-sync env vars from .env.local (SITE_URL=https://… overrides the site URL)
+```
+
+To enable push-to-deploy, install the Vercel GitHub app on the `keremtuzun-ai` account (Vercel dashboard → Settings → Git) and run `npx vercel git connect`.
+
+The project also sets `TZ=Europe/Istanbul` so server-rendered times match the school's clock.
+
+The app is a standard Next.js application. On any Vercel project:
 
 1. Import the repository.
 2. Add the environment variables from `.env.example` (set `NEXT_PUBLIC_SITE_URL` to the production URL).

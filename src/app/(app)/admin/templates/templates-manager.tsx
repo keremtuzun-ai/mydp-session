@@ -28,11 +28,12 @@ export function TemplatesManager({ templates, committees, sessions, members }: {
   useActionFeedback(state);
   const [templateId, setTemplateId] = useState(templates[0]?.id ?? "");
   const [committeeId, setCommitteeId] = useState(committees[0]?.id ?? "");
+  void setCommitteeId;
   const [sessionId, setSessionId] = useState("");
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pending, startTransition] = useTransition();
   const router = useRouter();
-  const eligible = Array.from(new Map(members.filter((m) => m.committee_id === committeeId).map((m) => [m.id, m])).values());
+  const eligible = Array.from(new Map(members.filter((m) => !committeeId || m.committee_id === committeeId).map((m) => [m.id, m])).values());
 
   const assign = () =>
     startTransition(async () => {
@@ -109,16 +110,7 @@ export function TemplatesManager({ templates, committees, sessions, members }: {
               ))}
             </NativeSelect>
           </Field>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Committee" htmlFor="as-committee">
-              <NativeSelect id="as-committee" value={committeeId} onChange={(e) => { setCommitteeId(e.target.value); setSelected(new Set()); }}>
-                {committees.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.acronym}
-                  </option>
-                ))}
-              </NativeSelect>
-            </Field>
+          <div className="grid grid-cols-1 gap-3">
             <Field label="Session" htmlFor="as-session" optional>
               <NativeSelect id="as-session" value={sessionId} onChange={(e) => setSessionId(e.target.value)}>
                 <option value="">None</option>

@@ -6,7 +6,7 @@ import { PermissionDenied } from "@/components/mun/permission-denied";
 import { StatTile } from "@/components/mun/stat-tile";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { AttendanceByWeekChart, AttendanceByCommitteeChart, TaskStatusChart } from "./charts";
+import { AttendanceByWeekChart, TaskStatusChart } from "./charts";
 import { humanize, fmt } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Analytics" };
@@ -20,11 +20,9 @@ export default async function AnalyticsPage() {
   if (!viewer.isStaff) return <PermissionDenied message="Analytics are available to executives and admins." />;
   const supabase = await createClient();
 
-  const [{ data: sessions }, { data: attendance }, { data: memberships }, { data: committees }, { data: tasks }, { data: profiles }] = await Promise.all([
+  const [{ data: sessions }, { data: attendance }, { data: tasks }, { data: profiles }] = await Promise.all([
     supabase.from("weekly_sessions").select("id, title, starts_at, status").eq("status", "completed").order("starts_at"),
     supabase.from("attendance_records").select("session_id, profile_id, status"),
-    supabase.from("committee_memberships").select("profile_id, committee_id"),
-    supabase.from("committees").select("id, acronym, name"),
     supabase.from("tasks").select("id, status, due_at, assigned_committee_id"),
     supabase.from("profiles").select("id, role, onboarding_completed_at"),
   ]);
@@ -40,14 +38,6 @@ export default async function AnalyticsPage() {
     return { week: fmt(s.starts_at, "d MMM"), title: s.title, rate: rows.length ? Math.round((yes / rows.length) * 100) : 0, present: yes, total: rows.length };
   });
 
-  // Attendance by committee (members' records across completed sessions)
-  const committeeList = committees ?? [];
-  const byCommittee = committeeList.map((c) => {
-    const memberIds = new Set((memberships ?? []).filter((m) => m.committee_id === c.id).map((m) => m.profile_id));
-    const rows = att.filter((a) => memberIds.has(a.profile_id) && sessionList.some((s) => s.id === a.session_id));
-    const yes = rows.filter((a) => attended(a.status)).length;
-    return { committee: c.acronym, name: c.name, rate: rows.length ? Math.round((yes / rows.length) * 100) : 0, present: yes, total: rows.length, members: memberIds.size };
-  });
 
   // Tasks
   const taskList = tasks ?? [];
@@ -74,7 +64,7 @@ export default async function AnalyticsPage() {
         <StatTile label="Awaiting review" value={awaitingReview} hint="submitted, not yet reviewed" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6">
         <Card>
           <CardHeader>
             <CardTitle>Attendance by week</CardTitle>
@@ -106,34 +96,6 @@ export default async function AnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Attendance by committee</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AttendanceByCommitteeChart data={byCommittee} />
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Committee</TableHead>
-                  <TableHead className="text-right">Members</TableHead>
-                  <TableHead className="text-right">Rate</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {byCommittee.map((c) => (
-                  <TableRow key={c.committee}>
-                    <TableCell>
-                      <span className="font-medium">{c.committee}</span> <span className="muted">{c.name}</span>
-                    </TableCell>
-                    <TableCell className="text-right">{c.members}</TableCell>
-                    <TableCell className="text-right font-medium">{c.total ? `${c.rate}%` : "—"}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
       </div>
 
       <Card>

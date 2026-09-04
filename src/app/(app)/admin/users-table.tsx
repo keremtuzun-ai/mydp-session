@@ -15,13 +15,12 @@ import { UserChip } from "@/components/mun/user-chip";
 import { setUserRole, deleteUser, setTemporaryPassword } from "@/actions/admin";
 import { toast } from "sonner";
 import { KeyRound } from "lucide-react";
-import { upsertMembership } from "@/actions/committees";
 import { useActionFeedback } from "@/hooks/use-action-feedback";
 import { USER_ROLES, ROLE_LABEL } from "@/lib/auth/roles";
 import { formatDate } from "@/lib/utils";
 import type { Profile } from "@/lib/types/database";
 
-type Row = Profile & { committees: string[] };
+type Row = Profile;
 
 function RoleSelect({ profileId, role, disabled }: { profileId: string; role: Profile["role"]; disabled: boolean }) {
   const [state, action] = useActionState(setUserRole, null);
@@ -43,11 +42,9 @@ function RoleSelect({ profileId, role, disabled }: { profileId: string; role: Pr
   );
 }
 
-export function UsersTable({ rows, selfId, committees }: { rows: Row[]; selfId: string; committees: { id: string; acronym: string }[] }) {
+export function UsersTable({ rows, selfId }: { rows: Row[]; selfId: string }) {
   const [q, setQ] = useState("");
   const filtered = rows.filter((r) => `${r.display_name ?? ""} ${r.username ?? ""} ${r.school_email}`.toLowerCase().includes(q.toLowerCase()));
-  const [assignState, assignAction] = useActionState(upsertMembership, null);
-  useActionFeedback(assignState);
 
   return (
     <div className="flex flex-col gap-6">
@@ -67,7 +64,6 @@ export function UsersTable({ rows, selfId, committees }: { rows: Row[]; selfId: 
             <TableHead>Member</TableHead>
             <TableHead>School email</TableHead>
             <TableHead>Grade</TableHead>
-            <TableHead>Committees</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Joined</TableHead>
             <TableHead className="text-right">Actions</TableHead>
@@ -84,11 +80,6 @@ export function UsersTable({ rows, selfId, committees }: { rows: Row[]; selfId: 
                 {r.phone ? <span className="block text-xs">{r.phone}</span> : null}
               </TableCell>
               <TableCell>{r.grade ?? "—"}</TableCell>
-              <TableCell>
-                <div className="flex flex-wrap gap-1">
-                  {r.committees.length ? r.committees.map((c) => <Badge key={c} variant="navy">{c}</Badge>) : <span className="muted">—</span>}
-                </div>
-              </TableCell>
               <TableCell>
                 <div className="flex flex-col gap-1">
                   <RoleBadge role={r.role} />
@@ -132,35 +123,6 @@ export function UsersTable({ rows, selfId, committees }: { rows: Row[]; selfId: 
         </TableBody>
       </Table>
 
-      <Card className="card-tight">
-        <form action={assignAction} className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
-          <span className="sm:col-span-4 section-label m-0">Assign a member to a committee</span>
-          <Field label="Username" htmlFor="as-username">
-            <Input id="as-username" name="username" placeholder="ayse-demir" required />
-          </Field>
-          <Field label="Committee" htmlFor="as-committee">
-            <NativeSelect id="as-committee" name="committee_id" required>
-              {committees.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.acronym}
-                </option>
-              ))}
-            </NativeSelect>
-          </Field>
-          <Field label="Membership role" htmlFor="as-role">
-            <NativeSelect id="as-role" name="membership_role" defaultValue="delegate">
-              <option value="delegate">Delegate</option>
-              <option value="co_chair">Co-Chair</option>
-              <option value="chair">Chair</option>
-              <option value="executive">Executive</option>
-            </NativeSelect>
-          </Field>
-          <SubmitButton>
-            <UserPlus className="size-4" aria-hidden /> Assign
-          </SubmitButton>
-          <FormError message={assignState && !assignState.ok ? assignState.error : null} />
-        </form>
-      </Card>
     </div>
   );
 }

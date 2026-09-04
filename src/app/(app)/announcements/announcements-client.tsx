@@ -68,7 +68,7 @@ export function NewAnnouncementForm({ committees, sessions, isStaff, defaultComm
   return (
     <Card>
       <div className="section-head"><h2>Post an announcement</h2></div>
-      <p className="mb-4 small muted">{isStaff ? "Target everyone, a role, a committee or a session." : "Chairs post to the committees they chair."}</p>
+      <p className="mb-4 small muted">{isStaff ? "Target everyone, a role or a session." : ""}</p>
       <form ref={formRef} action={action} className="flex flex-col gap-4">
         <Field label="Title" htmlFor="a-title" error={fieldError(state, "title")}>
           <Input id="a-title" name="title" required />
@@ -86,16 +86,7 @@ export function NewAnnouncementForm({ committees, sessions, isStaff, defaultComm
             </NativeSelect>
           </Field>
         ) : null}
-        <Field label="Committee" htmlFor="a-committee" optional={isStaff}>
-          <NativeSelect id="a-committee" name="target_committee_id" defaultValue={defaultCommittee || (isStaff ? "" : committees[0]?.id ?? "")}>
-            {isStaff ? <option value="">All committees</option> : null}
-            {committees.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.acronym}
-              </option>
-            ))}
-          </NativeSelect>
-        </Field>
+        <input type="hidden" name="target_committee_id" value={defaultCommittee || (committees[0]?.id ?? "")} />
         {isStaff ? (
           <Field label="Session" htmlFor="a-session" optional>
             <NativeSelect id="a-session" name="target_session_id" defaultValue="">

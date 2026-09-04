@@ -52,7 +52,7 @@ export function MaterialsBrowser({ items, committees, sessions, initial }: { ite
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="lg:col-span-2">
           <Label htmlFor="q" className="mb-1 block">
             Search
@@ -61,19 +61,6 @@ export function MaterialsBrowser({ items, committees, sessions, initial }: { ite
             <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 muted" aria-hidden />
             <Input id="q" className="pl-8" placeholder="Title or description" value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} />
           </div>
-        </div>
-        <div>
-          <Label htmlFor="f-committee" className="mb-1 block">
-            Committee
-          </Label>
-          <NativeSelect id="f-committee" value={f.committee} onChange={(e) => setF({ ...f, committee: e.target.value })}>
-            <option value="">All</option>
-            {committees.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.acronym}
-              </option>
-            ))}
-          </NativeSelect>
         </div>
         <div>
           <Label htmlFor="f-session" className="mb-1 block">
@@ -180,7 +167,7 @@ export function NewMaterialDialog({ committees, sessions, isStaff }: { committee
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>Add a material</DialogTitle>
-          <DialogDescription>Attach a file or link a source. Committee-only materials are visible to that committee&apos;s members.</DialogDescription>
+          <DialogDescription>Attach a file or link a source. Delegates can open everything marked “Everyone”.</DialogDescription>
         </DialogHeader>
         <form action={action} className="flex flex-col gap-4">
           <Field label="Title" htmlFor="m-title" error={fieldError(state, "title")}>
@@ -200,22 +187,12 @@ export function NewMaterialDialog({ committees, sessions, isStaff }: { committee
               </NativeSelect>
             </Field>
             <Field label="Visibility" htmlFor="m-visibility">
-              <NativeSelect id="m-visibility" name="visibility" defaultValue={isStaff ? "everyone" : "committee"}>
-                {isStaff ? <option value="everyone">Everyone</option> : null}
-                <option value="committee">Committee members</option>
-                {isStaff ? <option value="staff">Chairs and staff</option> : null}
+              <NativeSelect id="m-visibility" name="visibility" defaultValue="everyone">
+                <option value="everyone">Everyone</option>
+                <option value="staff">Executives only</option>
               </NativeSelect>
             </Field>
-            <Field label="Committee" htmlFor="m-committee" optional={isStaff}>
-              <NativeSelect id="m-committee" name="committee_id" defaultValue={isStaff ? "" : committees[0]?.id ?? ""}>
-                {isStaff ? <option value="">None</option> : null}
-                {committees.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.acronym}
-                  </option>
-                ))}
-              </NativeSelect>
-            </Field>
+            <input type="hidden" name="committee_id" value="" />
             <Field label="Session" htmlFor="m-session" optional>
               <NativeSelect id="m-session" name="session_id" defaultValue="">
                 <option value="">None</option>

@@ -1,17 +1,14 @@
 import type { Metadata } from "next";
 import { getViewer } from "@/lib/auth/session";
 import { PageHeader } from "@/components/mun/page-header";
-import { RoleBadge, MembershipBadge } from "@/components/mun/role-badge";
+import { RoleBadge } from "@/components/mun/role-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/server";
 import { ProfileForm, AvatarForm, PasswordForm, SessionControls } from "./settings-forms";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const viewer = await getViewer();
-  const supabase = await createClient();
-  const { data: committees } = await supabase.from("committees").select("id, acronym, name").in("id", viewer.memberCommitteeIds.length ? viewer.memberCommitteeIds : ["00000000-0000-0000-0000-000000000000"]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -74,25 +71,10 @@ export default async function SettingsPage() {
                   <dt>Username</dt>
                   <dd><span className="code-pill">{viewer.profile.username}</span></dd>
                 </div>
-                <div className="settings-row">
+                <div className="settings-row !border-b-0">
                   <dt>Role</dt>
                   <dd>
                     <RoleBadge role={viewer.role} />
-                  </dd>
-                </div>
-                <div className="settings-row !border-b-0">
-                  <dt>Committees</dt>
-                  <dd className="flex flex-col gap-1">
-                    {viewer.memberships.length ? (
-                      viewer.memberships.map((m) => (
-                        <div key={m.id} className="flex items-center justify-between gap-2">
-                          <span>{committees?.find((c) => c.id === m.committee_id)?.acronym ?? "—"}</span>
-                          <MembershipBadge role={m.membership_role} />
-                        </div>
-                      ))
-                    ) : (
-                      <span className="muted">—</span>
-                    )}
                   </dd>
                 </div>
               </dl>

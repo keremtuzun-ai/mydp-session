@@ -13,24 +13,20 @@ export const metadata: Metadata = { title: "Sessions" };
 export default async function SessionsPage({ searchParams }: PageProps<"/sessions">) {
   const sp = await searchParams;
   const scope = sp.scope === "past" ? "past" : sp.scope === "all" ? "all" : "upcoming";
-  const committee = typeof sp.committee === "string" ? sp.committee : "";
   const status = typeof sp.status === "string" ? sp.status : "";
 
   const viewer = await getViewer();
   const supabase = await createClient();
   const now = new Date().toISOString();
-  const [sessions, { data: committees }] = await Promise.all([
-    listSessionsWithCoverage(supabase, scope === "upcoming" ? { from: now, order: "asc" } : scope === "past" ? { to: now, order: "desc" } : { order: "desc" }),
-    supabase.from("committees").select("id, acronym, name").order("acronym"),
-  ]);
-  const filtered = sessions.filter((s) => (!committee || s.committees.some((c) => c.id === committee)) && (!status || s.status === status));
+  const sessions = await listSessionsWithCoverage(supabase, scope === "upcoming" ? { from: now, order: "asc" } : scope === "past" ? { to: now, order: "desc" } : { order: "desc" });
+  const filtered = sessions.filter((s) => !status || s.status === status);
 
   return (
     <div>
       <PageHeader
         eyebrow="Weekly programme"
         title="Sessions"
-        description="Every weekly session with its agenda, committee coverage and attendance."
+        description="Every weekly session with its room, agenda and attendance. Tuesdays at 10:55 in 1S and 15:10 in the Library."
         actions={
           viewer.isStaff ? (
             <Link href="/sessions/new" className="btn">
@@ -39,14 +35,13 @@ export default async function SessionsPage({ searchParams }: PageProps<"/session
           ) : null
         }
       />
-      <SessionFilters scope={scope} committee={committee} status={status} committees={committees ?? []} />
+      <SessionFilters scope={scope} status={status} />
       {filtered.length ? (
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           {filtered.map((s, i) => (
             <SessionCard
               key={s.id}
               session={s}
-              committeeAcronyms={s.committees.map((c) => c.acronym)}
               attendanceSummary={attendanceSummaryText(s.attendance)}
               agendaPreview={s.general_agenda}
               highlight={scope === "upcoming" && i === 0 && s.status === "published"}

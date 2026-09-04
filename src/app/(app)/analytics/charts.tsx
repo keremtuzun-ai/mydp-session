@@ -21,23 +21,6 @@ export function AttendanceByWeekChart({ data }: { data: { week: string; rate: nu
   );
 }
 
-export function AttendanceByCommitteeChart({ data }: { data: { committee: string; rate: number }[] }) {
-  if (!data.length) return <p className="mb-4 text-sm muted">No committees yet.</p>;
-  return (
-    <div className="mb-4 h-56" role="img" aria-label="Attendance rate per committee">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-          <CartesianGrid stroke="var(--line-soft)" strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="committee" tick={{ fontSize: 11, fill: "var(--ink-2)", fontFamily: "var(--font-mono)" }} axisLine={false} tickLine={false} />
-          <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: "var(--ink-2)", fontFamily: "var(--font-mono)" }} axisLine={false} tickLine={false} unit="%" />
-          <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--navy-soft)" }} formatter={(v) => [`${v}%`, "Attendance"]} />
-          <Bar dataKey="rate" fill="var(--navy)" radius={[4, 4, 0, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
-  );
-}
-
 export function TaskStatusChart({ data }: { data: { status: string; count: number }[] }) {
   return (
     <div className="h-64" role="img" aria-label="Number of tasks per status">

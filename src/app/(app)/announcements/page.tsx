@@ -12,19 +12,19 @@ export default async function AnnouncementsPage({ searchParams }: PageProps<"/an
   const sp = await searchParams;
   const viewer = await getViewer();
   const supabase = await createClient();
-  const [{ data: announcements }, { data: reads }, { data: committees }, { data: sessions }] = await Promise.all([
+  const [{ data: announcements }, { data: reads }, { data: sessions }] = await Promise.all([
     supabase.from("announcements").select("*").order("pinned", { ascending: false }).order("published_at", { ascending: false }),
     supabase.from("announcement_reads").select("announcement_id").eq("profile_id", viewer.userId),
-    supabase.from("committees").select("id, acronym, name").order("acronym"),
     supabase.from("weekly_sessions").select("id, title, starts_at").order("starts_at", { ascending: false }).limit(12),
   ]);
+  const committees: { id: string; acronym: string; name: string }[] = [];
   const list = announcements ?? [];
   const readSet = new Set((reads ?? []).map((r) => r.announcement_id));
   const names = await getNameMap(supabase, list.map((a) => a.author_id));
-  const committeeMap = new Map((committees ?? []).map((c) => [c.id, c.acronym]));
+  const committeeMap = new Map(committees.map((c) => [c.id, c.acronym]));
   const sessionMap = new Map((sessions ?? []).map((s) => [s.id, s.title]));
-  const canPost = viewer.isStaff || viewer.isChair;
-  const postCommittees = viewer.isStaff ? committees ?? [] : (committees ?? []).filter((c) => viewer.chairedCommitteeIds.includes(c.id));
+  const canPost = viewer.isStaff;
+  const postCommittees = committees;
   const unread = list.filter((a) => !readSet.has(a.id)).length;
 
   return (

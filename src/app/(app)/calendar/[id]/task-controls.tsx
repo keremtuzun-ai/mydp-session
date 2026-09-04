@@ -94,20 +94,23 @@ export function EvidenceUploadForm({ taskId }: { taskId: string }) {
     <Card className="card-tight">
       <form action={action} className="flex flex-col gap-3">
         <input type="hidden" name="task_id" value={taskId} />
-        <span className="section-label m-0">Upload evidence</span>
+        <span className="section-label m-0">Submit your work</span>
         <Field label="Title" htmlFor="up-title">
           <Input id="up-title" name="title" placeholder="Position paper (final)" required />
         </Field>
         <Field label="Notes" htmlFor="up-notes" optional>
           <Textarea id="up-notes" name="notes" rows={2} placeholder="Anything your chair should know." />
         </Field>
-        <Field label="File" htmlFor="up-file" hint={`PDF, PNG, JPG or DOCX up to ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB.`}>
-          <Input id="up-file" name="file" type="file" accept={ACCEPT_ATTRIBUTE} required />
+        <Field label="Google Doc or other link" htmlFor="up-url" optional hint="Set sharing to “Anyone with the link” so your chair can open it.">
+          <Input id="up-url" name="external_url" type="url" inputMode="url" placeholder="https://docs.google.com/document/d/…" />
+        </Field>
+        <Field label="File" htmlFor="up-file" optional hint={`PDF, PNG, JPG or DOCX up to ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB. Attach a file, a link, or both.`}>
+          <Input id="up-file" name="file" type="file" accept={ACCEPT_ATTRIBUTE} />
         </Field>
         <FormError message={state && !state.ok ? state.error : null} />
         <div className="flex justify-end">
-          <SubmitButton size="sm" pendingText="Uploading…">
-            Upload
+          <SubmitButton size="sm" pendingText="Saving…">
+            Submit
           </SubmitButton>
         </div>
       </form>

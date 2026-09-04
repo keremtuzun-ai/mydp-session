@@ -49,10 +49,10 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
     assignedByName: nameOf(names, t.created_by),
     assigneeName: t.assigned_to_profile_id ? nameOf(names, t.assigned_to_profile_id) : t.assigned_role ? `All ${t.assigned_role}s` : "Committee-wide",
     sessionTitle: t.session_id ? sessionMap.get(t.session_id) ?? null : null,
-    committeeAcronym: t.assigned_committee_id ? committeeMap.get(t.assigned_committee_id) ?? null : null,
+    committeeAcronym: t.committee_label ?? (t.assigned_committee_id ? committeeMap.get(t.assigned_committee_id) ?? null : null),
     uploads: (uploads ?? [])
       .filter((u) => u.task_id === t.id)
-      .map((u) => ({ id: u.id, title: u.title, file_name: u.file_name, created_at: u.created_at, authorName: nameOf(names, u.uploaded_by) })),
+      .map((u) => ({ id: u.id, title: u.title, file_name: u.file_name, external_url: u.external_url, created_at: u.created_at, authorName: nameOf(names, u.uploaded_by) })),
     canManage: isManaged(t),
     isAssignee: t.assigned_to_profile_id === viewer.userId,
   }));

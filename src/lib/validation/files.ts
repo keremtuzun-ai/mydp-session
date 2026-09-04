@@ -29,6 +29,9 @@ export function validateEvidenceFile(file: FileMeta, maxBytes = MAX_UPLOAD_BYTES
 export const uploadMetaSchema = z.object({
   title: z.string().trim().min(2, "Give the upload a title").max(120),
   notes: z.string().trim().max(2000).optional().or(z.literal("")),
+  external_url: z
+    .union([z.string().trim().url("Paste the full link, starting with https://").refine((v) => v.startsWith("https://"), "Links must start with https://"), z.literal("")])
+    .optional(),
 });
 
 export function safeFileName(name: string) {

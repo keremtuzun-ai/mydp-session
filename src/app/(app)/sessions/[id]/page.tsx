@@ -4,18 +4,16 @@ import { notFound } from "next/navigation";
 import { CalendarDays, MapPin, Video, Shirt, Pencil, Megaphone, ListChecks, Library, MessageSquare } from "lucide-react";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
-import { getNameMap, nameOf, getUploadCounts, SESSION_COMMITTEE_COLUMNS } from "@/lib/data/queries";
+import { getNameMap, nameOf, getUploadCounts } from "@/lib/data/queries";
 import { PageHeader } from "@/components/mun/page-header";
 import { SessionStatusBadge, AttendanceBadge } from "@/components/mun/session-status-badge";
 import { TaskStatusBadge } from "@/components/mun/task-status-badge";
 import { PriorityBadge } from "@/components/mun/priority-badge";
-import { CommitteeSeal } from "@/components/mun/committee-badge";
 import { EmptyState } from "@/components/mun/empty-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { formatDate, formatTimeRange, relativeDue, formatDateTime, humanize } from "@/lib/utils";
-import { SessionStatusControls, CommitteeBlockEditor, FeedbackForm } from "./session-controls";
+import { SessionStatusControls, FeedbackForm } from "./session-controls";
 
 export const metadata: Metadata = { title: "Session" };
 
@@ -26,8 +24,7 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
   const { data: session } = await supabase.from("weekly_sessions").select("*").eq("id", id).maybeSingle();
   if (!session) notFound();
 
-  const [{ data: blocks }, { data: announcements }, { data: tasks }, { data: materials }, { data: myAttendance }, { data: feedback }] = await Promise.all([
-    supabase.from("session_committees").select(`${SESSION_COMMITTEE_COLUMNS}, committees ( id, acronym, name, slug )`).eq("session_id", id),
+  const [{ data: announcements }, { data: tasks }, { data: materials }, { data: myAttendance }, { data: feedback }] = await Promise.all([
     supabase.from("announcements").select("*").eq("target_session_id", id).order("pinned", { ascending: false }).order("published_at", { ascending: false }),
     supabase.from("tasks").select("*").eq("session_id", id).order("due_at", { ascending: true, nullsFirst: false }),
     supabase.from("materials").select("*").eq("session_id", id).order("created_at", { ascending: false }),
@@ -35,16 +32,6 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
     supabase.from("session_feedback").select("*").eq("session_id", id).order("created_at", { ascending: false }),
   ]);
 
-  const blockList = (blocks ?? []).sort((a, b) => (a.committees?.acronym ?? "").localeCompare(b.committees?.acronym ?? ""));
-  const canManageBlock = (committeeId: string) => viewer.isStaff || viewer.chairedCommitteeIds.includes(committeeId);
-  // Chair notes only for authorised roles (column is hidden from others by the DB).
-  const chairNotes = new Map<string, string | null>();
-  await Promise.all(
-    blockList.filter((b) => canManageBlock(b.committee_id)).map(async (b) => {
-      const { data } = await supabase.rpc("session_chair_notes", { sc: b.id });
-      chairNotes.set(b.id, data ?? null);
-    }),
-  );
 
   const taskList = tasks ?? [];
   const uploadCounts = await getUploadCounts(supabase, taskList.map((t) => t.id));
@@ -55,15 +42,11 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
     ...(feedback ?? []).flatMap((f) => [f.author_id, f.profile_id]),
   ]);
 
-  // Members the viewer may write feedback for (chairs: their committees; staff: all members in this session's committees)
+  // Staff may write feedback for any delegate.
   let feedbackTargets: { id: string; name: string }[] = [];
-  if (viewer.isStaff || viewer.isChair) {
-    const committeeIds = blockList.map((b) => b.committee_id).filter((c) => viewer.isStaff || viewer.chairedCommitteeIds.includes(c));
-    if (committeeIds.length) {
-      const { data: members } = await supabase.from("committee_memberships").select("profile_id").in("committee_id", committeeIds).eq("membership_role", "delegate");
-      const memberNames = await getNameMap(supabase, (members ?? []).map((m) => m.profile_id));
-      feedbackTargets = Array.from(new Set((members ?? []).map((m) => m.profile_id))).map((pid) => ({ id: pid, name: nameOf(memberNames, pid) }));
-    }
+  if (viewer.isStaff) {
+    const { data: delegates } = await supabase.from("public_profiles").select("id, display_name, username").eq("role", "delegate").not("display_name", "is", null).order("display_name");
+    feedbackTargets = (delegates ?? []).map((d) => ({ id: d.id, name: d.display_name ?? d.username ?? "?" }));
   }
 
   return (
@@ -131,42 +114,14 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
           <CardContent className="space-y-2 text-sm">
             <AttendanceBadge status={myAttendance?.status} />
             {myAttendance?.note ? <p className="muted">Note: {myAttendance.note}</p> : null}
-            {viewer.isStaff || viewer.isChair ? (
+            {viewer.isStaff ? (
               <Button asChild variant="outline" size="sm" className="mt-2">
-                <Link href={`/attendance?session=${session.id}`}>Take roll call</Link>
+                <Link href={`/exec/attendance?session=${session.id}`}>Take attendance</Link>
               </Button>
             ) : null}
           </CardContent>
         </Card>
       </div>
-
-      <section aria-labelledby="committee-blocks">
-        <div className="section-head"><h2 id="committee-blocks">Committee agenda blocks</h2></div>
-        {blockList.length ? (
-          <div className="grid gap-4 md:grid-cols-2">
-            {blockList.map((b) => (
-              <Card key={b.id} className="card-rule">
-                <div className="flex items-start gap-3">
-                  <CommitteeSeal acronym={b.committees?.acronym ?? "?"} size="sm" />
-                  <div className="min-w-0 flex-1">
-                    <Link href={`/committees/${b.committees?.slug}`} className="row-title">
-                      {b.committees?.name}
-                    </Link>
-                    <p className="m-0 text-[0.9rem] text-gold">{b.topic ?? "Topic to be announced"}</p>
-                  </div>
-                  {viewer.memberCommitteeIds.includes(b.committee_id) ? <Badge variant="gold">Yours</Badge> : null}
-                </div>
-                {b.agenda ? <pre className="mt-3 whitespace-pre-wrap font-sans text-[0.9rem] muted">{b.agenda}</pre> : <p className="mt-3 text-sm muted">No agenda yet.</p>}
-                {canManageBlock(b.committee_id) ? (
-                  <CommitteeBlockEditor block={{ id: b.id, topic: b.topic, agenda: b.agenda, chair_notes: chairNotes.get(b.id) ?? null }} acronym={b.committees?.acronym ?? ""} />
-                ) : null}
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <EmptyState title="No committees assigned" description="This session has no committee blocks yet." className="empty-state-sm" />
-        )}
-      </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section aria-labelledby="session-tasks">
@@ -186,7 +141,7 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
                     <div className="min-w-0 flex-1">
                       <p className="m-0 font-[650]">{t.title}</p>
                       <p className="m-0 row-sub">
-                        {t.assigned_to_profile_id ? nameOf(names, t.assigned_to_profile_id) : t.assigned_role ? `All ${t.assigned_role}s` : "Committee-wide"} · {relativeDue(t.due_at)}
+                        {t.assigned_to_profile_id ? nameOf(names, t.assigned_to_profile_id) : "Everyone"}{t.committee_label ? ` · ${t.committee_label}` : ""} · {relativeDue(t.due_at)}
                         {uploadCounts.get(t.id) ? ` · ${uploadCounts.get(t.id)} upload(s)` : ""}
                       </p>
                     </div>

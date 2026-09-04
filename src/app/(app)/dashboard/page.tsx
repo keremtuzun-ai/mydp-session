@@ -2,13 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
-import { listSessionsWithCoverage, getUploadCounts, getNameMap, nameOf, SESSION_COMMITTEE_COLUMNS } from "@/lib/data/queries";
+import { listSessionsWithCoverage, getUploadCounts, getNameMap, nameOf } from "@/lib/data/queries";
 import { PageHeader } from "@/components/mun/page-header";
 import { SessionCard } from "@/components/mun/session-card";
 import { EmptyState } from "@/components/mun/empty-state";
 import { TaskStatusBadge } from "@/components/mun/task-status-badge";
 import { PriorityBadge } from "@/components/mun/priority-badge";
-import { MembershipBadge } from "@/components/mun/role-badge";
 import { StatTile } from "@/components/mun/stat-tile";
 import { FormSuccess } from "@/components/ui/field";
 import { relativeDue, formatDate, fmt } from "@/lib/utils";
@@ -21,9 +20,8 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
   const supabase = await createClient();
   const now = new Date().toISOString();
 
-  const [upcoming, { data: committees }, { data: tasks }, { data: announcements }, { data: attendance }, { data: sessionsDone }] = await Promise.all([
+  const [upcoming, { data: tasks }, { data: announcements }, { data: attendance }, { data: sessionsDone }] = await Promise.all([
     listSessionsWithCoverage(supabase, { from: now, order: "asc", limit: 1 }),
-    supabase.from("committees").select("*").in("id", viewer.memberCommitteeIds.length ? viewer.memberCommitteeIds : ["00000000-0000-0000-0000-000000000000"]),
     supabase.from("tasks").select("*").not("status", "in", "(completed,reviewed)").order("due_at", { ascending: true, nullsFirst: false }).limit(6),
     supabase.from("announcements").select("*").lte("published_at", now).order("pinned", { ascending: false }).order("published_at", { ascending: false }).limit(4),
     supabase.from("attendance_records").select("status, session_id").eq("profile_id", viewer.userId),
@@ -40,10 +38,6 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
   const held = (sessionsDone ?? []).length;
   const rate = recorded ? Math.round((attended / recorded) * 100) : null;
 
-  const { data: nextBlocks } = nextSession
-    ? await supabase.from("session_committees").select(`${SESSION_COMMITTEE_COLUMNS}, committees ( acronym, name, slug )`).eq("session_id", nextSession.id)
-    : { data: [] };
-  const myBlocks = (nextBlocks ?? []).filter((b) => viewer.memberCommitteeIds.includes(b.committee_id));
   const firstName = viewer.profile.display_name?.split(" ")[0] ?? viewer.profile.username;
 
   return (
@@ -73,7 +67,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile label="Attendance" value={rate === null ? "—" : `${rate}%`} hint={recorded ? `${attended} of ${recorded} recorded` : `${held} session${held === 1 ? "" : "s"} held`} />
         <StatTile label="Open tasks" value={taskList.length} hint="on your calendar" />
-        <StatTile label="Committees" value={viewer.memberships.length} hint={viewer.memberships.length ? "you belong to" : "not placed yet"} />
+        <StatTile label="Sessions held" value={held} hint="this year so far" />
         <StatTile label="Notices" value={(announcements ?? []).length} hint="recent announcements" />
       </div>
 
@@ -87,20 +81,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
           </div>
           {nextSession ? (
             <>
-              <SessionCard session={nextSession} committeeAcronyms={nextSession.committees.map((c) => c.acronym)} highlight agendaPreview={nextSession.general_agenda} />
-              {myBlocks.length ? (
-                <ul className="agenda-list mt-4">
-                  {myBlocks.map((b) => (
-                    <li key={b.id}>
-                      <span className="schedule-time">{b.committees?.acronym}</span>
-                      <span>
-                        <strong>{b.topic ?? "Topic to be announced"}</strong>
-                        {b.agenda ? <span className="block small muted">{b.agenda}</span> : null}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              ) : null}
+              <SessionCard session={nextSession} highlight agendaPreview={nextSession.general_agenda} />
             </>
           ) : (
             <EmptyState title="No session scheduled" description="The Secretariat has not published the next weekly session yet." className="empty-state-sm" />
@@ -109,38 +90,21 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
 
         <section className="card">
           <div className="section-head">
-            <h2>{viewer.memberships.length === 1 ? "Your committee" : "Your committees"}</h2>
+            <h2>{viewer.isStaff ? "Executive desk" : "Quick links"}</h2>
           </div>
-          {committees && committees.length ? (
-            <ul className="people-list">
-              {committees.map((c) => {
-                const m = viewer.memberships.find((x) => x.committee_id === c.id);
-                return (
-                  <li key={c.id} className="justify-between">
-                    <span className="min-w-0">
-                      <Link href={`/committees/${c.slug}`} className="row-title">
-                        {c.acronym}
-                      </Link>
-                      <span className="block small muted truncate">{c.current_topic ?? c.name}</span>
-                    </span>
-                    {m ? <MembershipBadge role={m.membership_role} /> : null}
-                  </li>
-                );
-              })}
-            </ul>
+          {viewer.isStaff ? (
+            <p className="m-0 mb-3 small muted">Assign tasks, follow every delegate&apos;s progress, review submissions and take attendance.</p>
           ) : (
-            <EmptyState title="No committee yet" description="You will be placed in a committee by the Secretariat." className="empty-state-sm" />
+            <p className="m-0 mb-3 small muted">Your tasks, sessions and materials.</p>
           )}
-          <div className="section-head mt-6">
-            <h3>Quick links</h3>
-          </div>
           <div className="filter-pills">
             {[
+              ...(viewer.isStaff ? [["/exec", "Tasks & progress"], ["/exec/uploads", "Submissions"], ["/exec/attendance", "Attendance"], ["/calendar/new", "Assign task"]] : []),
               ["/calendar", "Calendar"],
               ["/sessions", "Sessions"],
-              ["/committees", "Committees"],
               ["/materials", "Materials"],
-              ["/attendance", "Attendance"],
+              ["/announcements", "Announcements"],
+              ["/attendance", "My attendance"],
               ["/settings", "Profile"],
               ...(viewer.isStaff ? [["/analytics", "Analytics"]] : []),
             ].map(([href, label]) => (

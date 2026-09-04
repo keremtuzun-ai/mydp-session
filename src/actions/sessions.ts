@@ -29,7 +29,6 @@ function sessionInput(formData: FormData) {
     dress_code: formData.get("dress_code") ?? "",
     general_agenda: formData.get("general_agenda") ?? "",
     status: formData.get("status") ?? "draft",
-    committee_ids: formData.getAll("committee_ids").map(String),
   };
 }
 
@@ -45,14 +44,11 @@ export async function createSession(_prev: ActionResult | null, formData: FormDa
   if (!canManageSessions(actor)) return fail("Only executives and admins can schedule sessions.");
   const parsed = sessionSchema.safeParse(sessionInput(formData));
   if (!parsed.success) return fail("Check the highlighted fields.", fieldErrors(parsed.error.issues));
-  const { committee_ids, ...session } = parsed.data;
+  const { committee_ids: _unused, ...session } = parsed.data;
+  void _unused;
   const supabase = await createClient();
   const { data, error } = await supabase.from("weekly_sessions").insert({ ...session, created_by: actor.id }).select("id").single();
   if (error) return fail(describeDbError(error));
-  if (committee_ids.length) {
-    const { error: scErr } = await supabase.from("session_committees").insert(committee_ids.map((committee_id) => ({ session_id: data.id, committee_id })));
-    if (scErr) return fail(`Session saved, but committees failed: ${describeDbError(scErr)}`);
-  }
   await logAudit({ actorId: actor.id, action: "session.created", entityType: "weekly_session", entityId: data.id, metadata: { title: session.title } });
   revalidateSessions(data.id);
   redirect(`/sessions/${data.id}`);
@@ -64,24 +60,11 @@ export async function updateSession(sessionId: string, _prev: ActionResult | nul
   if (!uuid.safeParse(sessionId).success) return fail("Invalid session.");
   const parsed = sessionSchema.safeParse(sessionInput(formData));
   if (!parsed.success) return fail("Check the highlighted fields.", fieldErrors(parsed.error.issues));
-  const { committee_ids, ...session } = parsed.data;
+  const { committee_ids: _unused, ...session } = parsed.data;
+  void _unused;
   const supabase = await createClient();
   const { error } = await supabase.from("weekly_sessions").update(session).eq("id", sessionId);
   if (error) return fail(describeDbError(error));
-
-  const { data: existing } = await supabase.from("session_committees").select("id, committee_id").eq("session_id", sessionId);
-  const current = new Set((existing ?? []).map((r) => r.committee_id));
-  const wanted = new Set(committee_ids);
-  const toAdd = committee_ids.filter((c) => !current.has(c));
-  const toRemove = (existing ?? []).filter((r) => !wanted.has(r.committee_id)).map((r) => r.id);
-  if (toAdd.length) {
-    const { error: e } = await supabase.from("session_committees").insert(toAdd.map((committee_id) => ({ session_id: sessionId, committee_id })));
-    if (e) return fail(describeDbError(e));
-  }
-  if (toRemove.length) {
-    const { error: e } = await supabase.from("session_committees").delete().in("id", toRemove);
-    if (e) return fail(describeDbError(e));
-  }
   await logAudit({ actorId: actor.id, action: "session.updated", entityType: "weekly_session", entityId: sessionId });
   revalidateSessions(sessionId);
   return ok(undefined, "Session updated.");

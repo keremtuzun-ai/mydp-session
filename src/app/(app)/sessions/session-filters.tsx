@@ -5,13 +5,13 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
-type Props = { scope: string; committee: string; status: string; committees: { id: string; acronym: string; name: string }[] };
+type Props = { scope: string; status: string };
 
-export function SessionFilters({ scope, committee, status, committees }: Props) {
+export function SessionFilters({ scope, status }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const update = (patch: Record<string, string>) => {
-    const params = new URLSearchParams({ scope, committee, status, ...patch });
+    const params = new URLSearchParams({ scope, status, ...patch });
     for (const [k, v] of Array.from(params.entries())) if (!v) params.delete(k);
     router.push(`${pathname}?${params.toString()}`);
   };
@@ -24,20 +24,7 @@ export function SessionFilters({ scope, committee, status, committees }: Props) 
           </button>
         ))}
       </div>
-      <div className="grid flex-1 grid-cols-2 gap-3 sm:max-w-md">
-        <div>
-          <Label htmlFor="f-committee" className="mb-1 block">
-            Committee
-          </Label>
-          <NativeSelect id="f-committee" value={committee} onChange={(e) => update({ committee: e.target.value })}>
-            <option value="">All committees</option>
-            {committees.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.acronym}
-              </option>
-            ))}
-          </NativeSelect>
-        </div>
+      <div className="grid flex-1 grid-cols-1 gap-3 sm:max-w-xs">
         <div>
           <Label htmlFor="f-status" className="mb-1 block">
             Status

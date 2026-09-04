@@ -9,8 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Field, FormError } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { createSession, updateSession } from "@/actions/sessions";
 import { useRhfAction, toDatetimeLocal } from "@/components/forms/rhf-form";
 import { useActionFeedback, fieldError } from "@/hooks/use-action-feedback";
@@ -33,9 +31,9 @@ const clientSchema = z
   .refine((v) => new Date(v.ends_at) > new Date(v.starts_at), { path: ["ends_at"], message: "End must be after start" });
 type Values = z.infer<typeof clientSchema>;
 
-type Props = { session?: WeeklySession; committees: { id: string; acronym: string; name: string }[]; selectedCommitteeIds?: string[] };
+type Props = { session?: WeeklySession };
 
-export function SessionForm({ session, committees, selectedCommitteeIds = [] }: Props) {
+export function SessionForm({ session }: Props) {
   const action = session ? updateSession.bind(null, session.id) : createSession;
   const [state, dispatch, pending] = useActionState(action as (p: ActionResult | null, f: FormData) => Promise<ActionResult>, null);
   useActionFeedback(state);
@@ -46,7 +44,7 @@ export function SessionForm({ session, committees, selectedCommitteeIds = [] }: 
       theme: session?.theme ?? "",
       starts_at: toDatetimeLocal(session?.starts_at),
       ends_at: toDatetimeLocal(session?.ends_at),
-      location: session?.location ?? "Room B204",
+      location: session?.location ?? "1S",
       meeting_url: session?.meeting_url ?? "",
       dress_code: session?.dress_code ?? "",
       description: session?.description ?? "",
@@ -97,20 +95,6 @@ export function SessionForm({ session, committees, selectedCommitteeIds = [] }: 
           <Textarea id="general_agenda" rows={5} {...register("general_agenda")} />
         </Field>
       </div>
-
-      <fieldset>
-        <legend className="section-label">Committees meeting this week</legend>
-        <div className="grid gap-2 sm:grid-cols-2">
-          {committees.map((c) => (
-            <div key={c.id} className="flex items-center gap-2 rounded-[7px] border border-line px-3 py-2 bg-surface">
-              <Checkbox id={`c-${c.id}`} name="committee_ids" value={c.id} defaultChecked={selectedCommitteeIds.includes(c.id)} />
-              <Label htmlFor={`c-${c.id}`} className="cursor-pointer normal-case tracking-normal text-[0.88rem] font-medium text-ink">
-                <span className="font-[650]">{c.acronym}</span> <span className="muted">{c.name}</span>
-              </Label>
-            </div>
-          ))}
-        </div>
-      </fieldset>
 
       <FormError message={state && !state.ok && !state.fieldErrors ? state.error : null} />
       <div className="form-actions">

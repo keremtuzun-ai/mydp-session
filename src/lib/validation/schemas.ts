@@ -75,6 +75,7 @@ const optionalDate = z.string().transform((v) => (v ? new Date(v).toISOString() 
 export const taskSchema = z.object({
   title: z.string().trim().min(3, "Title is too short").max(140),
   description: optionalText(4000),
+  committee_label: optionalText(120),
   assigned_to_profile_id: optionalUuid,
   assigned_role: z.union([z.enum(USER_ROLE_VALUES), z.literal("")]).transform((v) => (v === "" ? null : v)),
   assigned_committee_id: optionalUuid,

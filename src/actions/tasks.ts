@@ -22,6 +22,7 @@ function taskFormInput(formData: FormData) {
   return {
     title: formData.get("title"),
     description: formData.get("description") ?? "",
+    committee_label: formData.get("committee_label") ?? "",
     assigned_to_profile_id: formData.get("assigned_to_profile_id") ?? "",
     assigned_role: formData.get("assigned_role") ?? "",
     assigned_committee_id: formData.get("assigned_committee_id") ?? "",
@@ -45,7 +46,7 @@ export async function createTask(_prev: ActionResult | null, formData: FormData)
   if (!parsed.success) return fail("Check the highlighted fields.", fieldErrors(parsed.error.issues));
   const input = parsed.data;
   if (!input.assigned_to_profile_id && !input.assigned_role && !input.assigned_committee_id) {
-    return fail("Assign the task to a member, a role or a committee.");
+    input.assigned_role = "delegate"; // "everyone": every delegate sees it
   }
   if (!canCreateTask(actor, input.assigned_committee_id)) {
     return fail(isStaff(actor) ? "You cannot create this task." : "Chairs can only create tasks for a committee they chair.");
@@ -138,26 +139,33 @@ export async function setTaskStatus(input: { taskId: string; status: Status; not
   return ok(undefined, "Status updated.");
 }
 
-/** Upload evidence: PDF, PNG, JPG or DOCX up to the configured limit. */
+/** Submit work on a task: a file (PDF, PNG, JPG, DOCX) and/or a document link such as a Google Doc. */
 export async function uploadEvidence(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const { actor } = await getActor();
   const taskId = String(formData.get("task_id") ?? "");
   if (!uuid.safeParse(taskId).success) return fail("Invalid task.");
-  const meta = uploadMetaSchema.safeParse({ title: formData.get("title"), notes: formData.get("notes") ?? "" });
+  const meta = uploadMetaSchema.safeParse({ title: formData.get("title"), notes: formData.get("notes") ?? "", external_url: formData.get("external_url") ?? "" });
   if (!meta.success) return fail(meta.error.issues[0]?.message ?? "Check the upload details.");
   const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) return fail("Choose a file to upload.");
-  const valid = validateEvidenceFile({ name: file.name, type: file.type, size: file.size });
-  if (!valid.ok) return fail(valid.error);
+  const hasFile = file instanceof File && file.size > 0;
+  const link = meta.data.external_url || null;
+  if (!hasFile && !link) return fail("Attach a file or paste a document link.");
+  if (hasFile) {
+    const valid = validateEvidenceFile({ name: file.name, type: file.type, size: file.size });
+    if (!valid.ok) return fail(valid.error);
+  }
 
   const supabase = await createClient();
   const { data: task } = await supabase.from("tasks").select("*").eq("id", taskId).maybeSingle();
   if (!task || !canViewTask(actor, task)) return fail("Task not found.");
   if (!canUploadEvidence(actor, task)) return fail("Uploads are closed for this task.");
 
-  const path = `${taskId}/${randomUUID()}-${safeFileName(file.name)}`;
-  const { error: upErr } = await supabase.storage.from("task-evidence").upload(path, file, { contentType: file.type, upsert: false });
-  if (upErr) return fail(`Upload failed: ${upErr.message}`);
+  let path: string | null = null;
+  if (hasFile) {
+    path = `${taskId}/${randomUUID()}-${safeFileName(file.name)}`;
+    const { error: upErr } = await supabase.storage.from("task-evidence").upload(path, file, { contentType: file.type, upsert: false });
+    if (upErr) return fail(`Upload failed: ${upErr.message}`);
+  }
 
   const { error } = await supabase.from("task_uploads").insert({
     task_id: taskId,
@@ -165,16 +173,17 @@ export async function uploadEvidence(_prev: ActionResult | null, formData: FormD
     title: meta.data.title,
     notes: meta.data.notes || null,
     storage_path: path,
-    file_name: file.name,
-    mime_type: file.type,
-    size_bytes: file.size,
+    external_url: link,
+    file_name: hasFile ? file.name : null,
+    mime_type: hasFile ? file.type : null,
+    size_bytes: hasFile ? file.size : null,
   });
   if (error) {
-    await supabase.storage.from("task-evidence").remove([path]);
+    if (path) await supabase.storage.from("task-evidence").remove([path]);
     return fail(describeDbError(error));
   }
   revalidateTaskViews(taskId);
-  return ok(undefined, "Evidence uploaded.");
+  return ok(undefined, hasFile ? "Work uploaded." : "Document link saved.");
 }
 
 export async function deleteUpload(uploadId: string): Promise<ActionResult> {
@@ -186,7 +195,7 @@ export async function deleteUpload(uploadId: string): Promise<ActionResult> {
   if (upload.uploaded_by !== actor.id && !(task && canManageTask(actor, task))) return fail("You cannot remove this upload.");
   const { error } = await supabase.from("task_uploads").delete().eq("id", uploadId);
   if (error) return fail(describeDbError(error));
-  await supabase.storage.from("task-evidence").remove([upload.storage_path]);
+  if (upload.storage_path) await supabase.storage.from("task-evidence").remove([upload.storage_path]);
   await supabase.from("task_activity").insert({ task_id: upload.task_id, actor_id: actor.id, action: "evidence_removed", metadata: { title: upload.title } });
   revalidateTaskViews(upload.task_id);
   return ok(undefined, "Upload removed.");

@@ -16,7 +16,7 @@ export type TaskRow = Task & {
   assigneeName: string;
   sessionTitle: string | null;
   committeeAcronym: string | null;
-  uploads: { id: string; title: string; file_name: string; created_at: string; authorName: string }[];
+  uploads: { id: string; title: string; file_name: string | null; external_url: string | null; created_at: string; authorName: string }[];
   canManage: boolean;
   isAssignee: boolean;
 };
@@ -62,12 +62,13 @@ function RowAction({ row }: { row: TaskRow }) {
   return null;
 }
 
-export function TaskTable({ rows, scope, status, showScope }: { rows: TaskRow[]; scope: string; status: string; showScope: boolean }) {
+export function TaskTable({ rows, scope, status, showScope, basePath }: { rows: TaskRow[]; scope: string; status: string; showScope: boolean; basePath?: string }) {
   const router = useRouter();
-  const pathname = usePathname();
+  const currentPath = usePathname();
+  const pathname = basePath ?? currentPath;
   const update = (patch: Record<string, string>) => {
     const params = new URLSearchParams({ scope, status, ...patch });
-    for (const [k, v] of Array.from(params.entries())) if (!v) params.delete(k);
+    for (const [k, v] of Array.from(params.entries())) if (!v || (k === "scope" && !showScope)) params.delete(k);
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -168,7 +169,7 @@ function Row({ row: t }: { row: TaskRow }) {
                       <a href={`/api/files/task-uploads/${u.id}`} target="_blank" rel="noopener noreferrer" className="prose-link">
                         <strong>{u.title}</strong>
                       </a>
-                      <span className="muted small mono">{u.file_name}</span>
+                      <span className="muted small mono">{u.file_name ?? (u.external_url ? new URL(u.external_url).hostname : "")}</span>
                       <div className="muted small">
                         Submitted {fmt(u.created_at, "dd MMM HH:mm")} · {u.authorName}
                       </div>

@@ -45,7 +45,7 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
   return (
     <div className="flex flex-col gap-7">
       <PageHeader
-        eyebrow={committee ? `${committee.acronym} · task` : "Task"}
+        eyebrow={task.committee_label ? `${task.committee_label} · task` : committee ? `${committee.acronym} · task` : "Task"}
         title={task.title}
         actions={
           <>
@@ -90,8 +90,8 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
                 <dd>{session ? <Link href={`/sessions/${session.id}`} className="prose-link">{session.title}</Link> : "—"}</dd>
               </div>
               <div>
-                <dt className="label-caps">Committee</dt>
-                <dd>{committee ? <Link href={`/committees/${committee.slug}`} className="prose-link">{committee.name}</Link> : "—"}</dd>
+                <dt className="label-caps">Committee / clause</dt>
+                <dd>{task.committee_label ?? committee?.name ?? "—"}</dd>
               </div>
               {task.reviewed_by ? (
                 <div>
@@ -136,12 +136,13 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
                 file_name: u.file_name,
                 mime_type: u.mime_type,
                 size_bytes: u.size_bytes,
+                external_url: u.external_url,
                 created_at: u.created_at,
                 authorName: nameOf(names, u.uploaded_by),
-                downloadHref: `/api/files/task-uploads/${u.id}`,
+                downloadHref: u.external_url && !u.storage_path ? u.external_url : `/api/files/task-uploads/${u.id}`,
               }))}
               emptyTitle="No evidence uploaded"
-              emptyDescription={canUpload ? "Upload your work as PDF, PNG, JPG or DOCX." : undefined}
+              emptyDescription={canUpload ? "Upload a file (PDF, PNG, JPG, DOCX) or paste the link to your Google Doc." : undefined}
             >
               {(item) => ((uploads ?? []).find((u) => u.id === item.id)?.uploaded_by === viewer.userId || manager ? <DeleteUploadButton id={item.id} /> : null)}
             </UploadList>

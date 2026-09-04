@@ -233,6 +233,7 @@ export type Database = {
           reviewed_by: string | null;
           reviewed_at: string | null;
           review_note: string | null;
+          committee_label: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -240,6 +241,7 @@ export type Database = {
           id?: string;
           title: string;
           description?: string | null;
+          committee_label?: string | null;
           assigned_to_profile_id?: string | null;
           assigned_role?: Database["public"]["Enums"]["user_role"] | null;
           assigned_committee_id?: string | null;
@@ -258,6 +260,7 @@ export type Database = {
           id?: string;
           title?: string;
           description?: string | null;
+          committee_label?: string | null;
           assigned_to_profile_id?: string | null;
           assigned_role?: Database["public"]["Enums"]["user_role"] | null;
           assigned_committee_id?: string | null;
@@ -290,10 +293,11 @@ export type Database = {
           uploaded_by: string;
           title: string;
           notes: string | null;
-          storage_path: string;
-          file_name: string;
-          mime_type: string;
-          size_bytes: number;
+          storage_path: string | null;
+          external_url: string | null;
+          file_name: string | null;
+          mime_type: string | null;
+          size_bytes: number | null;
           created_at: string;
         };
         Insert: {
@@ -302,10 +306,11 @@ export type Database = {
           uploaded_by: string;
           title: string;
           notes?: string | null;
-          storage_path: string;
-          file_name: string;
-          mime_type: string;
-          size_bytes: number;
+          storage_path?: string | null;
+          external_url?: string | null;
+          file_name?: string | null;
+          mime_type?: string | null;
+          size_bytes?: number | null;
           created_at?: string;
         };
         Update: {
@@ -314,10 +319,11 @@ export type Database = {
           uploaded_by?: string;
           title?: string;
           notes?: string | null;
-          storage_path?: string;
-          file_name?: string;
-          mime_type?: string;
-          size_bytes?: number;
+          storage_path?: string | null;
+          external_url?: string | null;
+          file_name?: string | null;
+          mime_type?: string | null;
+          size_bytes?: number | null;
           created_at?: string;
         };
         Relationships: [

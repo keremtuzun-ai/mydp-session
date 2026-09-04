@@ -19,6 +19,7 @@ import type { Task } from "@/lib/types/database";
 const clientSchema = z.object({
   title: z.string().trim().min(3, "Title is too short").max(140),
   description: z.string().max(4000),
+  committee_label: z.string().max(120),
   assigned_to_profile_id: z.string(),
   assigned_role: z.string(),
   assigned_committee_id: z.string(),
@@ -34,10 +35,11 @@ type Props = {
   sessions: { id: string; title: string; starts_at: string }[];
   members: { id: string; name: string; committee_id: string }[];
   isStaff: boolean;
+  recentLabels?: string[];
   defaults?: { committee?: string; session?: string };
 };
 
-export function TaskForm({ task, committees, sessions, members, isStaff, defaults }: Props) {
+export function TaskForm({ task, committees, sessions, members, isStaff, recentLabels = [], defaults }: Props) {
   const router = useRouter();
   const action = task ? updateTask.bind(null, task.id) : createTask;
   const [state, dispatch, pending] = useActionState(action as (p: ActionResult<unknown> | null, f: FormData) => Promise<ActionResult<unknown>>, null);
@@ -50,6 +52,7 @@ export function TaskForm({ task, committees, sessions, members, isStaff, default
     defaultValues: {
       title: task?.title ?? "",
       description: task?.description ?? "",
+      committee_label: task?.committee_label ?? "",
       assigned_to_profile_id: task?.assigned_to_profile_id ?? "",
       assigned_role: task?.assigned_role ?? "",
       assigned_committee_id: task?.assigned_committee_id ?? defaults?.committee ?? committees[0]?.id ?? "",
@@ -62,7 +65,7 @@ export function TaskForm({ task, committees, sessions, members, isStaff, default
   const { register, formState: { errors }, control } = form;
   const err = (n: keyof Values) => errors[n]?.message ?? fieldError(state, n);
   const committeeId = useWatch({ control, name: "assigned_committee_id" });
-  const eligible = members.filter((m) => !committeeId || m.committee_id === committeeId);
+  const eligible = isStaff ? members : members.filter((m) => !committeeId || m.committee_id === committeeId);
   const uniqueEligible = Array.from(new Map(eligible.map((m) => [m.id, m])).values());
 
   return (
@@ -74,19 +77,30 @@ export function TaskForm({ task, committees, sessions, members, isStaff, default
         <Textarea id="description" rows={4} {...register("description")} />
       </Field>
       <div className="form-grid">
-        <Field label="Committee" htmlFor="assigned_committee_id" error={err("assigned_committee_id")} hint={isStaff ? "Leave empty for a programme-wide task." : "Chairs assign within their own committee."}>
-          <NativeSelect id="assigned_committee_id" {...register("assigned_committee_id")}>
-            {isStaff ? <option value="">No committee</option> : null}
-            {committees.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.acronym} · {c.name}
-              </option>
+        <Field label="Committee / clause" htmlFor="committee_label" optional error={err("committee_label")} hint="Free text: the committee, clause or topic this task belongs to.">
+          <Input id="committee_label" list="recent-labels" placeholder="e.g. UNHCR · Clause 3" {...register("committee_label")} />
+          <datalist id="recent-labels">
+            {recentLabels.map((l) => (
+              <option key={l} value={l} />
             ))}
-          </NativeSelect>
+          </datalist>
         </Field>
-        <Field label="Assign to member" htmlFor="assigned_to_profile_id" error={err("assigned_to_profile_id")} hint="Leave empty to address the whole committee or role.">
+        {isStaff ? (
+          <input type="hidden" value="" {...register("assigned_committee_id")} />
+        ) : (
+          <Field label="Committee" htmlFor="assigned_committee_id" error={err("assigned_committee_id")}>
+            <NativeSelect id="assigned_committee_id" {...register("assigned_committee_id")}>
+              {committees.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.acronym} · {c.name}
+                </option>
+              ))}
+            </NativeSelect>
+          </Field>
+        )}
+        <Field label="Assign to" htmlFor="assigned_to_profile_id" error={err("assigned_to_profile_id")} hint="Pick one member, or leave it on “Everyone” for all delegates.">
           <NativeSelect id="assigned_to_profile_id" {...register("assigned_to_profile_id")}>
-            <option value="">Everyone in scope</option>
+            <option value="">Everyone (all delegates)</option>
             {uniqueEligible.map((m) => (
               <option key={m.id} value={m.id}>
                 {m.name}
@@ -94,18 +108,7 @@ export function TaskForm({ task, committees, sessions, members, isStaff, default
             ))}
           </NativeSelect>
         </Field>
-        {isStaff ? (
-          <Field label="Or assign to a role" htmlFor="assigned_role" error={err("assigned_role")}>
-            <NativeSelect id="assigned_role" {...register("assigned_role")}>
-              <option value="">No role targeting</option>
-              <option value="delegate">All delegates</option>
-              <option value="chair">All chairs</option>
-              <option value="executive">All executives</option>
-            </NativeSelect>
-          </Field>
-        ) : (
-          <input type="hidden" value="" {...register("assigned_role")} />
-        )}
+        <input type="hidden" value="" {...register("assigned_role")} />
         <Field label="Linked session" htmlFor="session_id" optional error={err("session_id")}>
           <NativeSelect id="session_id" {...register("session_id")}>
             <option value="">No session</option>

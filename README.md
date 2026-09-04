@@ -198,7 +198,7 @@ Any Node 20.9+ host works the same way (`npm run build && npm start`).
 
 ## Email delivery
 
-Production sends every auth email through the app itself: Supabase's **Send Email** auth hook posts to `/api/auth/send-email`, which verifies the Standard Webhooks signature and sends the branded MUNDP template (code + link) through Resend. That bypasses the built-in mailer and its hourly quota. Configure `RESEND_API_KEY`, `EMAIL_FROM` (an address on a domain verified in Resend) and `SEND_EMAIL_HOOK_SECRET` (from Authentication → Auth Hooks → Send Email), then enable the hook with the production URL.
+Production sends every auth email through the app itself: Supabase's **Send Email** auth hook posts to `/api/auth/send-email`, which verifies the Standard Webhooks signature and sends the branded MUNDP template (code + link) through Resend. That bypasses the built-in mailer and its hourly quota. Configure `RESEND_API_KEY`, `EMAIL_FROM` (an address on a domain verified in Resend) and `SEND_EMAIL_HOOK_SECRET` (from Authentication → Auth Hooks → Send Email), then enable the hook with the production URL. The live project has this enabled; the sender is currently on the `frcrams.com` domain until `modelundp.org` is verified in Resend.
 
 ## Email templates
 

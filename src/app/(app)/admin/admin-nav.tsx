@@ -16,7 +16,7 @@ const ITEMS = [
 export function AdminNav() {
   const pathname = usePathname();
   return (
-    <nav aria-label="Administration sections" className="flex gap-1 overflow-x-auto rounded-md border bg-card p-1">
+    <nav aria-label="Administration sections" className="filter-pills">
       {ITEMS.map((i) => {
         const active = i.href === "/admin" ? pathname === "/admin" : pathname.startsWith(i.href);
         return (
@@ -24,7 +24,7 @@ export function AdminNav() {
             key={i.href}
             href={i.href}
             aria-current={active ? "page" : undefined}
-            className={cn("whitespace-nowrap rounded px-3 py-1.5 text-sm", active ? "bg-navy text-primary-foreground dark:bg-gold dark:text-navy-deep" : "text-muted-foreground hover:bg-accent")}
+            className={cn("filter-pill", active && "active")}
           >
             {i.label}
           </Link>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plus, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { listSessionsWithCoverage, attendanceSummaryText } from "@/lib/data/queries";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -14,13 +14,9 @@ export default async function AdminSessionsPage() {
   const supabase = await createClient();
   const sessions = await listSessionsWithCoverage(supabase, { order: "desc" });
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       <div className="flex justify-end">
-        <Button asChild>
-          <Link href="/sessions/new">
-            <Plus className="size-4" aria-hidden /> New session
-          </Link>
-        </Button>
+        <Link href="/sessions/new" className="btn">New session</Link>
       </div>
       <Table>
         <TableHeader>
@@ -37,14 +33,14 @@ export default async function AdminSessionsPage() {
           {sessions.map((s) => (
             <TableRow key={s.id}>
               <TableCell>
-                <Link href={`/sessions/${s.id}`} className="font-medium underline-offset-4 hover:underline">
+                <Link href={`/sessions/${s.id}`} className="row-title">
                   {s.title}
                 </Link>
-                {s.theme ? <span className="block text-xs text-muted-foreground">{s.theme}</span> : null}
+                {s.theme ? <span className="block row-sub">{s.theme}</span> : null}
               </TableCell>
-              <TableCell className="text-muted-foreground">{formatDateTime(s.starts_at)}</TableCell>
+              <TableCell className="muted">{formatDateTime(s.starts_at)}</TableCell>
               <TableCell>{s.committees.map((c) => c.acronym).join(", ") || "—"}</TableCell>
-              <TableCell className="text-muted-foreground">{attendanceSummaryText(s.attendance) || "—"}</TableCell>
+              <TableCell className="muted">{attendanceSummaryText(s.attendance) || "—"}</TableCell>
               <TableCell>
                 <SessionStatusBadge status={s.status} />
               </TableCell>
@@ -59,7 +55,7 @@ export default async function AdminSessionsPage() {
           ))}
         </TableBody>
       </Table>
-      <p className="text-xs text-muted-foreground">Announcements and materials are managed from their own pages; admins and executives can delete any item there.</p>
+      <p className="m-0 small muted">Announcements and materials are managed from their own pages; admins and executives can delete any item there.</p>
     </div>
   );
 }

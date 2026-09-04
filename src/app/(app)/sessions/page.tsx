@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarDays, Plus } from "lucide-react";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { listSessionsWithCoverage, attendanceSummaryText } from "@/lib/data/queries";
 import { PageHeader } from "@/components/mun/page-header";
 import { SessionCard } from "@/components/mun/session-card";
 import { EmptyState } from "@/components/mun/empty-state";
-import { Button } from "@/components/ui/button";
 import { SessionFilters } from "./session-filters";
 
 export const metadata: Metadata = { title: "Sessions" };
@@ -35,17 +33,15 @@ export default async function SessionsPage({ searchParams }: PageProps<"/session
         description="Every weekly session with its agenda, committee coverage and attendance."
         actions={
           viewer.isStaff ? (
-            <Button asChild>
-              <Link href="/sessions/new">
-                <Plus className="size-4" aria-hidden /> New session
-              </Link>
-            </Button>
+            <Link href="/sessions/new" className="btn">
+              New session
+            </Link>
           ) : null
         }
       />
       <SessionFilters scope={scope} committee={committee} status={status} committees={committees ?? []} />
       {filtered.length ? (
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
           {filtered.map((s, i) => (
             <SessionCard
               key={s.id}
@@ -59,10 +55,9 @@ export default async function SessionsPage({ searchParams }: PageProps<"/session
         </div>
       ) : (
         <EmptyState
-          icon={CalendarDays}
           title={scope === "upcoming" ? "No upcoming sessions" : "No sessions match"}
           description={scope === "upcoming" ? "New sessions appear here once the Secretariat publishes them." : "Try another filter."}
-          className="mt-4"
+          className="mt-5"
         />
       )}
     </div>

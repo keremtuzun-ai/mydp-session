@@ -16,13 +16,13 @@ export default function WelcomePage() {
     >
       <WelcomeForm />
       {domains.length ? (
-        <p className="mt-4 text-xs text-muted-foreground">Accepted domains: {domains.map((d) => `@${d}`).join(", ")}</p>
+        <p className="mt-4 small muted mono">Accepted domains: {domains.map((d) => `@${d}`).join(", ")}</p>
       ) : (
-        <p className="mt-4 text-xs text-destructive">No school domains are configured. Set ALLOWED_SCHOOL_DOMAINS.</p>
+        <p className="mt-4 small text-destructive">No school domains are configured. Set ALLOWED_SCHOOL_DOMAINS.</p>
       )}
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      <p className="mt-6 small muted">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link href="/login" className="prose-link">
           Sign in
         </Link>
       </p>

@@ -17,15 +17,15 @@ export function DomainsManager({ dbDomains, envDomains }: { dbDomains: string[];
   const all = Array.from(new Set([...dbDomains, ...envDomains])).sort();
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="space-y-3">
-        <p className="text-sm text-muted-foreground">
+      <div className="flex flex-col gap-3">
+        <p className="m-0 small muted">
           Two lists must agree. <strong>Environment</strong> (ALLOWED_SCHOOL_DOMAINS) is checked by the app before any code is sent.{" "}
           <strong>Database</strong> is enforced by a trigger when an account is created, even if someone calls the auth API directly.
         </p>
-        <ul className="divide-y rounded-lg border bg-card">
+        <ul className="ledger">
           {all.map((d) => (
-            <li key={d} className="flex items-center justify-between gap-3 p-3">
-              <span className="font-mono text-sm">@{d}</span>
+            <li key={d} className="flex items-center justify-between gap-3">
+              <span className="code-pill">@{d}</span>
               <div className="flex items-center gap-2">
                 <Badge variant={envDomains.includes(d) ? "success" : "warning"}>{envDomains.includes(d) ? "env" : "not in env"}</Badge>
                 <Badge variant={dbDomains.includes(d) ? "success" : "warning"}>{dbDomains.includes(d) ? "db" : "not in db"}</Badge>
@@ -39,14 +39,14 @@ export function DomainsManager({ dbDomains, envDomains }: { dbDomains: string[];
           ))}
         </ul>
       </div>
-      <Card className="p-4">
-        <form action={action} className="space-y-3">
-          <p className="text-sm font-medium">Add a domain to the database list</p>
+      <Card className="card-tight">
+        <form action={action} className="flex flex-col gap-3">
+          <span className="section-label m-0">Add a domain to the database list</span>
           <Field label="Domain" htmlFor="domain" hint="Lowercase, without @. Subdomains are separate entries.">
             <Input id="domain" name="domain" placeholder="stu.school.edu" required />
           </Field>
           <FormError message={state && !state.ok ? state.error : null} />
-          <div className="flex justify-end">
+          <div className="form-actions">
             <SubmitButton size="sm">Add domain</SubmitButton>
           </div>
         </form>

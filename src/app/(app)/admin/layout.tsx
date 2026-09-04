@@ -10,7 +10,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
     <div>
       <PageHeader eyebrow="Secretariat" title="Administration" description="Users, roles, committees, sessions, templates, domains and the audit log." />
       <AdminNav />
-      <div className="mt-6">{children}</div>
+      <div className="mt-5">{children}</div>
     </div>
   );
 }

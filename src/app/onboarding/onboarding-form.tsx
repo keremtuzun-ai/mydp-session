@@ -57,9 +57,9 @@ export function OnboardingForm() {
   const err = (name: keyof FormValues | "avatar") => (name === "avatar" ? fieldError(state, "avatar") : errors[name]?.message ?? fieldError(state, name));
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="space-y-5" noValidate>
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Full name" htmlFor="display_name" error={err("display_name")} className="sm:col-span-2">
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+      <div className="form-grid">
+        <Field label="Full name" htmlFor="display_name" error={err("display_name")} className="full-width">
           <Input id="display_name" autoComplete="name" aria-invalid={Boolean(err("display_name"))} {...register("display_name")} />
         </Field>
         <Field label="Grade" htmlFor="grade" error={err("grade")}>
@@ -79,7 +79,7 @@ export function OnboardingForm() {
       <Field label="Username" htmlFor="username" error={err("username") ?? (availability.status === "taken" ? availability.reason : undefined)} hint="3 to 24 characters: lowercase letters, numbers, hyphens. This cannot be changed later.">
         <div className="relative">
           <Input id="username" autoComplete="username" autoCapitalize="none" spellCheck={false} className="pr-9" aria-invalid={Boolean(err("username")) || availability.status === "taken"} {...register("username", { setValueAs: (v: string) => v.trim().toLowerCase() })} />
-          <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2" aria-live="polite">
+          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" aria-live="polite">
             {availability.status === "checking" ? <Loader2 className="size-4 animate-spin text-muted-foreground" aria-label="Checking" /> : null}
             {availability.status === "ok" ? <CheckCircle2 className="size-4 text-success" aria-label="Available" /> : null}
             {availability.status === "taken" ? <XCircle className="size-4 text-destructive" aria-label="Taken" /> : null}
@@ -87,7 +87,7 @@ export function OnboardingForm() {
         </div>
       </Field>
 
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="form-grid">
         <Field label="Password" htmlFor="password" error={err("password")} hint="At least 10 characters, with a letter and a number.">
           <Input id="password" type="password" autoComplete="new-password" aria-invalid={Boolean(err("password"))} {...register("password")} />
         </Field>
@@ -101,9 +101,11 @@ export function OnboardingForm() {
       </Field>
 
       <FormError message={state && !state.ok && !state.fieldErrors ? state.error : null} />
-      <Button type="submit" variant="gold" className="w-full" loading={pending} disabled={availability.status === "taken"}>
-        Finish setup
-      </Button>
+      <div className="form-actions">
+        <Button type="submit" loading={pending} disabled={availability.status === "taken"}>
+          Finish setup
+        </Button>
+      </div>
     </form>
   );
 }

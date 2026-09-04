@@ -21,7 +21,7 @@ export default async function AdminAuditPage({ searchParams }: PageProps<"/admin
   const names = await getNameMap(supabase, list.map((l) => l.actor_id));
   const pages = Math.max(1, Math.ceil((count ?? 0) / size));
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       {list.length ? (
         <Table>
           <TableHeader>
@@ -36,14 +36,14 @@ export default async function AdminAuditPage({ searchParams }: PageProps<"/admin
           <TableBody>
             {list.map((l) => (
               <TableRow key={l.id}>
-                <TableCell className="whitespace-nowrap text-muted-foreground">{formatDateTime(l.created_at)}</TableCell>
+                <TableCell className="whitespace-nowrap mono text-[0.82rem] muted">{formatDateTime(l.created_at)}</TableCell>
                 <TableCell>{nameOf(names, l.actor_id, "System")}</TableCell>
-                <TableCell className="font-mono text-xs">{l.action}</TableCell>
-                <TableCell className="text-muted-foreground">
+                <TableCell className="mono text-[0.82rem]">{l.action}</TableCell>
+                <TableCell className="muted">
                   {l.entity_type}
                   {l.entity_id ? <span className="block font-mono text-[10px]">{l.entity_id}</span> : null}
                 </TableCell>
-                <TableCell className="max-w-xs truncate font-mono text-[11px] text-muted-foreground" title={JSON.stringify(l.metadata)}>
+                <TableCell className="max-w-xs truncate font-mono text-[11px] muted" title={JSON.stringify(l.metadata)}>
                   {JSON.stringify(l.metadata)}
                 </TableCell>
               </TableRow>
@@ -54,14 +54,14 @@ export default async function AdminAuditPage({ searchParams }: PageProps<"/admin
         <EmptyState title="No audit entries yet" />
       )}
       {pages > 1 ? (
-        <nav aria-label="Pagination" className="flex items-center justify-between text-sm">
-          <a href={`?page=${Math.max(1, page - 1)}`} aria-disabled={page === 1} className="underline-offset-4 hover:underline aria-disabled:pointer-events-none aria-disabled:opacity-50">
+        <nav aria-label="Pagination" className="flex items-center justify-between small">
+          <a href={`?page=${Math.max(1, page - 1)}`} aria-disabled={page === 1} className="prose-link aria-disabled:pointer-events-none aria-disabled:opacity-50">
             Newer
           </a>
-          <span className="text-muted-foreground">
+          <span className="muted">
             Page {page} of {pages}
           </span>
-          <a href={`?page=${Math.min(pages, page + 1)}`} aria-disabled={page === pages} className="underline-offset-4 hover:underline aria-disabled:pointer-events-none aria-disabled:opacity-50">
+          <a href={`?page=${Math.min(pages, page + 1)}`} aria-disabled={page === pages} className="prose-link aria-disabled:pointer-events-none aria-disabled:opacity-50">
             Older
           </a>
         </nav>

@@ -46,16 +46,16 @@ export function TemplatesManager({ templates, committees, sessions, members }: {
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      <div className="space-y-4">
-        <h2 className="eyebrow">Templates</h2>
+      <div className="flex flex-col gap-4">
+        <div className="section-head"><h2>Templates</h2></div>
         {templates.length ? (
-          <ul className="divide-y rounded-lg border bg-card">
+          <ul className="ledger">
             {templates.map((t) => (
-              <li key={t.id} className="flex items-start gap-3 p-4">
+              <li key={t.id} className="flex items-start gap-3">
                 <div className="min-w-0 flex-1">
-                  <p className="font-medium">{t.title}</p>
-                  {t.description ? <p className="text-sm text-muted-foreground">{t.description}</p> : null}
-                  <p className="mt-1 text-xs text-muted-foreground">Due {t.default_due_days} day{t.default_due_days === 1 ? "" : "s"} after assignment</p>
+                  <p className="m-0 font-[650]">{t.title}</p>
+                  {t.description ? <p className="m-0 small muted">{t.description}</p> : null}
+                  <p className="m-0 mt-1 dateline">Due {t.default_due_days} day{t.default_due_days === 1 ? "" : "s"} after assignment</p>
                 </div>
                 <PriorityBadge priority={t.priority} />
                 <ActionButton size="icon" variant="ghost" aria-label={`Delete ${t.title}`} action={() => deleteTaskTemplate(t.id)} confirm={{ title: `Delete template “${t.title}”?`, description: "Tasks already assigned from it are not affected.", confirmLabel: "Delete" }}>
@@ -65,11 +65,11 @@ export function TemplatesManager({ templates, committees, sessions, members }: {
             ))}
           </ul>
         ) : (
-          <EmptyState title="No templates yet" className="py-8" />
+          <EmptyState title="No templates yet" className="empty-state-sm" />
         )}
-        <Card className="p-4">
-          <form action={action} className="space-y-3">
-            <p className="text-sm font-medium">New template</p>
+        <Card className="card-tight">
+          <form action={action} className="flex flex-col gap-3">
+            <span className="section-label m-0">New template</span>
             <Field label="Title" htmlFor="t-title">
               <Input id="t-title" name="title" required />
             </Field>
@@ -90,16 +90,16 @@ export function TemplatesManager({ templates, committees, sessions, members }: {
               </Field>
             </div>
             <FormError message={state && !state.ok ? state.error : null} />
-            <div className="flex justify-end">
+            <div className="form-actions justify-end">
               <SubmitButton size="sm">Save template</SubmitButton>
             </div>
           </form>
         </Card>
       </div>
 
-      <div className="space-y-4">
-        <h2 className="eyebrow">Assign from a template</h2>
-        <Card className="space-y-3 p-4">
+      <div className="flex flex-col gap-4">
+        <div className="section-head"><h2>Assign from a template</h2></div>
+        <Card className="card-tight flex flex-col gap-3">
           <Field label="Template" htmlFor="as-template">
             <NativeSelect id="as-template" value={templateId} onChange={(e) => setTemplateId(e.target.value)}>
               {templates.map((t) => (
@@ -131,7 +131,7 @@ export function TemplatesManager({ templates, committees, sessions, members }: {
             </Field>
           </div>
           <fieldset>
-            <legend className="mb-2 flex items-center justify-between text-sm font-medium">
+            <legend className="mb-2 flex w-full items-center justify-between section-label">
               Delegates
               <Button type="button" size="sm" variant="ghost" onClick={() => setSelected(new Set(selected.size === eligible.length ? [] : eligible.map((m) => m.id)))}>
                 {selected.size === eligible.length && eligible.length ? "Clear" : "Select all"}
@@ -140,7 +140,7 @@ export function TemplatesManager({ templates, committees, sessions, members }: {
             {eligible.length ? (
               <ul className="grid gap-1 sm:grid-cols-2">
                 {eligible.map((m) => (
-                  <li key={m.id} className="flex items-center gap-2 rounded-md border px-2 py-1.5">
+                  <li key={m.id} className="flex items-center gap-2 rounded-[7px] border border-line bg-surface px-2 py-1.5">
                     <Checkbox
                       id={`m-${m.id}`}
                       checked={selected.has(m.id)}
@@ -153,17 +153,17 @@ export function TemplatesManager({ templates, committees, sessions, members }: {
                         })
                       }
                     />
-                    <Label htmlFor={`m-${m.id}`} className="cursor-pointer text-sm">
+                    <Label htmlFor={`m-${m.id}`} className="cursor-pointer normal-case tracking-normal text-[0.88rem] font-medium text-ink">
                       {m.name}
                     </Label>
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-muted-foreground">No delegates in this committee.</p>
+              <p className="m-0 small muted">No delegates in this committee.</p>
             )}
           </fieldset>
-          <div className="flex justify-end">
+          <div className="form-actions justify-end">
             <Button onClick={assign} loading={pending} disabled={!templateId || selected.size === 0}>
               Assign to {selected.size} delegate{selected.size === 1 ? "" : "s"}
             </Button>

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Library } from "lucide-react";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { getNameMap, nameOf } from "@/lib/data/queries";
@@ -39,7 +38,7 @@ export default async function MaterialsPage({ searchParams }: PageProps<"/materi
           initial={{ committee: typeof sp.committee === "string" ? sp.committee : "", session: typeof sp.session === "string" ? sp.session : "", category: typeof sp.category === "string" ? sp.category : "", type: "", q: "" }}
         />
       ) : (
-        <EmptyState icon={Library} title="The library is empty" description={canUpload ? "Upload the first study guide or rules document." : "Materials shared with you will appear here."} />
+        <EmptyState title="The library is empty" description={canUpload ? "Upload the first study guide or rules document." : "Materials shared with you will appear here."} />
       )}
     </div>
   );

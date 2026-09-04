@@ -1,11 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import { ROLE_LABEL, MEMBERSHIP_LABEL, type UserRole, type MembershipRole } from "@/lib/auth/roles";
 
-const ROLE_VARIANT: Record<UserRole, "gold" | "navy" | "info" | "muted"> = {
+const ROLE_VARIANT: Record<UserRole, "gold" | "success" | "navy" | "secondary"> = {
   admin: "gold",
-  executive: "navy",
-  chair: "info",
-  delegate: "muted",
+  executive: "success",
+  chair: "navy",
+  delegate: "secondary",
 };
 
 export function RoleBadge({ role, className }: { role: UserRole; className?: string }) {
@@ -17,7 +17,7 @@ export function RoleBadge({ role, className }: { role: UserRole; className?: str
 }
 
 export function MembershipBadge({ role, className }: { role: MembershipRole; className?: string }) {
-  const variant = role === "chair" || role === "co_chair" ? "info" : role === "executive" ? "navy" : "muted";
+  const variant = role === "chair" || role === "co_chair" ? "navy" : role === "executive" ? "success" : "secondary";
   return (
     <Badge variant={variant} className={className}>
       {MEMBERSHIP_LABEL[role]}

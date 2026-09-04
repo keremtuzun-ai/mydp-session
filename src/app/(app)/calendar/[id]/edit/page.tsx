@@ -23,7 +23,7 @@ export default async function EditTaskPage({ params }: PageProps<"/calendar/[id]
   return (
     <div>
       <PageHeader eyebrow="Calendar" title={`Edit: ${task.title}`} />
-      <Card className="p-6">
+      <Card>
         <TaskForm task={task} {...data} isStaff={viewer.isStaff} />
       </Card>
     </div>

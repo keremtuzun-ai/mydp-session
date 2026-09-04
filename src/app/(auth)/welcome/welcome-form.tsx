@@ -9,14 +9,14 @@ import { startFirstTimeSetup } from "@/actions/auth";
 export function WelcomeForm() {
   const [state, action] = useActionState(startFirstTimeSetup, null);
   return (
-    <form action={action} className="space-y-4" noValidate>
+    <form action={action} className="flex flex-col gap-4" noValidate>
       <Field label="School email" htmlFor="email">
         <Input id="email" name="email" type="email" autoComplete="email" inputMode="email" placeholder="name@school.edu" required autoFocus />
       </Field>
       <FormError message={state && !state.ok ? state.error : null} />
-      <SubmitButton className="w-full" variant="gold" pendingText="Sending code…">
-        Send verification code
-      </SubmitButton>
+      <div className="form-actions">
+        <SubmitButton pendingText="Sending…">Send verification email</SubmitButton>
+      </div>
     </form>
   );
 }

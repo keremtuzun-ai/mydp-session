@@ -13,7 +13,7 @@ export default async function NewCommitteePage() {
   return (
     <div>
       <PageHeader eyebrow="Committees" title="Create a committee" />
-      <Card className="p-6">
+      <Card>
         <CommitteeForm />
       </Card>
     </div>

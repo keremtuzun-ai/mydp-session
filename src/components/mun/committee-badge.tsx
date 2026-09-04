@@ -1,18 +1,15 @@
 import { cn } from "@/lib/utils";
 
-/** Square seal-style acronym mark used across cards and lists. */
+/** Committee code, set in the display face the way the portal sets APQ / CCPCJ. */
 export function CommitteeSeal({ acronym, size = "md", className }: { acronym: string; size?: "sm" | "md" | "lg"; className?: string }) {
-  const sizes = { sm: "size-8 text-[10px]", md: "size-11 text-xs", lg: "size-16 text-base" };
+  const sizes = { sm: "text-[0.95rem]", md: "text-[1.2rem]", lg: "text-[2rem]" };
   return (
-    <div
-      aria-hidden
-      className={cn(
-        "seal flex shrink-0 items-center justify-center rounded-md bg-navy font-display font-semibold uppercase tracking-wider text-primary-foreground dark:bg-navy-deep",
-        sizes[size],
-        className,
-      )}
-    >
-      {acronym.slice(0, 6)}
-    </div>
+    <span aria-hidden className={cn("font-serif font-[650] tracking-[-0.01em] text-ink", sizes[size], className)}>
+      {acronym}
+    </span>
   );
+}
+
+export function CommitteeTag({ acronym }: { acronym: string }) {
+  return <span className="chip chip-navy">{acronym}</span>;
 }

@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ClipboardCheck } from "lucide-react";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { getNameMap, nameOf } from "@/lib/data/queries";
@@ -53,19 +52,17 @@ export default async function AttendancePage({ searchParams }: PageProps<"/atten
   }
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-7">
       <PageHeader
         eyebrow="Records"
         title="Attendance"
         description={canRecord ? "Your own history, and roll call for the committees you are responsible for." : "Your attendance across weekly sessions."}
       />
 
-      <section aria-labelledby="my-attendance" className="space-y-4">
-        <h2 id="my-attendance" className="eyebrow">
-          Your attendance
-        </h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <StatTile label="Rate" value={rate === null ? "—" : `${rate}%`} hint={recorded ? `${attended} of ${recorded} recorded sessions` : "No sessions recorded yet"} icon={ClipboardCheck} />
+      <section aria-labelledby="my-attendance" className="card">
+        <div className="section-head"><h2 id="my-attendance">Your attendance</h2></div>
+        <div className="grid gap-4 sm:grid-cols-3 mb-4">
+          <StatTile label="Rate" value={rate === null ? "—" : `${rate}%`} hint={recorded ? `${attended} of ${recorded} recorded sessions` : "No sessions recorded yet"} />
           <StatTile label="Sessions held" value={pastSessions.length} />
           <StatTile label="Absences" value={pastSessions.filter((s) => mine.get(s.id)?.status === "absent").length} />
         </div>
@@ -83,32 +80,31 @@ export default async function AttendancePage({ searchParams }: PageProps<"/atten
               {sessionList.map((s) => (
                 <TableRow key={s.id}>
                   <TableCell className="font-medium">{s.title}</TableCell>
-                  <TableCell className="text-muted-foreground">{formatDate(s.starts_at)}</TableCell>
+                  <TableCell className="muted">{formatDate(s.starts_at)}</TableCell>
                   <TableCell>
                     <AttendanceBadge status={mine.get(s.id)?.status} />
                   </TableCell>
-                  <TableCell className="text-muted-foreground">{mine.get(s.id)?.note ?? "—"}</TableCell>
+                  <TableCell className="muted">{mine.get(s.id)?.note ?? "—"}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         ) : (
-          <EmptyState title="No sessions yet" className="py-8" />
+          <EmptyState title="No sessions yet" className="empty-state-sm" />
         )}
       </section>
 
       {canRecord ? (
-        <section aria-labelledby="roll-call" className="space-y-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <h2 id="roll-call" className="eyebrow">
-              Roll call {viewer.isStaff ? "(all committees)" : "(your committees)"}
-            </h2>
-            <SessionPicker sessions={sessionList} selected={selectedSessionId} />
+        <section aria-labelledby="roll-call" className="flex flex-col gap-4">
+          <div className="section-head flex-wrap items-end">
+            <h2 id="roll-call">Roll call</h2>
+            <span className="tab-count">{viewer.isStaff ? "all committees" : "your committees"}</span>
+            <div className="ml-auto"><SessionPicker sessions={sessionList} selected={selectedSessionId} /></div>
           </div>
           {roster.length ? (
             roster.map((c) => <RollCall key={c.committeeId} sessionId={selectedSessionId} committee={c} />)
           ) : (
-            <EmptyState title="No members to record" description="You are not chairing a committee with members yet." className="py-8" />
+            <EmptyState title="No members to record" description="You are not chairing a committee with members yet." className="empty-state-sm" />
           )}
         </section>
       ) : null}

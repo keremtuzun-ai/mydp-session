@@ -67,7 +67,7 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
   }
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-7">
       <PageHeader
         eyebrow={`Weekly session · ${formatDate(session.starts_at)}`}
         title={session.title}
@@ -77,11 +77,9 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
             <SessionStatusBadge status={session.status} />
             {viewer.isStaff ? (
               <>
-                <Button asChild variant="outline" size="sm">
-                  <Link href={`/sessions/${session.id}/edit`}>
-                    <Pencil className="size-4" aria-hidden /> Edit
-                  </Link>
-                </Button>
+                <Link href={`/sessions/${session.id}/edit`} className="btn btn-outline btn-sm">
+                  <Pencil aria-hidden /> Edit
+                </Link>
                 <SessionStatusControls sessionId={session.id} status={session.status} />
               </>
             ) : null}
@@ -94,7 +92,7 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
           <CardHeader>
             <CardTitle className="text-base">Details</CardTitle>
           </CardHeader>
-          <CardContent className="grid gap-3 text-sm sm:grid-cols-2">
+          <CardContent className="grid gap-3 text-[0.9rem] sm:grid-cols-2">
             <p className="inline-flex items-center gap-2">
               <CalendarDays className="size-4 text-gold-deep" aria-hidden /> {formatDate(session.starts_at)} · {formatTimeRange(session.starts_at, session.ends_at)}
             </p>
@@ -116,11 +114,11 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
                 <Shirt className="size-4 text-gold-deep" aria-hidden /> {session.dress_code}
               </p>
             ) : null}
-            {session.description ? <p className="text-muted-foreground sm:col-span-2">{session.description}</p> : null}
+            {session.description ? <p className="muted sm:col-span-2">{session.description}</p> : null}
             {session.general_agenda ? (
               <div className="sm:col-span-2">
-                <p className="eyebrow mb-1">General agenda</p>
-                <pre className="whitespace-pre-wrap rounded-md bg-muted/50 p-3 font-sans text-sm">{session.general_agenda}</pre>
+                <span className="section-label">General agenda</span>
+                <pre className="whitespace-pre-wrap rounded-[7px] border border-line-soft bg-surface-2 p-3 font-sans text-[0.9rem]">{session.general_agenda}</pre>
               </div>
             ) : null}
           </CardContent>
@@ -132,7 +130,7 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
             <AttendanceBadge status={myAttendance?.status} />
-            {myAttendance?.note ? <p className="text-muted-foreground">Note: {myAttendance.note}</p> : null}
+            {myAttendance?.note ? <p className="muted">Note: {myAttendance.note}</p> : null}
             {viewer.isStaff || viewer.isChair ? (
               <Button asChild variant="outline" size="sm" className="mt-2">
                 <Link href={`/attendance?session=${session.id}`}>Take roll call</Link>
@@ -143,24 +141,22 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
       </div>
 
       <section aria-labelledby="committee-blocks">
-        <h2 id="committee-blocks" className="eyebrow mb-3">
-          Committee agenda blocks
-        </h2>
+        <div className="section-head"><h2 id="committee-blocks">Committee agenda blocks</h2></div>
         {blockList.length ? (
           <div className="grid gap-4 md:grid-cols-2">
             {blockList.map((b) => (
-              <Card key={b.id} className="p-5">
+              <Card key={b.id} className="card-rule">
                 <div className="flex items-start gap-3">
                   <CommitteeSeal acronym={b.committees?.acronym ?? "?"} size="sm" />
                   <div className="min-w-0 flex-1">
-                    <Link href={`/committees/${b.committees?.slug}`} className="font-semibold underline-offset-4 hover:underline">
+                    <Link href={`/committees/${b.committees?.slug}`} className="row-title">
                       {b.committees?.name}
                     </Link>
-                    <p className="text-sm text-gold-deep dark:text-gold">{b.topic ?? "Topic to be announced"}</p>
+                    <p className="m-0 text-[0.9rem] text-gold">{b.topic ?? "Topic to be announced"}</p>
                   </div>
                   {viewer.memberCommitteeIds.includes(b.committee_id) ? <Badge variant="gold">Yours</Badge> : null}
                 </div>
-                {b.agenda ? <pre className="mt-3 whitespace-pre-wrap font-sans text-sm text-muted-foreground">{b.agenda}</pre> : <p className="mt-3 text-sm text-muted-foreground">No agenda yet.</p>}
+                {b.agenda ? <pre className="mt-3 whitespace-pre-wrap font-sans text-[0.9rem] muted">{b.agenda}</pre> : <p className="mt-3 text-sm muted">No agenda yet.</p>}
                 {canManageBlock(b.committee_id) ? (
                   <CommitteeBlockEditor block={{ id: b.id, topic: b.topic, agenda: b.agenda, chair_notes: chairNotes.get(b.id) ?? null }} acronym={b.committees?.acronym ?? ""} />
                 ) : null}
@@ -168,30 +164,28 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
             ))}
           </div>
         ) : (
-          <EmptyState title="No committees assigned" description="This session has no committee blocks yet." className="py-8" />
+          <EmptyState title="No committees assigned" description="This session has no committee blocks yet." className="empty-state-sm" />
         )}
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section aria-labelledby="session-tasks">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 id="session-tasks" className="eyebrow">
-              Tasks for this session
-            </h2>
+          <div className="section-head">
+            <h2 id="session-tasks">Tasks for this session</h2>
             {viewer.isStaff || viewer.isChair ? (
-              <Link href={`/calendar/new?session=${session.id}`} className="text-sm underline-offset-4 hover:underline">
+              <Link href={`/calendar/new?session=${session.id}`} className="section-tail prose-link">
                 Assign task
               </Link>
             ) : null}
           </div>
           {taskList.length ? (
-            <ul className="divide-y rounded-lg border bg-card">
+            <ul className="ledger">
               {taskList.map((t) => (
                 <li key={t.id}>
-                  <Link href={`/calendar/${t.id}`} className="flex flex-col gap-2 p-4 hover:bg-muted/40 sm:flex-row sm:items-center">
+                  <Link href={`/calendar/${t.id}`} className="flex flex-col gap-2 no-underline text-ink sm:flex-row sm:items-center">
                     <div className="min-w-0 flex-1">
-                      <p className="font-medium leading-tight">{t.title}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="m-0 font-[650]">{t.title}</p>
+                      <p className="m-0 row-sub">
                         {t.assigned_to_profile_id ? nameOf(names, t.assigned_to_profile_id) : t.assigned_role ? `All ${t.assigned_role}s` : "Committee-wide"} · {relativeDue(t.due_at)}
                         {uploadCounts.get(t.id) ? ` · ${uploadCounts.get(t.id)} upload(s)` : ""}
                       </p>
@@ -205,21 +199,19 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
               ))}
             </ul>
           ) : (
-            <EmptyState icon={ListChecks} title="No tasks linked" className="py-8" />
+            <EmptyState icon={ListChecks} title="No tasks linked" className="empty-state-sm" />
           )}
         </section>
 
         <section aria-labelledby="session-materials">
-          <h2 id="session-materials" className="eyebrow mb-3">
-            Resources
-          </h2>
+          <div className="section-head"><h2 id="session-materials">Resources</h2></div>
           {materials && materials.length ? (
-            <ul className="divide-y rounded-lg border bg-card">
+            <ul className="ledger">
               {materials.map((m) => (
-                <li key={m.id} className="flex items-center justify-between gap-3 p-4">
+                <li key={m.id} className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="font-medium leading-tight">{m.title}</p>
-                    <p className="text-xs text-muted-foreground">{humanize(m.category)}</p>
+                    <p className="m-0 font-[650]">{m.title}</p>
+                    <p className="m-0 row-sub">{humanize(m.category)}</p>
                   </div>
                   <Button asChild size="sm" variant="outline">
                     <a href={`/api/files/materials/${m.id}`} target="_blank" rel="noopener noreferrer">
@@ -230,49 +222,45 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
               ))}
             </ul>
           ) : (
-            <EmptyState icon={Library} title="No resources attached" className="py-8" />
+            <EmptyState icon={Library} title="No resources attached" className="empty-state-sm" />
           )}
         </section>
       </div>
 
       <section aria-labelledby="session-announcements">
-        <h2 id="session-announcements" className="eyebrow mb-3">
-          Announcements for this session
-        </h2>
+        <div className="section-head"><h2 id="session-announcements">Announcements for this session</h2></div>
         {announcements && announcements.length ? (
           <div className="grid gap-3 md:grid-cols-2">
             {announcements.map((a) => (
-              <Card key={a.id} className="p-4">
-                <p className="font-semibold">{a.title}</p>
-                <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{a.body}</p>
-                <p className="mt-2 text-xs text-muted-foreground">{nameOf(names, a.author_id, "Secretariat")} · {formatDateTime(a.published_at)}</p>
+              <Card key={a.id} className="card-tight">
+                <p className="m-0 font-[650]">{a.title}</p>
+                <p className="m-0 mt-1 whitespace-pre-wrap small muted">{a.body}</p>
+                <p className="m-0 mt-2 dateline">{nameOf(names, a.author_id, "Secretariat")} · {formatDateTime(a.published_at)}</p>
               </Card>
             ))}
           </div>
         ) : (
-          <EmptyState icon={Megaphone} title="Nothing announced for this session" className="py-8" />
+          <EmptyState icon={Megaphone} title="Nothing announced for this session" className="empty-state-sm" />
         )}
       </section>
 
       <section aria-labelledby="session-feedback">
-        <h2 id="session-feedback" className="eyebrow mb-3">
-          Post-session feedback
-        </h2>
+        <div className="section-head"><h2 id="session-feedback">Post-session feedback</h2></div>
         <div className="grid gap-4 lg:grid-cols-2">
           <div>
             {feedback && feedback.length ? (
-              <ul className="divide-y rounded-lg border bg-card">
+              <ul className="ledger">
                 {feedback.map((f) => (
-                  <li key={f.id} className="p-4">
-                    <p className="text-sm">{f.body}</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                  <li key={f.id}>
+                    <p className="m-0 text-[0.92rem]">{f.body}</p>
+                    <p className="m-0 mt-1 dateline">
                       For {nameOf(names, f.profile_id)} · from {nameOf(names, f.author_id, "Chair")} · {formatDateTime(f.created_at)}
                     </p>
                   </li>
                 ))}
               </ul>
             ) : (
-              <EmptyState icon={MessageSquare} title="No feedback yet" description={session.status === "completed" ? "Chairs add feedback after the session." : "Feedback appears once the session is complete."} className="py-8" />
+              <EmptyState icon={MessageSquare} title="No feedback yet" description={session.status === "completed" ? "Chairs add feedback after the session." : "Feedback appears once the session is complete."} className="empty-state-sm" />
             )}
           </div>
           {feedbackTargets.length ? <FeedbackForm sessionId={session.id} targets={feedbackTargets} /> : null}

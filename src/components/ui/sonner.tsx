@@ -10,9 +10,14 @@ function Toaster(props: ToasterProps) {
       theme={(resolvedTheme as ToasterProps["theme"]) ?? "system"}
       position="bottom-right"
       toastOptions={{
+        unstyled: true,
         classNames: {
-          toast: "group border bg-card text-foreground shadow-md",
-          description: "text-muted-foreground",
+          toast: "flash flash-navy flex items-center gap-3 w-[356px] shadow-[var(--shadow-pop)]",
+          success: "flash-success",
+          error: "flash-error",
+          warning: "flash-warning",
+          title: "font-semibold",
+          description: "muted small",
         },
       }}
       {...props}

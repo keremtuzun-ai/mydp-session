@@ -12,7 +12,7 @@ export default async function UpdatePasswordPage() {
   if (!user) {
     return (
       <AuthCard title="Link expired" description="Your reset link is no longer valid. Request a new one to continue.">
-        <Button asChild className="w-full">
+        <Button asChild>
           <Link href="/reset-password">Request a new link</Link>
         </Button>
       </AuthCard>

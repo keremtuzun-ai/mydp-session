@@ -18,7 +18,7 @@ export default async function NewTaskPage({ searchParams }: PageProps<"/calendar
   return (
     <div>
       <PageHeader eyebrow="Calendar" title="Assign a task" description="Tasks appear on each member's calendar and can be reviewed once submitted." />
-      <Card className="p-6">
+      <Card>
         <TaskForm {...data} isStaff={viewer.isStaff} defaults={{ committee: typeof sp.committee === "string" ? sp.committee : undefined, session: typeof sp.session === "string" ? sp.session : undefined }} />
       </Card>
     </div>

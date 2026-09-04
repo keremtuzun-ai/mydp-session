@@ -1,72 +1,86 @@
 import Link from "next/link";
-import { ArrowRight, CalendarDays, Landmark, ListChecks, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
 import { Brand, BrandMark } from "@/components/shell/brand";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { appName, schoolName } from "@/lib/env";
+import { Countdown } from "./countdown";
 
-const FEATURES = [
-  { icon: CalendarDays, title: "One weekly rhythm", body: "Every session has a date, a room, an agenda and a committee line-up. Nothing lives in a group chat." },
-  { icon: ListChecks, title: "Responsibilities, not reminders", body: "Position papers, speeches and research briefs are assigned, tracked and reviewed by your chair." },
-  { icon: Landmark, title: "A workspace per committee", body: "Topic, background guide, chair team, members, resources and submissions in one place." },
-  { icon: ShieldCheck, title: "School accounts only", body: "Access starts with a verified school email. Chairs see their committee; delegates see their own work." },
-];
+function nextWednesday() {
+  const d = new Date();
+  const delta = (3 - d.getDay() + 7) % 7 || 7;
+  d.setDate(d.getDate() + delta);
+  d.setHours(15, 45, 0, 0);
+  return d;
+}
 
 export default function LandingPage() {
+  const next = nextWednesday();
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex h-16 items-center justify-between px-5 sm:px-8">
-        <Brand />
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
-          <Button asChild variant="ghost">
-            <Link href="/login">Sign in</Link>
-          </Button>
+    <>
+      <header className="masthead masthead-auth">
+        <div className="masthead-inner">
+          <Brand />
+          <div className="masthead-side">
+            <div className="masthead-meta">
+              <span>{format(new Date(), "EEEE, d MMMM yyyy")}</span>
+              <br />
+              <span className="masthead-user">{schoolName}</span>
+            </div>
+            <ThemeToggle />
+            <Link href="/login" className="masthead-signout no-underline">
+              Sign in
+            </Link>
+          </div>
         </div>
       </header>
-      <main className="flex-1">
-        <section className="mx-auto max-w-5xl px-5 pb-16 pt-12 sm:px-8 sm:pt-20">
-          <p className="eyebrow">{schoolName}</p>
-          <h1 className="mt-3 max-w-3xl text-4xl font-semibold leading-[1.05] sm:text-6xl">
-            The weekly home of the <span className="text-gold-deep dark:text-gold">Model United Nations</span> programme.
-          </h1>
-          <p className="mt-5 max-w-2xl text-lg text-muted-foreground">
-            {appName} organises every weekly session: who is meeting, what is on the agenda, which tasks are due, and where the
-            materials are. Delegates see their committee. Chairs run it. The Secretariat sees the whole programme.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg" variant="gold">
-              <Link href="/welcome">
-                First-time setup <ArrowRight className="size-4" aria-hidden />
-              </Link>
-            </Button>
-            <Button asChild size="lg" variant="outline">
-              <Link href="/login">Already have an account? Sign in</Link>
-            </Button>
-          </div>
-        </section>
-        <section className="border-t bg-card/60">
-          <div className="mx-auto grid max-w-5xl gap-6 px-5 py-14 sm:grid-cols-2 sm:px-8">
-            {FEATURES.map(({ icon: Icon, title, body }) => (
-              <div key={title} className="flex gap-4">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-navy text-primary-foreground seal dark:bg-navy-deep">
-                  <Icon className="size-5" aria-hidden />
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold">{title}</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">{body}</p>
-                </div>
+      <main className="main-area">
+        <div className="main-inner">
+          <section className="front-hero">
+            <div>
+              <p className="front-hero-kicker">{schoolName} · Model United Nations</p>
+              <h1 className="front-hero-title">
+                The weekly <span className="accent-line">session</span> hub.
+              </h1>
+              <p className="front-hero-standfirst">
+                <strong>{appName}</strong> organises every weekly session: who is meeting, what is on the agenda, which position papers are due and where the materials are.
+                Delegates see their committee. Chairs run it. The Secretariat sees the whole programme.
+              </p>
+              <div className="front-hero-actions">
+                <Link href="/welcome" className="btn btn-lg">
+                  First-time setup
+                </Link>
+                <Link href="/login" className="btn btn-outline btn-lg">
+                  Already have an account
+                </Link>
+              </div>
+            </div>
+            <BrandMark className="front-hero-logo !h-auto" />
+          </section>
+
+          <section className="grid gap-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              ["Sessions", "Every week has a date, a room, an agenda and a committee line-up."],
+              ["Calendar", "Position papers, speeches and research briefs assigned, tracked and reviewed by your chair."],
+              ["Committees", "Topic, background guide, chair team, members, resources and submissions in one workspace."],
+              ["School accounts", "Access starts with a verified school email. Chairs see their committee; delegates see their own work."],
+            ].map(([t, b]) => (
+              <div key={t} className="card-rule bg-surface border border-line">
+                <span className="section-label">{t}</span>
+                <p className="m-0 small muted">{b}</p>
               </div>
             ))}
-          </div>
-        </section>
+          </section>
+
+          <section className="front-countdown">
+            <p className="countdown-label">Next weekly session · {format(next, "EEEE d MMMM, HH:mm")}</p>
+            <Countdown target={next.toISOString()} />
+          </section>
+        </div>
       </main>
-      <footer className="flex items-center justify-between px-5 py-6 text-xs text-muted-foreground sm:px-8">
-        <span className="inline-flex items-center gap-2">
-          <BrandMark className="size-5" /> {appName}
-        </span>
+      <footer className="main-inner !pt-0 !pb-8 flex items-center justify-between label-caps">
+        <span>{appName}</span>
         <span>Internal platform · access by verified school email</span>
       </footer>
-    </div>
+    </>
   );
 }

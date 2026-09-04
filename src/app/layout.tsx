@@ -1,12 +1,8 @@
 import type { Metadata } from "next";
-import { Fraunces, Source_Sans_3 } from "next/font/google";
 import { ThemeProvider } from "@/components/shell/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { appName, schoolName } from "@/lib/env";
 import "./globals.css";
-
-const serif = Fraunces({ variable: "--font-serif", subsets: ["latin"], axes: ["opsz"] });
-const sans = Source_Sans_3({ variable: "--font-sans", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: { default: appName, template: `%s · ${appName}` },
@@ -15,9 +11,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${serif.variable} ${sans.variable} h-full`}>
+    <html lang="en" suppressHydrationWarning className="h-full">
       <body className="min-h-full flex flex-col">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange value={{ light: "light", dark: "dark" }}>
+          <div className="ambient-waves" aria-hidden />
           {children}
           <Toaster />
         </ThemeProvider>

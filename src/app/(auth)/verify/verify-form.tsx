@@ -13,7 +13,7 @@ export function VerifyForm({ email, flow }: { email: string; flow: "setup" | "lo
   const [resendState, resendAction] = useActionState(flow === "setup" ? startFirstTimeSetup : requestLoginCode, null);
   return (
     <div className="space-y-6">
-      <form action={action} className="space-y-4" noValidate>
+      <form action={action} className="flex flex-col gap-4" noValidate>
         <input type="hidden" name="email" value={email} />
         <Field label="Verification code" htmlFor="token">
           <Input
@@ -23,22 +23,22 @@ export function VerifyForm({ email, flow }: { email: string; flow: "setup" | "lo
             autoComplete="one-time-code"
             pattern="\d{6}"
             maxLength={6}
-            className="text-center font-mono text-2xl tracking-[0.5em]"
+            className="code-input"
             required
             autoFocus
           />
         </Field>
         <FormError message={state && !state.ok ? state.error : null} />
-        <SubmitButton className="w-full" variant="gold" pendingText="Verifying…">
+        <SubmitButton pendingText="Verifying…">
           {flow === "setup" ? "Verify and continue" : "Verify and sign in"}
         </SubmitButton>
       </form>
-      <form action={resendAction} className="flex items-center justify-between text-sm">
+      <form action={resendAction} className="flex items-center justify-between small">
         <input type="hidden" name="email" value={email} />
-        <Button type="submit" variant="link" className="px-0">
-          Resend code
+        <Button type="submit" variant="link">
+          Resend email
         </Button>
-        <Link href={flow === "setup" ? "/welcome" : "/login"} className="text-muted-foreground underline-offset-4 hover:underline">
+        <Link href={flow === "setup" ? "/welcome" : "/login"} className="prose-link">
           Use a different email
         </Link>
       </form>

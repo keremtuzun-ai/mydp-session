@@ -9,8 +9,8 @@ export default function ResetPasswordPage() {
   return (
     <AuthCard eyebrow="Account recovery" title="Reset your password" description="Enter your school email. We will send a reset link and a code.">
       <ResetRequestForm />
-      <p className="mt-6 text-center text-sm text-muted-foreground">
-        <Link href="/login" className="underline-offset-4 hover:underline">
+      <p className="mt-6 small muted">
+        <Link href="/login" className="prose-link">
           Back to sign in
         </Link>
       </p>

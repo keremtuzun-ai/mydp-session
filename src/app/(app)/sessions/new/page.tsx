@@ -16,7 +16,7 @@ export default async function NewSessionPage() {
   return (
     <div>
       <PageHeader eyebrow="Sessions" title="Schedule a weekly session" />
-      <Card className="p-6">
+      <Card>
         <SessionForm committees={committees ?? []} />
       </Card>
     </div>

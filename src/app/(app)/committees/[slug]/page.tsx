@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { BookOpen, ExternalLink, Library, ListChecks, Megaphone, Users } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { getNameMap, nameOf, getUploadCounts, SESSION_COMMITTEE_COLUMNS } from "@/lib/data/queries";
 import { PageHeader } from "@/components/mun/page-header";
-import { CommitteeSeal } from "@/components/mun/committee-badge";
 import { MembershipBadge } from "@/components/mun/role-badge";
 import { TaskStatusBadge } from "@/components/mun/task-status-badge";
 import { PriorityBadge } from "@/components/mun/priority-badge";
@@ -54,18 +53,17 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
   const blocks = (upcomingBlocks ?? []).filter((b) => b.weekly_sessions && b.weekly_sessions.status !== "cancelled").sort((a, b) => a.weekly_sessions!.starts_at.localeCompare(b.weekly_sessions!.starts_at));
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-        <CommitteeSeal acronym={committee.acronym} size="lg" className="hidden sm:flex" />
+    <div className="flex flex-col gap-7">
+      <div>
         <div className="flex-1">
           <PageHeader
             eyebrow={committee.category}
-            title={committee.name}
-            description={committee.description ?? undefined}
+            title={committee.acronym}
+            description={`${committee.name}${committee.description ? ` · ${committee.description}` : ""}`}
             className="mb-0"
             actions={
               <>
-                <Badge variant={committee.is_open ? "success" : "muted"}>{committee.is_open ? "Open" : "Closed"}</Badge>
+                <Badge variant={committee.is_open ? "success" : "muted"} dot>{committee.is_open ? "Open" : "Closed"}</Badge>
                 {isMember ? <Badge variant="gold">Your committee</Badge> : null}
                 {canManage ? <CommitteeManagePanel committee={committee} canRename={viewer.isStaff} canDelete={viewer.isAdmin} /> : null}
               </>
@@ -77,12 +75,10 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <BookOpen className="size-4 text-gold-deep" aria-hidden /> Current topic
-            </CardTitle>
+            <CardTitle>Current topic</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="font-display text-xl">{committee.current_topic ?? "To be announced"}</p>
+            <p className="m-0 font-serif text-[1.35rem] font-[640]">{committee.current_topic ?? "To be announced"}</p>
             {committee.background_guide_url ? (
               <Button asChild variant="outline" size="sm">
                 <a href={committee.background_guide_url} target="_blank" rel="noopener noreferrer">
@@ -90,24 +86,24 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
                 </a>
               </Button>
             ) : (
-              <p className="text-sm text-muted-foreground">No background guide linked yet.</p>
+              <p className="text-sm muted">No background guide linked yet.</p>
             )}
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Chair team</CardTitle>
+            <CardTitle>Chair team</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent>
             {chairTeam.length ? (
-              chairTeam.map((m) => (
-                <div key={m.id} className="flex items-center justify-between gap-2">
+              <ul className="people-list">{chairTeam.map((m) => (
+                <li key={m.id} className="justify-between">
                   <UserChip name={nameOf(names, m.profile_id)} username={names.get(m.profile_id)?.username} avatarUrl={names.get(m.profile_id)?.avatar_url} />
                   <MembershipBadge role={m.membership_role} />
-                </div>
-              ))
+                </li>
+              ))}</ul>
             ) : (
-              <p className="text-sm text-muted-foreground">Chairs to be announced.</p>
+              <p className="m-0 small muted">Chairs to be announced.</p>
             )}
           </CardContent>
         </Card>
@@ -115,57 +111,51 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section aria-labelledby="members">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 id="members" className="eyebrow">
-              Delegates ({delegates.length})
-            </h2>
-          </div>
+          <div className="section-head"><h2 id="members">Delegates ({delegates.length})</h2></div>
           {delegates.length ? (
-            <ul className="divide-y rounded-lg border bg-card">
+            <ul className="ledger">
               {delegates.map((m) => (
-                <li key={m.id} className="flex items-center justify-between gap-2 p-3">
+                <li key={m.id} className="flex items-center justify-between gap-2">
                   <UserChip name={nameOf(names, m.profile_id)} username={names.get(m.profile_id)?.username} avatarUrl={names.get(m.profile_id)?.avatar_url} />
                   <div className="flex items-center gap-2">
-                    {m.delegation ? <span className="text-xs text-muted-foreground">{m.delegation}</span> : null}
+                    {m.delegation ? <span className="chip">{m.delegation}</span> : null}
                     {canManage ? <RemoveMember membershipId={m.id} name={nameOf(names, m.profile_id)} /> : null}
                   </div>
                 </li>
               ))}
             </ul>
           ) : (
-            <EmptyState icon={Users} title="No delegates yet" className="py-8" />
+            <EmptyState title="No delegates yet" className="empty-state-sm" />
           )}
           {canManage ? <AddMember committeeId={committee.id} canAppointChairs={viewer.isStaff} /> : null}
         </section>
 
         <section aria-labelledby="upcoming">
-          <h2 id="upcoming" className="eyebrow mb-3">
-            Upcoming committee work
-          </h2>
+          <div className="section-head"><h2 id="upcoming">Upcoming committee work</h2></div>
           {blocks.length ? (
-            <ul className="mb-4 divide-y rounded-lg border bg-card">
+            <ul className="ledger mb-4">
               {blocks.map((b) => (
-                <li key={b.id} className="p-3">
-                  <Link href={`/sessions/${b.weekly_sessions!.id}`} className="font-medium underline-offset-4 hover:underline">
+                <li key={b.id}>
+                  <Link href={`/sessions/${b.weekly_sessions!.id}`} className="row-title">
                     {b.weekly_sessions!.title}
                   </Link>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="m-0 row-sub">
                     {formatDate(b.weekly_sessions!.starts_at)} · {b.topic ?? "Topic to be announced"}
                   </p>
                 </li>
               ))}
             </ul>
           ) : (
-            <EmptyState title="No upcoming session for this committee" className="mb-4 py-6" />
+            <EmptyState title="No upcoming session for this committee" className="empty-state-sm mb-4" />
           )}
           {tasks && tasks.length ? (
-            <ul className="divide-y rounded-lg border bg-card">
+            <ul className="ledger">
               {tasks.map((t) => (
                 <li key={t.id}>
-                  <Link href={`/calendar/${t.id}`} className="flex items-center gap-3 p-3 hover:bg-muted/40">
+                  <Link href={`/calendar/${t.id}`} className="flex items-center gap-3 no-underline text-ink">
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium">{t.title}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="m-0 truncate font-[650]">{t.title}</p>
+                      <p className="m-0 row-sub">
                         {t.assigned_to_profile_id ? nameOf(names, t.assigned_to_profile_id) : "Everyone in committee"} · {relativeDue(t.due_at)}
                         {uploadCounts.get(t.id) ? ` · ${uploadCounts.get(t.id)} upload(s)` : ""}
                       </p>
@@ -177,7 +167,7 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
               ))}
             </ul>
           ) : (
-            <EmptyState icon={ListChecks} title="No open tasks" className="py-6" />
+            <EmptyState title="No open tasks" className="empty-state-sm" />
           )}
           {canManage ? (
             <Button asChild variant="outline" size="sm" className="mt-3">
@@ -189,21 +179,18 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section aria-labelledby="resources">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 id="resources" className="eyebrow">
-              Resources
-            </h2>
-            <Link href={`/materials?committee=${committee.id}`} className="text-sm underline-offset-4 hover:underline">
+          <div className="section-head"><h2 id="resources">Resources</h2>
+            <Link href={`/materials?committee=${committee.id}`} className="section-tail prose-link">
               All materials
             </Link>
           </div>
           {materials && materials.length ? (
-            <ul className="divide-y rounded-lg border bg-card">
+            <ul className="ledger">
               {materials.map((m) => (
-                <li key={m.id} className="flex items-center justify-between gap-3 p-3">
+                <li key={m.id} className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="truncate font-medium">{m.title}</p>
-                    <p className="text-xs text-muted-foreground">{humanize(m.category)} · {formatDate(m.created_at)}</p>
+                    <p className="m-0 truncate font-[650]">{m.title}</p>
+                    <p className="m-0 row-sub">{humanize(m.category)} · {formatDate(m.created_at)}</p>
                   </div>
                   <Button asChild size="sm" variant="outline">
                     <a href={`/api/files/materials/${m.id}`} target="_blank" rel="noopener noreferrer">
@@ -214,26 +201,24 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
               ))}
             </ul>
           ) : (
-            <EmptyState icon={Library} title="No committee resources yet" className="py-8" />
+            <EmptyState title="No committee resources yet" className="empty-state-sm" />
           )}
         </section>
 
         <section aria-labelledby="announcements">
-          <h2 id="announcements" className="eyebrow mb-3">
-            Committee announcements
-          </h2>
+          <div className="section-head"><h2 id="announcements">Committee announcements</h2></div>
           {announcements && announcements.length ? (
             <div className="space-y-3">
               {announcements.map((a) => (
-                <Card key={a.id} className="p-4">
-                  <p className="font-semibold">{a.title}</p>
-                  <p className="mt-1 whitespace-pre-wrap text-sm text-muted-foreground">{a.body}</p>
-                  <p className="mt-2 text-xs text-muted-foreground">{nameOf(names, a.author_id, "Chair")} · {formatDateTime(a.published_at)}</p>
+                <Card key={a.id} className="card-tight">
+                  <p className="m-0 font-[650]">{a.title}</p>
+                  <p className="m-0 mt-1 whitespace-pre-wrap small muted">{a.body}</p>
+                  <p className="m-0 mt-2 dateline">{nameOf(names, a.author_id, "Chair")} · {formatDateTime(a.published_at)}</p>
                 </Card>
               ))}
             </div>
           ) : (
-            <EmptyState icon={Megaphone} title="No announcements" className="py-8" />
+            <EmptyState title="No announcements" className="empty-state-sm" />
           )}
           {canManage ? (
             <Button asChild variant="outline" size="sm" className="mt-3">
@@ -245,9 +230,7 @@ export default async function CommitteePage({ params }: PageProps<"/committees/[
 
       {committee.submissions_enabled && (isMember || canManage) ? (
         <section aria-labelledby="submissions">
-          <h2 id="submissions" className="eyebrow mb-3">
-            Position papers and preparation
-          </h2>
+          <div className="section-head"><h2 id="submissions">Position papers and preparation</h2></div>
           <div className="grid gap-4 lg:grid-cols-3">
             <div className="lg:col-span-2">
               <UploadList

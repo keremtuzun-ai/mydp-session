@@ -59,12 +59,12 @@ export function SessionForm({ session, committees, selectedCommitteeIds = [] }: 
   const err = (n: keyof Values) => errors[n]?.message ?? fieldError(state, n);
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="space-y-5" noValidate>
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Title" htmlFor="title" error={err("title")} className="sm:col-span-2">
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+      <div className="form-grid">
+        <Field label="Title" htmlFor="title" error={err("title")} className="full-width">
           <Input id="title" {...register("title")} aria-invalid={Boolean(err("title"))} />
         </Field>
-        <Field label="Theme" htmlFor="theme" optional error={err("theme")} className="sm:col-span-2">
+        <Field label="Theme" htmlFor="theme" optional error={err("theme")} className="full-width">
           <Input id="theme" placeholder="e.g. Moderated caucus practice" {...register("theme")} />
         </Field>
         <Field label="Starts" htmlFor="starts_at" error={err("starts_at")}>
@@ -90,22 +90,22 @@ export function SessionForm({ session, committees, selectedCommitteeIds = [] }: 
             <option value="cancelled">Cancelled</option>
           </NativeSelect>
         </Field>
-        <Field label="Description" htmlFor="description" optional error={err("description")} className="sm:col-span-2">
+        <Field label="Description" htmlFor="description" optional error={err("description")} className="full-width">
           <Textarea id="description" rows={2} {...register("description")} />
         </Field>
-        <Field label="General agenda" htmlFor="general_agenda" optional error={err("general_agenda")} className="sm:col-span-2">
+        <Field label="General agenda" htmlFor="general_agenda" optional error={err("general_agenda")} className="full-width">
           <Textarea id="general_agenda" rows={5} {...register("general_agenda")} />
         </Field>
       </div>
 
       <fieldset>
-        <legend className="mb-2 text-sm font-medium">Committees meeting this week</legend>
+        <legend className="section-label">Committees meeting this week</legend>
         <div className="grid gap-2 sm:grid-cols-2">
           {committees.map((c) => (
-            <div key={c.id} className="flex items-center gap-2 rounded-md border px-3 py-2">
+            <div key={c.id} className="flex items-center gap-2 rounded-[7px] border border-line px-3 py-2 bg-surface">
               <Checkbox id={`c-${c.id}`} name="committee_ids" value={c.id} defaultChecked={selectedCommitteeIds.includes(c.id)} />
-              <Label htmlFor={`c-${c.id}`} className="cursor-pointer">
-                <span className="font-semibold">{c.acronym}</span> <span className="text-muted-foreground">{c.name}</span>
+              <Label htmlFor={`c-${c.id}`} className="cursor-pointer normal-case tracking-normal text-[0.88rem] font-medium text-ink">
+                <span className="font-[650]">{c.acronym}</span> <span className="muted">{c.name}</span>
               </Label>
             </div>
           ))}
@@ -113,7 +113,7 @@ export function SessionForm({ session, committees, selectedCommitteeIds = [] }: 
       </fieldset>
 
       <FormError message={state && !state.ok && !state.fieldErrors ? state.error : null} />
-      <div className="flex justify-end gap-2">
+      <div className="form-actions">
         <Button type="submit" loading={pending}>
           {session ? "Save changes" : "Create session"}
         </Button>

@@ -12,8 +12,8 @@ export default async function VerifyPage({ searchParams }: PageProps<"/verify">)
   if (!email) redirect(flow === "setup" ? "/welcome" : "/login");
   return (
     <AuthCard
-      eyebrow={flow === "setup" ? "Step 1 of 2" : "Check your inbox"}
-      title="Enter the 6-digit code"
+      eyebrow={flow === "setup" ? "First-time setup · step 1 of 2" : "Check your inbox"}
+      title="Check your email"
       description={`We sent an email to ${email}. Enter the 6-digit code if the email contains one; if it contains a sign-in link instead, open that link in this browser and you will be brought straight through.`}
     >
       <VerifyForm email={email} flow={flow} />

@@ -4,17 +4,17 @@ import type { Enums } from "@/lib/types/database";
 type Status = Enums<"task_status">;
 
 export const TASK_STATUS_LABEL: Record<Status, string> = {
-  not_started: "Not started",
+  not_started: "Open",
   in_progress: "In progress",
   submitted: "Submitted",
   reviewed: "Returned",
-  completed: "Completed",
+  completed: "Done",
   overdue: "Overdue",
 };
 
-const VARIANT: Record<Status, "muted" | "info" | "warning" | "gold" | "success" | "destructive"> = {
-  not_started: "muted",
-  in_progress: "info",
+const VARIANT: Record<Status, "navy" | "warning" | "gold" | "success" | "destructive" | "secondary"> = {
+  not_started: "navy",
+  in_progress: "navy",
   submitted: "warning",
   reviewed: "gold",
   completed: "success",
@@ -23,7 +23,7 @@ const VARIANT: Record<Status, "muted" | "info" | "warning" | "gold" | "success" 
 
 export function TaskStatusBadge({ status, className }: { status: Status; className?: string }) {
   return (
-    <Badge variant={VARIANT[status]} className={className}>
+    <Badge variant={VARIANT[status]} dot className={`${status === "in_progress" ? "chip-pulse" : ""} ${className ?? ""}`}>
       {TASK_STATUS_LABEL[status]}
     </Badge>
   );

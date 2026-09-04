@@ -66,14 +66,14 @@ export function TaskForm({ task, committees, sessions, members, isStaff, default
   const uniqueEligible = Array.from(new Map(eligible.map((m) => [m.id, m])).values());
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="space-y-5" noValidate>
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
       <Field label="Title" htmlFor="title" error={err("title")}>
         <Input id="title" placeholder="Submit position paper: …" {...register("title")} aria-invalid={Boolean(err("title"))} />
       </Field>
       <Field label="Instructions" htmlFor="description" optional error={err("description")}>
         <Textarea id="description" rows={4} {...register("description")} />
       </Field>
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="form-grid">
         <Field label="Committee" htmlFor="assigned_committee_id" error={err("assigned_committee_id")} hint={isStaff ? "Leave empty for a programme-wide task." : "Chairs assign within their own committee."}>
           <NativeSelect id="assigned_committee_id" {...register("assigned_committee_id")}>
             {isStaff ? <option value="">No committee</option> : null}
@@ -129,7 +129,7 @@ export function TaskForm({ task, committees, sessions, members, isStaff, default
         </Field>
       </div>
       <FormError message={state && !state.ok && !state.fieldErrors ? state.error : null} />
-      <div className="flex justify-end">
+      <div className="form-actions">
         <Button type="submit" loading={pending}>
           {task ? "Save changes" : "Assign task"}
         </Button>

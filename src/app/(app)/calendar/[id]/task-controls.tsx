@@ -25,7 +25,7 @@ export function TaskStatusControls({ taskId, status, manager, isAssignee }: { ta
   const closed = status === "reviewed" || status === "completed";
 
   return (
-    <div className="space-y-3">
+    <div className="flex flex-col gap-3">
       {isAssignee && !closed ? (
         <div className="flex flex-wrap gap-2">
           {status !== "in_progress" ? (
@@ -34,7 +34,7 @@ export function TaskStatusControls({ taskId, status, manager, isAssignee }: { ta
             </ActionButton>
           ) : null}
           {status !== "submitted" ? (
-            <ActionButton size="sm" variant="gold" action={() => setTaskStatus({ taskId, status: "submitted" })}>
+            <ActionButton size="sm" action={() => setTaskStatus({ taskId, status: "submitted" })}>
               <Send className="size-4" aria-hidden /> Submit for review
             </ActionButton>
           ) : (
@@ -44,12 +44,12 @@ export function TaskStatusControls({ taskId, status, manager, isAssignee }: { ta
           )}
         </div>
       ) : null}
-      {isAssignee && closed && !manager ? <p className="text-sm text-muted-foreground">This task has been {status === "completed" ? "completed" : "returned"} by your chair.</p> : null}
-      {isAssignee && status === "reviewed" ? <p className="text-sm text-muted-foreground">Read the chair&apos;s note, then ask your chair to reopen it if you need to resubmit.</p> : null}
+      {isAssignee && closed && !manager ? <p className="m-0 small muted">This task has been {status === "completed" ? "completed" : "returned"} by your chair.</p> : null}
+      {isAssignee && status === "reviewed" ? <p className="m-0 small muted">Read the chair&apos;s note, then ask your chair to reopen it if you need to resubmit.</p> : null}
 
       {manager ? (
-        <div className="space-y-2 border-t pt-3">
-          <p className="eyebrow">Review</p>
+        <div className="flex flex-col gap-2 border-t border-line pt-3">
+          <span className="section-label">Review</span>
           <div className="flex flex-wrap gap-2">
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
@@ -91,10 +91,10 @@ export function EvidenceUploadForm({ taskId }: { taskId: string }) {
   const [state, action] = useActionState(uploadEvidence, null);
   useActionFeedback(state);
   return (
-    <Card className="p-4">
-      <form action={action} className="space-y-3">
+    <Card className="card-tight">
+      <form action={action} className="flex flex-col gap-3">
         <input type="hidden" name="task_id" value={taskId} />
-        <p className="text-sm font-medium">Upload evidence</p>
+        <span className="section-label m-0">Upload evidence</span>
         <Field label="Title" htmlFor="up-title">
           <Input id="up-title" name="title" placeholder="Position paper (final)" required />
         </Field>
@@ -106,7 +106,7 @@ export function EvidenceUploadForm({ taskId }: { taskId: string }) {
         </Field>
         <FormError message={state && !state.ok ? state.error : null} />
         <div className="flex justify-end">
-          <SubmitButton size="sm" variant="gold" pendingText="Uploading…">
+          <SubmitButton size="sm" pendingText="Uploading…">
             Upload
           </SubmitButton>
         </div>

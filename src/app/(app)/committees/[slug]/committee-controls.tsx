@@ -56,10 +56,10 @@ export function AddMember({ committeeId, canAppointChairs }: { committeeId: stri
   const [state, action] = useActionState(upsertMembership, null);
   useActionFeedback(state);
   return (
-    <Card className="mt-3 p-4">
+    <Card className="mt-4 card-tight">
       <form action={action} className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
         <input type="hidden" name="committee_id" value={committeeId} />
-        <div className="sm:col-span-3 text-sm font-medium">Add a member by username</div>
+        <div className="sm:col-span-3 section-label m-0">Add a member by username</div>
         <Field label="Username" htmlFor="add-username">
           <Input id="add-username" name="username" placeholder="e.g. ayse-demir" autoCapitalize="none" required />
         </Field>
@@ -107,10 +107,10 @@ export function SubmissionForm({ committeeId }: { committeeId: string }) {
   const [state, action] = useActionState(submitToCommittee, null);
   useActionFeedback(state);
   return (
-    <Card className="p-4">
-      <form action={action} className="space-y-3">
+    <Card className="card-tight">
+      <form action={action} className="flex flex-col gap-3">
         <input type="hidden" name="committee_id" value={committeeId} />
-        <p className="text-sm font-medium">Submit a position paper</p>
+        <span className="section-label m-0">Submit a position paper</span>
         <Field label="Title" htmlFor="sub-title">
           <Input id="sub-title" name="title" placeholder="Position paper, France" required />
         </Field>

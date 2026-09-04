@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ClipboardCheck, ListChecks, AlertTriangle, Users, Inbox } from "lucide-react";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/mun/page-header";
@@ -65,21 +64,21 @@ export default async function AnalyticsPage() {
   const onboarded = (profiles ?? []).filter((p) => p.onboarding_completed_at).length;
 
   return (
-    <div className="space-y-8">
+    <div className="flex flex-col gap-7">
       <PageHeader eyebrow="Secretariat" title="Analytics" description="Attendance, task flow and engagement across the programme." />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <StatTile label="Attendance" value={byWeek.length ? `${Math.round(byWeek.reduce((a, b) => a + b.rate, 0) / byWeek.length)}%` : "—"} hint="average over completed sessions" icon={ClipboardCheck} />
-        <StatTile label="Task completion" value={`${completionRate}%`} hint={`${completed} of ${taskList.length} tasks`} icon={ListChecks} />
-        <StatTile label="Overdue" value={overdue} hint="open tasks past due" icon={AlertTriangle} />
-        <StatTile label="Active members" value={activeIds.size} hint={`of ${onboarded} onboarded`} icon={Users} />
-        <StatTile label="Awaiting review" value={awaitingReview} hint="submitted, not yet reviewed" icon={Inbox} />
+        <StatTile label="Attendance" value={byWeek.length ? `${Math.round(byWeek.reduce((a, b) => a + b.rate, 0) / byWeek.length)}%` : "—"} hint="average over completed sessions" />
+        <StatTile label="Task completion" value={`${completionRate}%`} hint={`${completed} of ${taskList.length} tasks`} />
+        <StatTile label="Overdue" value={overdue} hint="open tasks past due" />
+        <StatTile label="Active members" value={activeIds.size} hint={`of ${onboarded} onboarded`} />
+        <StatTile label="Awaiting review" value={awaitingReview} hint="submitted, not yet reviewed" />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Attendance by week</CardTitle>
+            <CardTitle>Attendance by week</CardTitle>
           </CardHeader>
           <CardContent>
             <AttendanceByWeekChart data={byWeek} />
@@ -95,7 +94,7 @@ export default async function AnalyticsPage() {
                 {byWeek.map((w) => (
                   <TableRow key={w.title + w.week}>
                     <TableCell>
-                      {w.title} <span className="text-muted-foreground">· {w.week}</span>
+                      {w.title} <span className="muted">· {w.week}</span>
                     </TableCell>
                     <TableCell className="text-right">
                       {w.present}/{w.total}
@@ -110,7 +109,7 @@ export default async function AnalyticsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Attendance by committee</CardTitle>
+            <CardTitle>Attendance by committee</CardTitle>
           </CardHeader>
           <CardContent>
             <AttendanceByCommitteeChart data={byCommittee} />
@@ -126,7 +125,7 @@ export default async function AnalyticsPage() {
                 {byCommittee.map((c) => (
                   <TableRow key={c.committee}>
                     <TableCell>
-                      <span className="font-medium">{c.committee}</span> <span className="text-muted-foreground">{c.name}</span>
+                      <span className="font-medium">{c.committee}</span> <span className="muted">{c.name}</span>
                     </TableCell>
                     <TableCell className="text-right">{c.members}</TableCell>
                     <TableCell className="text-right font-medium">{c.total ? `${c.rate}%` : "—"}</TableCell>
@@ -140,7 +139,7 @@ export default async function AnalyticsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Tasks by status</CardTitle>
+          <CardTitle>Tasks by status</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-6 lg:grid-cols-2">
           <TaskStatusChart data={statusCounts} />

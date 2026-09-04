@@ -49,12 +49,12 @@ export function CommitteeForm({ committee, canRename = true, onDone }: { committ
   const err = (n: keyof Values) => errors[n]?.message ?? fieldError(state, n);
 
   return (
-    <form ref={formRef} onSubmit={onSubmit} className="space-y-4" noValidate>
-      <div className="grid gap-4 sm:grid-cols-3">
+    <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+      <div className="form-grid">
         <Field label="Acronym" htmlFor="acronym" error={err("acronym")}>
           <Input id="acronym" readOnly={!canRename} {...register("acronym")} />
         </Field>
-        <Field label="Full name" htmlFor="name" error={err("name")} className="sm:col-span-2">
+        <Field label="Full name" htmlFor="name" error={err("name")} className="full-width">
           <Input
             id="name"
             readOnly={!canRename}
@@ -64,7 +64,7 @@ export function CommitteeForm({ committee, canRename = true, onDone }: { committ
         <Field label="Slug" htmlFor="slug" error={err("slug")} hint="Used in the address: /committees/slug">
           <Input id="slug" readOnly={!canRename} {...register("slug")} />
         </Field>
-        <Field label="Category" htmlFor="category" error={err("category")} className="sm:col-span-2">
+        <Field label="Category" htmlFor="category" error={err("category")} className="full-width">
           <Input id="category" list="categories" readOnly={!canRename} {...register("category")} />
           <datalist id="categories">
             {["General Assembly", "Security Council", "Specialised Agency", "Humanitarian", "Court", "Historical Crisis", "Regional Body"].map((c) => (
@@ -85,15 +85,15 @@ export function CommitteeForm({ committee, canRename = true, onDone }: { committ
       <div className="flex flex-wrap gap-6">
         <div className="flex items-center gap-2">
           <Checkbox id="is_open" name="is_open" defaultChecked={committee?.is_open ?? true} />
-          <Label htmlFor="is_open">Open to new delegates</Label>
+          <Label htmlFor="is_open" className="normal-case tracking-normal text-[0.88rem] font-medium text-ink">Open to new delegates</Label>
         </div>
         <div className="flex items-center gap-2">
           <Checkbox id="submissions_enabled" name="submissions_enabled" defaultChecked={committee?.submissions_enabled ?? true} />
-          <Label htmlFor="submissions_enabled">Accept position-paper submissions</Label>
+          <Label htmlFor="submissions_enabled" className="normal-case tracking-normal text-[0.88rem] font-medium text-ink">Accept position-paper submissions</Label>
         </div>
       </div>
       <FormError message={state && !state.ok && !state.fieldErrors ? state.error : null} />
-      <div className="flex justify-end">
+      <div className="form-actions">
         <Button type="submit" loading={pending}>
           {committee ? "Save changes" : "Create committee"}
         </Button>

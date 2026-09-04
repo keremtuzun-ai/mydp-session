@@ -29,7 +29,7 @@ export function ConfirmDialog({ trigger, title, description, confirmLabel = "Con
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            className={destructive ? undefined : "bg-primary text-primary-foreground hover:bg-primary/90"}
+            className={destructive ? undefined : "btn-outline"}
             disabled={pending}
             onClick={async (e) => {
               e.preventDefault();

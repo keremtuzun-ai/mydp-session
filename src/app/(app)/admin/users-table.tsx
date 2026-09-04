@@ -27,7 +27,7 @@ function RoleSelect({ profileId, role, disabled }: { profileId: string; role: Pr
   return (
     <form action={action} className="inline-flex items-center gap-1">
       <input type="hidden" name="profile_id" value={profileId} />
-      <NativeSelect name="role" defaultValue={role} disabled={disabled} aria-label="Role" className="h-8 w-32 text-xs">
+      <NativeSelect name="role" defaultValue={role} disabled={disabled} aria-label="Role" className="!py-1.5 !text-[0.8rem] w-36">
         {USER_ROLES.map((r) => (
           <option key={r} value={r}>
             {ROLE_LABEL[r]}
@@ -48,13 +48,13 @@ export function UsersTable({ rows, selfId, committees }: { rows: Row[]; selfId: 
   useActionFeedback(assignState);
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative sm:w-80">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 muted" aria-hidden />
           <Input className="pl-8" placeholder="Search name, username or email" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search members" />
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="m-0 label-caps">
           {rows.length} members · {rows.filter((r) => !r.onboarding_completed_at).length} pending onboarding
         </p>
       </div>
@@ -77,14 +77,14 @@ export function UsersTable({ rows, selfId, committees }: { rows: Row[]; selfId: 
               <TableCell>
                 <UserChip name={r.display_name ?? "(not onboarded)"} username={r.username} avatarUrl={r.avatar_url} />
               </TableCell>
-              <TableCell className="text-muted-foreground">
+              <TableCell className="muted">
                 {r.school_email}
                 {r.phone ? <span className="block text-xs">{r.phone}</span> : null}
               </TableCell>
               <TableCell>{r.grade ?? "—"}</TableCell>
               <TableCell>
                 <div className="flex flex-wrap gap-1">
-                  {r.committees.length ? r.committees.map((c) => <Badge key={c} variant="outline">{c}</Badge>) : <span className="text-muted-foreground">—</span>}
+                  {r.committees.length ? r.committees.map((c) => <Badge key={c} variant="navy">{c}</Badge>) : <span className="muted">—</span>}
                 </div>
               </TableCell>
               <TableCell>
@@ -93,9 +93,9 @@ export function UsersTable({ rows, selfId, committees }: { rows: Row[]; selfId: 
                   <RoleSelect profileId={r.id} role={r.role} disabled={r.id === selfId} />
                 </div>
               </TableCell>
-              <TableCell className="text-muted-foreground">
+              <TableCell className="muted">
                 {formatDate(r.created_at)}
-                {!r.onboarding_completed_at ? <Badge variant="warning" className="ml-1">Pending</Badge> : null}
+                {!r.onboarding_completed_at ? <Badge variant="warning" dot className="ml-1">Pending</Badge> : null}
               </TableCell>
               <TableCell className="text-right">
                 <ActionButton
@@ -114,9 +114,9 @@ export function UsersTable({ rows, selfId, committees }: { rows: Row[]; selfId: 
         </TableBody>
       </Table>
 
-      <Card className="p-4">
+      <Card className="card-tight">
         <form action={assignAction} className="grid gap-3 sm:grid-cols-[1fr_1fr_1fr_auto] sm:items-end">
-          <p className="sm:col-span-4 text-sm font-medium">Assign a member to a committee</p>
+          <span className="sm:col-span-4 section-label m-0">Assign a member to a committee</span>
           <Field label="Username" htmlFor="as-username">
             <Input id="as-username" name="username" placeholder="ayse-demir" required />
           </Field>

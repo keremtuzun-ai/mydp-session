@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
-import { Download, FileText, Link2, Plus, Search, Trash2 } from "lucide-react";
+import { Download, FileText, Link2, Search, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Textarea } from "@/components/ui/textarea";
@@ -51,19 +51,19 @@ export function MaterialsBrowser({ items, committees, sessions, initial }: { ite
   const sessionName = (id: string | null) => sessions.find((s) => s.id === id)?.title;
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-2">
-          <Label htmlFor="q" className="mb-1 block text-xs text-muted-foreground">
+          <Label htmlFor="q" className="mb-1 block">
             Search
           </Label>
           <div className="relative">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 muted" aria-hidden />
             <Input id="q" className="pl-8" placeholder="Title or description" value={f.q} onChange={(e) => setF({ ...f, q: e.target.value })} />
           </div>
         </div>
         <div>
-          <Label htmlFor="f-committee" className="mb-1 block text-xs text-muted-foreground">
+          <Label htmlFor="f-committee" className="mb-1 block">
             Committee
           </Label>
           <NativeSelect id="f-committee" value={f.committee} onChange={(e) => setF({ ...f, committee: e.target.value })}>
@@ -76,7 +76,7 @@ export function MaterialsBrowser({ items, committees, sessions, initial }: { ite
           </NativeSelect>
         </div>
         <div>
-          <Label htmlFor="f-session" className="mb-1 block text-xs text-muted-foreground">
+          <Label htmlFor="f-session" className="mb-1 block">
             Session
           </Label>
           <NativeSelect id="f-session" value={f.session} onChange={(e) => setF({ ...f, session: e.target.value })}>
@@ -90,7 +90,7 @@ export function MaterialsBrowser({ items, committees, sessions, initial }: { ite
         </div>
         <div className="grid grid-cols-2 gap-2">
           <div>
-            <Label htmlFor="f-category" className="mb-1 block text-xs text-muted-foreground">
+            <Label htmlFor="f-category" className="mb-1 block">
               Category
             </Label>
             <NativeSelect id="f-category" value={f.category} onChange={(e) => setF({ ...f, category: e.target.value })}>
@@ -103,7 +103,7 @@ export function MaterialsBrowser({ items, committees, sessions, initial }: { ite
             </NativeSelect>
           </div>
           <div>
-            <Label htmlFor="f-type" className="mb-1 block text-xs text-muted-foreground">
+            <Label htmlFor="f-type" className="mb-1 block">
               Type
             </Label>
             <NativeSelect id="f-type" value={f.type} onChange={(e) => setF({ ...f, type: e.target.value })}>
@@ -120,30 +120,30 @@ export function MaterialsBrowser({ items, committees, sessions, initial }: { ite
       </div>
 
       {filtered.length ? (
-        <ul className="grid gap-3 md:grid-cols-2">
+        <ul className="grid gap-4 md:grid-cols-2 list-none m-0 p-0">
           {filtered.map((m) => (
             <li key={m.id}>
-              <Card className="flex h-full flex-col p-4">
+              <Card className="flex h-full flex-col card-tight">
                 <div className="flex items-start gap-3">
-                  <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-accent text-accent-foreground">
+                  <div className="flex size-10 shrink-0 items-center justify-center rounded-[7px] border border-line bg-surface-2 text-ink-2">
                     {m.storage_path ? <FileText className="size-5" aria-hidden /> : <Link2 className="size-5" aria-hidden />}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold leading-tight">{m.title}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
+                    <p className="m-0 font-[650]">{m.title}</p>
+                    <p className="m-0 row-sub">
                       {humanize(m.category)}
                       {committeeName(m.committee_id) ? ` · ${committeeName(m.committee_id)}` : ""}
                       {sessionName(m.session_id) ? ` · ${sessionName(m.session_id)}` : ""}
                     </p>
                   </div>
-                  <Badge variant={m.visibility === "staff" ? "gold" : m.visibility === "committee" ? "info" : "muted"}>{m.visibility}</Badge>
+                  <Badge variant={m.visibility === "staff" ? "gold" : m.visibility === "committee" ? "navy" : "secondary"}>{m.visibility}</Badge>
                 </div>
-                {m.description ? <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{m.description}</p> : null}
-                <div className="mt-auto flex items-center justify-between pt-3 text-xs text-muted-foreground">
+                {m.description ? <p className="m-0 mt-2 line-clamp-2 small muted">{m.description}</p> : null}
+                <div className="mt-auto flex items-center justify-between pt-3 dateline"><span className="flex-1">
                   <span>
                     {m.uploaderName} · {formatDate(m.created_at)}
                     {m.size_bytes ? ` · ${formatBytes(m.size_bytes)}` : ""}
-                  </span>
+                  </span></span>
                   <div className="flex items-center gap-1">
                     <Button asChild size="sm" variant="outline">
                       <a href={`/api/files/materials/${m.id}`} target="_blank" rel="noopener noreferrer">
@@ -162,7 +162,7 @@ export function MaterialsBrowser({ items, committees, sessions, initial }: { ite
           ))}
         </ul>
       ) : (
-        <EmptyState title="No materials match" description="Try a broader filter." className="py-8" />
+        <EmptyState title="No materials match" description="Try a broader filter." className="empty-state-sm" />
       )}
     </div>
   );
@@ -175,23 +175,21 @@ export function NewMaterialDialog({ committees, sessions, isStaff }: { committee
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="size-4" aria-hidden /> Add material
-        </Button>
+        <Button>Add material</Button>
       </DialogTrigger>
       <DialogContent className="max-w-xl">
         <DialogHeader>
           <DialogTitle>Add a material</DialogTitle>
           <DialogDescription>Attach a file or link a source. Committee-only materials are visible to that committee&apos;s members.</DialogDescription>
         </DialogHeader>
-        <form action={action} className="space-y-4">
+        <form action={action} className="flex flex-col gap-4">
           <Field label="Title" htmlFor="m-title" error={fieldError(state, "title")}>
             <Input id="m-title" name="title" required />
           </Field>
           <Field label="Description" htmlFor="m-desc" optional>
             <Textarea id="m-desc" name="description" rows={2} />
           </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="form-grid">
             <Field label="Category" htmlFor="m-category">
               <NativeSelect id="m-category" name="category" defaultValue="study_guide">
                 {MATERIAL_CATEGORIES.map((c) => (
@@ -236,7 +234,7 @@ export function NewMaterialDialog({ committees, sessions, isStaff }: { committee
             <Input id="m-url" name="external_url" type="url" placeholder="https://" />
           </Field>
           <FormError message={state && !state.ok && !state.fieldErrors ? state.error : null} />
-          <div className="flex justify-end">
+          <div className="form-actions">
             <SubmitButton pendingText="Saving…">Add material</SubmitButton>
           </div>
         </form>

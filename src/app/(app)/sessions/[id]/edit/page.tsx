@@ -24,7 +24,7 @@ export default async function EditSessionPage({ params }: PageProps<"/sessions/[
   return (
     <div>
       <PageHeader eyebrow="Sessions" title={`Edit: ${session.title}`} />
-      <Card className="p-6">
+      <Card>
         <SessionForm session={session} committees={committees ?? []} selectedCommitteeIds={(sc ?? []).map((r) => r.committee_id)} />
       </Card>
     </div>

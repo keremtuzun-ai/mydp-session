@@ -13,12 +13,12 @@ export function LoginForms({ next }: { next: string }) {
   const [otpState, otpAction] = useActionState(requestLoginCode, null);
   return (
     <Tabs defaultValue="password">
-      <TabsList className="grid w-full grid-cols-2">
+      <TabsList>
         <TabsTrigger value="password">Username &amp; password</TabsTrigger>
         <TabsTrigger value="code">School email code</TabsTrigger>
       </TabsList>
       <TabsContent value="password">
-        <form action={pwAction} className="space-y-4" noValidate>
+        <form action={pwAction} className="flex flex-col gap-4" noValidate>
           <input type="hidden" name="next" value={next} />
           <Field label="Username" htmlFor="username">
             <Input id="username" name="username" autoComplete="username" autoCapitalize="none" spellCheck={false} required />
@@ -27,25 +27,23 @@ export function LoginForms({ next }: { next: string }) {
             <Input id="password" name="password" type="password" autoComplete="current-password" required />
           </Field>
           <FormError message={pwState && !pwState.ok ? pwState.error : null} />
-          <SubmitButton className="w-full" pendingText="Signing in…">
-            Sign in
-          </SubmitButton>
-          <p className="text-center text-sm">
-            <Link href="/reset-password" className="text-muted-foreground underline-offset-4 hover:underline">
+          <div className="form-actions">
+            <SubmitButton pendingText="Signing in…">Sign in</SubmitButton>
+            <Link href="/reset-password" className="prose-link small">
               Forgot your password?
             </Link>
-          </p>
+          </div>
         </form>
       </TabsContent>
       <TabsContent value="code">
-        <form action={otpAction} className="space-y-4" noValidate>
-          <Field label="School email" htmlFor="email" hint="We will send a 6-digit code. It only works for existing accounts.">
+        <form action={otpAction} className="flex flex-col gap-4" noValidate>
+          <Field label="School email" htmlFor="email" hint="We will email a sign-in link (and a code where the school's mail template supports it). Existing accounts only.">
             <Input id="email" name="email" type="email" autoComplete="email" inputMode="email" required />
           </Field>
           <FormError message={otpState && !otpState.ok ? otpState.error : null} />
-          <SubmitButton className="w-full" pendingText="Sending code…">
-            Email me a code
-          </SubmitButton>
+          <div className="form-actions">
+            <SubmitButton pendingText="Sending…">Email me a sign-in code</SubmitButton>
+          </div>
         </form>
       </TabsContent>
     </Tabs>

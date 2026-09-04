@@ -18,14 +18,14 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const signedOut = sp.signedout === "1";
   return (
     <AuthCard eyebrow="Welcome back" title="Sign in" description="Use your username and password, or request a one-time code at your school email.">
-      <div className="space-y-3">
+      <div className="flex flex-col gap-2 mb-4">
         <FormError message={error} />
         <FormSuccess message={signedOut ? "You have been signed out." : null} />
       </div>
       <LoginForms next={next} />
-      <p className="mt-6 text-center text-sm text-muted-foreground">
+      <p className="mt-6 small muted">
         First time here?{" "}
-        <Link href="/welcome" className="font-medium text-foreground underline-offset-4 hover:underline">
+        <Link href="/welcome" className="prose-link">
           Set up your account
         </Link>
       </p>

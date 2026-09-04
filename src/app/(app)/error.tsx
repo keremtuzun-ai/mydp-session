@@ -12,8 +12,8 @@ export default function AppError({ error, reset }: { error: Error & { digest?: s
         <AlertTriangle className="size-6" aria-hidden />
       </div>
       <h1 className="text-2xl font-semibold">Something went wrong</h1>
-      <p className="mt-2 text-sm text-muted-foreground">{error.message || "The page could not be loaded."}</p>
-      {error.digest ? <p className="mt-1 text-xs text-muted-foreground">Reference: {error.digest}</p> : null}
+      <p className="mt-2 text-sm muted">{error.message || "The page could not be loaded."}</p>
+      {error.digest ? <p className="mt-1 text-xs muted">Reference: {error.digest}</p> : null}
       <Button className="mt-6" onClick={reset}>
         Try again
       </Button>

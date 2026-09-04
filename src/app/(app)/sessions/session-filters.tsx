@@ -17,22 +17,16 @@ export function SessionFilters({ scope, committee, status, committees }: Props) 
   };
   return (
     <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-      <div role="tablist" aria-label="Time range" className="inline-flex rounded-md border bg-card p-0.5">
+      <div role="tablist" aria-label="Time range" className="filter-pills">
         {(["upcoming", "past", "all"] as const).map((s) => (
-          <button
-            key={s}
-            role="tab"
-            aria-selected={scope === s}
-            onClick={() => update({ scope: s })}
-            className={cn("rounded px-3 py-1.5 text-sm capitalize", scope === s ? "bg-navy text-primary-foreground dark:bg-gold dark:text-navy-deep" : "text-muted-foreground hover:bg-accent")}
-          >
+          <button key={s} type="button" role="tab" aria-selected={scope === s} onClick={() => update({ scope: s })} className={cn("filter-pill", scope === s && "active")}>
             {s}
           </button>
         ))}
       </div>
       <div className="grid flex-1 grid-cols-2 gap-3 sm:max-w-md">
         <div>
-          <Label htmlFor="f-committee" className="mb-1 block text-xs text-muted-foreground">
+          <Label htmlFor="f-committee" className="mb-1 block">
             Committee
           </Label>
           <NativeSelect id="f-committee" value={committee} onChange={(e) => update({ committee: e.target.value })}>
@@ -45,7 +39,7 @@ export function SessionFilters({ scope, committee, status, committees }: Props) 
           </NativeSelect>
         </div>
         <div>
-          <Label htmlFor="f-status" className="mb-1 block text-xs text-muted-foreground">
+          <Label htmlFor="f-status" className="mb-1 block">
             Status
           </Label>
           <NativeSelect id="f-status" value={status} onChange={(e) => update({ status: e.target.value })}>

@@ -57,9 +57,9 @@ export function CommitteeBlockEditor({ block, acronym }: { block: { id: string; 
   return (
     <div className="mt-3 space-y-2">
       {block.chair_notes ? (
-        <div className="rounded-md border border-gold-deep/40 bg-gold/10 p-3 text-sm">
-          <p className="eyebrow mb-1">Chair notes (not visible to delegates)</p>
-          <p className="whitespace-pre-wrap">{block.chair_notes}</p>
+        <div className="flash flash-navy">
+          <span className="section-label">Chair notes (not visible to delegates)</span>
+          <p className="m-0 whitespace-pre-wrap">{block.chair_notes}</p>
         </div>
       ) : null}
       <Dialog open={open} onOpenChange={setOpen}>
@@ -73,7 +73,7 @@ export function CommitteeBlockEditor({ block, acronym }: { block: { id: string; 
             <DialogTitle>{acronym} agenda for this session</DialogTitle>
             <DialogDescription>Topic and agenda are visible to delegates. Chair notes stay with chairs and the Secretariat.</DialogDescription>
           </DialogHeader>
-          <form action={action} className="space-y-4">
+          <form action={action} className="flex flex-col gap-4">
             <input type="hidden" name="session_committee_id" value={block.id} />
             <Field label="Topic" htmlFor={`topic-${block.id}`}>
               <Input id={`topic-${block.id}`} name="topic" defaultValue={block.topic ?? ""} />
@@ -99,10 +99,10 @@ export function FeedbackForm({ sessionId, targets }: { sessionId: string; target
   const [state, action] = useActionState(addSessionFeedback, null);
   useActionFeedback(state);
   return (
-    <Card className="p-4">
-      <form action={action} className="space-y-3">
+    <Card className="card-tight">
+      <form action={action} className="flex flex-col gap-3">
         <input type="hidden" name="session_id" value={sessionId} />
-        <p className="text-sm font-medium">Write feedback for a delegate</p>
+        <span className="section-label">Write feedback for a delegate</span>
         <Field label="Delegate" htmlFor="fb-profile">
           <NativeSelect id="fb-profile" name="profile_id" required>
             {targets.map((t) => (

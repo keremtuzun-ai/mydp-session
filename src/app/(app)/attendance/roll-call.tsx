@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect } from "@/components/ui/native-select";
 import { Label } from "@/components/ui/label";
-import { CommitteeSeal } from "@/components/mun/committee-badge";
 import { bulkRecordAttendance } from "@/actions/attendance";
 import { cn } from "@/lib/utils";
 import type { Enums } from "@/lib/types/database";
@@ -16,10 +15,10 @@ import type { Enums } from "@/lib/types/database";
 type Status = Enums<"attendance_status">;
 const STATUSES: Status[] = ["present", "late", "excused", "absent"];
 const TONE: Record<Status, string> = {
-  present: "data-[on=true]:bg-success/20 data-[on=true]:border-success data-[on=true]:text-success",
-  late: "data-[on=true]:bg-warning/25 data-[on=true]:border-warning",
-  excused: "data-[on=true]:bg-info/20 data-[on=true]:border-info data-[on=true]:text-info",
-  absent: "data-[on=true]:bg-destructive/15 data-[on=true]:border-destructive data-[on=true]:text-destructive",
+  present: "data-[on=true]:!bg-[var(--success-soft)] data-[on=true]:!border-[var(--success)] data-[on=true]:!text-[var(--success)]",
+  late: "data-[on=true]:!bg-[var(--warn-soft)] data-[on=true]:!border-[var(--warn)] data-[on=true]:!text-[var(--warn)]",
+  excused: "data-[on=true]:!bg-[var(--navy-soft)] data-[on=true]:!border-[var(--navy)] data-[on=true]:!text-[var(--navy)]",
+  absent: "data-[on=true]:!bg-[var(--danger-soft)] data-[on=true]:!border-[var(--danger)] data-[on=true]:!text-[var(--danger)]",
 };
 
 type Member = { profileId: string; name: string; delegation: string | null; status: Status | null; note: string | null };
@@ -29,7 +28,7 @@ export function SessionPicker({ sessions, selected }: { sessions: { id: string; 
   const pathname = usePathname();
   return (
     <div className="sm:w-80">
-      <Label htmlFor="session-pick" className="mb-1 block text-xs text-muted-foreground">
+      <Label htmlFor="session-pick" className="mb-1 block">
         Session
       </Label>
       <NativeSelect id="session-pick" value={selected} onChange={(e) => router.push(`${pathname}?session=${e.target.value}`)}>
@@ -70,13 +69,12 @@ export function RollCall({ sessionId, committee }: { sessionId: string; committe
   const markAll = (status: Status) => setRows((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, { ...v, status }])));
 
   return (
-    <Card className="p-4">
+    <Card className="card-rule">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <CommitteeSeal acronym={committee.acronym} size="sm" />
           <div>
-            <p className="font-semibold leading-tight">{committee.name}</p>
-            <p className="text-xs text-muted-foreground">{committee.members.length} members</p>
+            <p className="m-0 font-serif text-[1.15rem] font-[650]">{committee.acronym} <span className="font-light muted text-[0.95rem]">{committee.name}</span></p>
+            <p className="m-0 row-sub">{committee.members.length} members</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -88,12 +86,12 @@ export function RollCall({ sessionId, committee }: { sessionId: string; committe
           </Button>
         </div>
       </div>
-      <ul className="mt-4 divide-y">
+      <ul className="ledger mt-4 list-none p-0">
         {committee.members.map((m) => (
-          <li key={m.profileId} className="grid gap-2 py-3 sm:grid-cols-[1fr_auto_minmax(0,14rem)] sm:items-center">
+          <li key={m.profileId} className="grid gap-2 sm:grid-cols-[1fr_auto_minmax(0,14rem)] sm:items-center !py-3 hover:!bg-transparent">
             <div>
-              <p className="font-medium leading-tight">{m.name}</p>
-              {m.delegation ? <p className="text-xs text-muted-foreground">{m.delegation}</p> : null}
+              <p className="m-0 font-[650]">{m.name}</p>
+              {m.delegation ? <p className="m-0 row-sub">{m.delegation}</p> : null}
             </div>
             <div role="radiogroup" aria-label={`Attendance for ${m.name}`} className="flex flex-wrap gap-1">
               {STATUSES.map((s) => (
@@ -104,7 +102,7 @@ export function RollCall({ sessionId, committee }: { sessionId: string; committe
                   aria-checked={rows[m.profileId]?.status === s}
                   data-on={rows[m.profileId]?.status === s}
                   onClick={() => setRows((r) => ({ ...r, [m.profileId]: { ...r[m.profileId]!, status: s } }))}
-                  className={cn("rounded-full border px-2.5 py-1 text-xs font-medium capitalize transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", TONE[s])}
+                  className={cn("filter-pill", TONE[s])}
                 >
                   {s}
                 </button>
@@ -115,7 +113,7 @@ export function RollCall({ sessionId, committee }: { sessionId: string; committe
               placeholder="Note (optional)"
               value={rows[m.profileId]?.note ?? ""}
               onChange={(e) => setRows((r) => ({ ...r, [m.profileId]: { ...r[m.profileId]!, note: e.target.value } }))}
-              className="h-8 text-xs"
+              className="!py-1.5 !text-[0.82rem]"
             />
           </li>
         ))}

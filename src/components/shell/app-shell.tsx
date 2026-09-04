@@ -1,57 +1,43 @@
+import { format } from "date-fns";
 import { Brand } from "@/components/shell/brand";
-import { SidebarNav } from "@/components/shell/sidebar-nav";
-import { MobileNav } from "@/components/shell/mobile-nav";
-import { UserMenu } from "@/components/shell/user-menu";
+import { RailNav } from "@/components/shell/rail-nav";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { navForRole } from "@/components/shell/nav-config";
-import { RoleBadge } from "@/components/mun/role-badge";
 import type { Viewer } from "@/lib/auth/session";
-import { schoolName } from "@/lib/env";
+import { ROLE_LABEL } from "@/lib/auth/roles";
 
+/** Masthead + sticky rail + editorial main column, per the MUNDP portal. */
 export function AppShell({ viewer, children }: { viewer: Viewer; children: React.ReactNode }) {
   const items = navForRole(viewer.role);
+  const who = `${ROLE_LABEL[viewer.role]} · ${viewer.profile.username ?? viewer.profile.display_name ?? ""}`;
+  const today = format(new Date(), "EEEE, d MMMM yyyy");
   return (
-    <div className="flex min-h-screen">
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[100] focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:shadow"
-      >
+    <>
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-[300] focus:rounded-md focus:bg-card focus:px-3 focus:py-2">
         Skip to content
       </a>
-      <aside className="hidden w-64 shrink-0 flex-col border-r bg-card/70 backdrop-blur lg:flex">
-        <div className="flex h-16 items-center border-b px-5">
+      <header className="masthead">
+        <div className="masthead-inner">
           <Brand href="/dashboard" />
-        </div>
-        <div className="flex-1 overflow-y-auto p-3">
-          <SidebarNav items={items} />
-        </div>
-        <div className="border-t p-4 text-xs text-muted-foreground">
-          <p className="font-medium text-foreground">{schoolName}</p>
-          <p>Model United Nations programme</p>
-        </div>
-      </aside>
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-16 items-center gap-3 border-b bg-background/85 px-4 backdrop-blur sm:px-6">
-          <MobileNav items={items} />
-          <div className="lg:hidden">
-            <Brand href="/dashboard" compact />
-          </div>
-          <div className="ml-auto flex items-center gap-2">
-            <RoleBadge role={viewer.role} className="hidden sm:inline-flex" />
+          <div className="masthead-side">
+            <div className="masthead-meta">
+              <span>{today}</span>
+              <br />
+              <span className="masthead-user">{who}</span>
+            </div>
             <ThemeToggle />
-            <UserMenu
-              name={viewer.profile.display_name}
-              username={viewer.profile.username}
-              email={viewer.email}
-              avatarUrl={viewer.profile.avatar_url}
-            />
+            <form action="/auth/signout" method="post">
+              <button type="submit" className="masthead-signout">
+                Sign out
+              </button>
+            </form>
           </div>
-        </header>
-        <main id="main" className="flex-1 px-4 py-6 sm:px-6 lg:px-8">
-          <div className="mx-auto w-full max-w-6xl">{children}</div>
-        </main>
-      </div>
-    </div>
+        </div>
+      </header>
+      <RailNav items={items} meta={{ today, who }} />
+      <main id="main" className="main-area">
+        <div className="main-inner">{children}</div>
+      </main>
+    </>
   );
 }

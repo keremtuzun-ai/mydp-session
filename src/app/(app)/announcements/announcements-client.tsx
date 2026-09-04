@@ -19,7 +19,7 @@ import type { Announcement } from "@/lib/types/database";
 
 export function AnnouncementCard({ announcement: a, authorName, audience, isRead, canManage, canPin }: { announcement: Announcement; authorName: string; audience: string; isRead: boolean; canManage: boolean; canPin: boolean }) {
   return (
-    <Card className={`p-5 ${a.pinned ? "border-gold-deep/50" : ""} ${!isRead ? "bg-gradient-to-br from-card to-accent/40" : ""}`}>
+    <Card className={`${a.pinned ? "border-t-2 border-t-[var(--rule-strong)]" : ""} ${!isRead ? "!border-l-[3px] !border-l-[var(--navy)]" : ""}`}>
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <div className="flex flex-wrap items-center gap-2">
@@ -28,10 +28,10 @@ export function AnnouncementCard({ announcement: a, authorName, audience, isRead
                 <Pin className="size-3" aria-hidden /> Pinned
               </Badge>
             ) : null}
-            {!isRead ? <Badge variant="info">New</Badge> : null}
-            <Badge variant="outline">{audience}</Badge>
+            {!isRead ? <Badge variant="navy" dot className="chip-pulse">New</Badge> : null}
+            <Badge variant="secondary">{audience}</Badge>
           </div>
-          <h2 className="mt-2 text-lg font-semibold leading-tight">{a.title}</h2>
+          <h2 className="mt-2 m-0 text-[1.25rem]">{a.title}</h2>
         </div>
         <div className="flex items-center gap-1">
           {!isRead ? (
@@ -51,8 +51,8 @@ export function AnnouncementCard({ announcement: a, authorName, audience, isRead
           ) : null}
         </div>
       </div>
-      <p className="mt-2 whitespace-pre-wrap text-sm">{a.body}</p>
-      <p className="mt-3 text-xs text-muted-foreground">
+      <p className="m-0 mt-3 whitespace-pre-wrap text-[0.92rem]">{a.body}</p>
+      <p className="m-0 mt-3 dateline">
         {authorName} · {formatDateTime(a.published_at)}
       </p>
     </Card>
@@ -66,10 +66,10 @@ export function NewAnnouncementForm({ committees, sessions, isStaff, defaultComm
   const formRef = useRef<HTMLFormElement>(null);
   useActionFeedback(state, () => formRef.current?.reset());
   return (
-    <Card className="p-5">
-      <h2 className="font-display text-lg font-semibold">Post an announcement</h2>
-      <p className="mb-4 text-sm text-muted-foreground">{isStaff ? "Target everyone, a role, a committee or a session." : "Chairs post to the committees they chair."}</p>
-      <form ref={formRef} action={action} className="space-y-4">
+    <Card>
+      <div className="section-head"><h2>Post an announcement</h2></div>
+      <p className="mb-4 small muted">{isStaff ? "Target everyone, a role, a committee or a session." : "Chairs post to the committees they chair."}</p>
+      <form ref={formRef} action={action} className="flex flex-col gap-4">
         <Field label="Title" htmlFor="a-title" error={fieldError(state, "title")}>
           <Input id="a-title" name="title" required />
         </Field>
@@ -111,11 +111,11 @@ export function NewAnnouncementForm({ committees, sessions, isStaff, defaultComm
         {isStaff ? (
           <div className="flex items-center gap-2">
             <Checkbox id="a-pinned" name="pinned" />
-            <Label htmlFor="a-pinned">Pin to the top</Label>
+            <Label htmlFor="a-pinned" className="normal-case tracking-normal text-[0.88rem] font-medium text-ink">Pin to the top</Label>
           </div>
         ) : null}
         <FormError message={state && !state.ok && !state.fieldErrors ? state.error : null} />
-        <div className="flex justify-end">
+        <div className="form-actions">
           <SubmitButton pendingText="Posting…">Publish</SubmitButton>
         </div>
       </form>

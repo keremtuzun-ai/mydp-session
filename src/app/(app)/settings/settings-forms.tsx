@@ -19,9 +19,9 @@ export function ProfileForm({ profile }: { profile: Profile }) {
   const [state, action] = useActionState(updateProfile, null);
   useActionFeedback(state);
   return (
-    <form action={action} className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Display name" htmlFor="display_name" className="sm:col-span-2">
+    <form action={action} className="flex flex-col gap-4">
+      <div className="form-grid">
+        <Field label="Display name" htmlFor="display_name" className="full-width">
           <Input id="display_name" name="display_name" defaultValue={profile.display_name ?? ""} autoComplete="name" required />
         </Field>
         <Field label="Grade" htmlFor="grade">
@@ -38,7 +38,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         </Field>
       </div>
       <FormError message={state && !state.ok ? state.error : null} />
-      <div className="flex justify-end">
+      <div className="form-actions">
         <SubmitButton>Save profile</SubmitButton>
       </div>
     </form>
@@ -49,7 +49,7 @@ export function AvatarForm({ avatarUrl, name }: { avatarUrl: string | null; name
   const [state, action] = useActionState(updateAvatar, null);
   useActionFeedback(state);
   return (
-    <form action={action} className="space-y-3">
+    <form action={action} className="flex flex-col gap-3">
       <div className="flex items-center gap-4">
         <Avatar className="size-16">
           {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
@@ -60,7 +60,7 @@ export function AvatarForm({ avatarUrl, name }: { avatarUrl: string | null; name
         </Field>
       </div>
       <FormError message={state && !state.ok ? state.error : null} />
-      <div className="flex justify-end">
+      <div className="form-actions">
         <SubmitButton size="sm" variant="outline" pendingText="Uploading…">
           Update photo
         </SubmitButton>
@@ -73,8 +73,8 @@ export function PasswordForm() {
   const [state, action] = useActionState(changePassword, null);
   useActionFeedback(state);
   return (
-    <form action={action} className="space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2">
+    <form action={action} className="flex flex-col gap-4">
+      <div className="form-grid">
         <Field label="New password" htmlFor="password" hint="At least 10 characters with a letter and a number.">
           <Input id="password" name="password" type="password" autoComplete="new-password" required />
         </Field>
@@ -83,7 +83,7 @@ export function PasswordForm() {
         </Field>
       </div>
       <FormError message={state && !state.ok ? state.error : null} />
-      <div className="flex justify-end">
+      <div className="form-actions">
         <SubmitButton>Change password</SubmitButton>
       </div>
     </form>
@@ -94,11 +94,11 @@ export function SessionControls() {
   return (
     <div className="flex flex-wrap gap-2">
       <form action="/auth/signout" method="post">
-        <Button type="submit" variant="outline">
-          <LogOut className="size-4" aria-hidden /> Sign out
+        <Button type="submit" variant="destructive">
+          <LogOut aria-hidden /> Sign out
         </Button>
       </form>
-      <ActionButton variant="ghost" action={signOutOtherSessions} confirm={{ title: "Sign out other devices?", description: "Every other browser or phone signed in as you will need to sign in again. This device stays signed in.", confirmLabel: "Sign out others", destructive: false }}>
+      <ActionButton variant="destructive" action={signOutOtherSessions} confirm={{ title: "Sign out other devices?", description: "Every other browser or phone signed in as you will need to sign in again. This device stays signed in.", confirmLabel: "Sign out others", destructive: false }}>
         <ShieldOff className="size-4" aria-hidden /> Sign out other devices
       </ActionButton>
     </div>

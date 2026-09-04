@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Megaphone } from "lucide-react";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { getNameMap, nameOf } from "@/lib/data/queries";
@@ -31,8 +30,8 @@ export default async function AnnouncementsPage({ searchParams }: PageProps<"/an
   return (
     <div>
       <PageHeader eyebrow="Notice board" title="Announcements" description={unread ? `${unread} unread` : "You are up to date."} />
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-3 lg:col-span-2">
+      <div className="two-col-wide grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <div className="flex flex-col gap-4 lg:col-span-2">
           {list.length ? (
             list.map((a) => (
               <AnnouncementCard
@@ -48,7 +47,7 @@ export default async function AnnouncementsPage({ searchParams }: PageProps<"/an
               />
             ))
           ) : (
-            <EmptyState icon={Megaphone} title="No announcements yet" />
+            <EmptyState title="No announcements yet" />
           )}
         </div>
         {canPost ? (

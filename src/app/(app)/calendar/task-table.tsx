@@ -7,7 +7,7 @@ import { useTransition } from "react";
 import { TaskStatusBadge, TASK_STATUS_LABEL } from "@/components/mun/task-status-badge";
 import { PriorityBadge } from "@/components/mun/priority-badge";
 import { EmptyState } from "@/components/mun/empty-state";
-import { setTaskStatus } from "@/actions/tasks";
+import { setTaskStatus, toggleTaskDone } from "@/actions/tasks";
 import { cn, formatDateTime, fmt } from "@/lib/utils";
 import type { Task } from "@/lib/types/database";
 
@@ -19,6 +19,7 @@ export type TaskRow = Task & {
   uploads: { id: string; title: string; file_name: string | null; external_url: string | null; created_at: string; authorName: string }[];
   canManage: boolean;
   isAssignee: boolean;
+  doneByMe: boolean;
 };
 
 function dueText(due: string | null) {
@@ -48,18 +49,21 @@ function RowAction({ row }: { row: TaskRow }) {
       </button>
     );
   }
-  if (row.isAssignee && !closed) {
-    return row.status === "submitted" ? (
-      <button type="button" className="btn btn-outline btn-sm" disabled={pending} onClick={() => run("in_progress")}>
-        Withdraw
-      </button>
-    ) : (
-      <button type="button" className="btn btn-outline btn-sm" disabled={pending} onClick={() => run("submitted")}>
-        Submit
-      </button>
-    );
-  }
-  return null;
+  const toggle = (done: boolean) =>
+    start(async () => {
+      const r = await toggleTaskDone({ taskId: row.id, done });
+      if (r.ok) router.refresh();
+      else toast.error(r.error);
+    });
+  return row.doneByMe ? (
+    <button type="button" className="btn btn-outline btn-sm" disabled={pending} onClick={() => toggle(false)}>
+      Mark not done
+    </button>
+  ) : (
+    <button type="button" className="btn btn-sm" disabled={pending} onClick={() => toggle(true)}>
+      Mark done
+    </button>
+  );
 }
 
 export function TaskTable({ rows, scope, status, showScope, basePath }: { rows: TaskRow[]; scope: string; status: string; showScope: boolean; basePath?: string }) {

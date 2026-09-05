@@ -672,6 +672,15 @@ export type Database = {
           { foreignKeyName: "audit_logs_actor_id_fkey"; columns: ["actor_id"]; isOneToOne: false; referencedRelation: "public_profiles"; referencedColumns: ["id"] },
         ];
       };
+      task_completions: {
+        Row: { task_id: string; profile_id: string; completed_at: string };
+        Insert: { task_id: string; profile_id: string; completed_at?: string };
+        Update: { task_id?: string; profile_id?: string; completed_at?: string };
+        Relationships: [
+          { foreignKeyName: "task_completions_task_id_fkey"; columns: ["task_id"]; isOneToOne: false; referencedRelation: "tasks"; referencedColumns: ["id"] },
+          { foreignKeyName: "task_completions_profile_id_fkey"; columns: ["profile_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ];
+      };
     };
     Views: {
       public_profiles: {

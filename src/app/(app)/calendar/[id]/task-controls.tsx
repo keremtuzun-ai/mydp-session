@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, Undo2, CheckCheck, Send, RotateCcw, PlayCircle } from "lucide-react";
+import { Trash2, Undo2, CheckCheck, RotateCcw } from "lucide-react";
 import { ActionButton } from "@/components/forms/action-button";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Field, FormError } from "@/components/ui/field";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { Card } from "@/components/ui/card";
-import { setTaskStatus, uploadEvidence, deleteUpload, deleteTask } from "@/actions/tasks";
+import { setTaskStatus, toggleTaskDone, uploadEvidence, deleteUpload, deleteTask } from "@/actions/tasks";
 import { useActionFeedback } from "@/hooks/use-action-feedback";
 import { ACCEPT_ATTRIBUTE } from "@/lib/validation/files";
 import { MAX_UPLOAD_BYTES } from "@/lib/env";
@@ -19,33 +19,27 @@ import type { Enums } from "@/lib/types/database";
 
 type Status = Enums<"task_status">;
 
-export function TaskStatusControls({ taskId, status, manager, isAssignee }: { taskId: string; status: Status; manager: boolean; isAssignee: boolean }) {
+export function TaskStatusControls({ taskId, status, manager, doneByMe }: { taskId: string; status: Status; manager: boolean; doneByMe: boolean }) {
   const [note, setNote] = useState("");
   const [open, setOpen] = useState(false);
   const closed = status === "reviewed" || status === "completed";
 
   return (
     <div className="flex flex-col gap-3">
-      {isAssignee && !closed ? (
-        <div className="flex flex-wrap gap-2">
-          {status !== "in_progress" ? (
-            <ActionButton size="sm" variant="outline" action={() => setTaskStatus({ taskId, status: "in_progress" })}>
-              <PlayCircle className="size-4" aria-hidden /> Start
-            </ActionButton>
-          ) : null}
-          {status !== "submitted" ? (
-            <ActionButton size="sm" action={() => setTaskStatus({ taskId, status: "submitted" })}>
-              <Send className="size-4" aria-hidden /> Submit for review
+      {!manager ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {doneByMe ? (
+            <ActionButton size="sm" variant="outline" action={() => toggleTaskDone({ taskId, done: false })}>
+              <Undo2 className="size-4" aria-hidden /> Mark not done
             </ActionButton>
           ) : (
-            <ActionButton size="sm" variant="outline" action={() => setTaskStatus({ taskId, status: "in_progress" })}>
-              <Undo2 className="size-4" aria-hidden /> Withdraw submission
+            <ActionButton size="sm" action={() => toggleTaskDone({ taskId, done: true })}>
+              <CheckCheck className="size-4" aria-hidden /> Mark done
             </ActionButton>
           )}
+          {status === "reviewed" ? <span className="small muted">Returned by the desk.</span> : null}
         </div>
       ) : null}
-      {isAssignee && closed && !manager ? <p className="m-0 small muted">This task has been {status === "completed" ? "completed" : "returned"} by your chair.</p> : null}
-      {isAssignee && status === "reviewed" ? <p className="m-0 small muted">Ask an executive to reopen it to resubmit.</p> : null}
 
       {manager ? (
         <div className="flex flex-col gap-2 border-t border-line pt-3">

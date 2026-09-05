@@ -49,19 +49,18 @@ export function canCreateTask(a: Actor, committeeId: string | null): boolean {
   return chairs(a, committeeId);
 }
 
-export const DELEGATE_STATUSES = ["not_started", "in_progress", "submitted"] as const;
+export const DELEGATE_STATUSES = ["not_started", "in_progress", "submitted", "completed"] as const;
 export type DelegateStatus = (typeof DELEGATE_STATUSES)[number];
 
 export function canDelegateSetStatus(a: Actor, t: TaskLike & Pick<Task, "status">, next: string): boolean {
   if (t.assigned_to_profile_id !== a.id) return false;
-  if (t.status === "reviewed" || t.status === "completed") return false;
+  if (t.status === "reviewed") return false;
   return (DELEGATE_STATUSES as readonly string[]).includes(next);
 }
 
-export function canUploadEvidence(a: Actor, t: TaskLike & Pick<Task, "status">): boolean {
-  if (canManageTask(a, t)) return true;
-  if (t.assigned_to_profile_id !== a.id) return false;
-  return t.status !== "completed" && t.status !== "reviewed";
+/** Every member may submit work on any task. */
+export function canUploadEvidence(): boolean {
+  return true;
 }
 
 export function canManageCommittee(a: Actor, committeeId: string): boolean {

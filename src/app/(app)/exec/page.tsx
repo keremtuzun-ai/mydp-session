@@ -18,12 +18,14 @@ export default async function ExecPage({ searchParams }: PageProps<"/exec">) {
   const supabase = await createClient();
   await supabase.rpc("mark_overdue_tasks");
 
-  const [{ data: tasks }, { data: uploads }, { data: sessions }, { data: people }] = await Promise.all([
+  const [{ data: tasks }, { data: uploads }, { data: sessions }, { data: people }, { data: completions }] = await Promise.all([
     supabase.from("tasks").select("*").order("due_at", { ascending: true, nullsFirst: false }),
     supabase.from("task_uploads").select("*").order("created_at", { ascending: false }),
     supabase.from("weekly_sessions").select("id, title"),
     supabase.from("public_profiles").select("id, display_name, username, role"),
+    supabase.from("task_completions").select("task_id, profile_id"),
   ]);
+  const doneKeys = new Set((completions ?? []).map((c) => `${c.task_id}:${c.profile_id}`));
   const inviteToken = viewer.isStaff ? getExecInviteToken() : "";
   const inviteUrl = inviteToken ? `${siteUrl.replace(/\/$/, "")}/exec-invite/${inviteToken}` : null;
   const sharedPassword = viewer.isStaff ? getExecSharedPassword() : "";
@@ -47,13 +49,15 @@ export default async function ExecPage({ searchParams }: PageProps<"/exec">) {
     uploads: (uploads ?? []).filter((u) => u.task_id === t.id).map((u) => ({ id: u.id, title: u.title, file_name: u.file_name, external_url: u.external_url, created_at: u.created_at, authorName: nameOf(names, u.uploaded_by) })),
     canManage: true,
     isAssignee: t.assigned_to_profile_id === viewer.userId,
+    doneByMe: doneKeys.has(`${t.id}:${viewer.userId}`),
   }));
 
   // Per-delegate progress
   const perDelegate = delegates.map((d) => {
-    const mine = all.filter((t) => t.assigned_to_profile_id === d.id);
-    const doneMine = mine.filter((t) => t.status === "completed").length;
-    return { id: d.id, name: d.display_name ?? d.username ?? "?", total: mine.length, done: doneMine, open: mine.filter((t) => ["not_started", "in_progress", "overdue"].includes(t.status)).length, waiting: mine.filter((t) => t.status === "submitted").length };
+    const mine = all.filter((t) => t.assigned_to_profile_id === d.id || (t.assigned_to_profile_id === null && (t.assigned_role === null || t.assigned_role === "delegate")));
+    const isDone = (t: (typeof all)[number]) => doneKeys.has(`${t.id}:${d.id}`) || (t.assigned_to_profile_id === d.id && t.status === "completed");
+    const doneMine = mine.filter(isDone).length;
+    return { id: d.id, name: d.display_name ?? d.username ?? "?", total: mine.length, done: doneMine, open: mine.filter((t) => !isDone(t) && t.status !== "submitted").length, waiting: mine.filter((t) => !isDone(t) && t.status === "submitted").length };
   });
 
   return (

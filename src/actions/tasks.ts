@@ -102,6 +102,24 @@ type Status = Enums<"task_status">;
  * own task. Chairs and staff: any status, with an optional note that is written
  * to the activity log (returned = "reviewed", completed, reopened).
  */
+/** A member marks a task done (or not) for themselves; a directly assigned task also flips its status. */
+export async function toggleTaskDone(input: { taskId: string; done: boolean }): Promise<ActionResult> {
+  const { actor } = await getActor();
+  if (!uuid.safeParse(input.taskId).success) return fail("Invalid request.");
+  const supabase = await createClient();
+  const { data: task } = await supabase.from("tasks").select("*").eq("id", input.taskId).maybeSingle();
+  if (!task) return fail("Task not found.");
+  const { error } = input.done
+    ? await supabase.from("task_completions").upsert({ task_id: task.id, profile_id: actor.id }, { onConflict: "task_id,profile_id" })
+    : await supabase.from("task_completions").delete().eq("task_id", task.id).eq("profile_id", actor.id);
+  if (error) return fail(describeDbError(error));
+  if (task.assigned_to_profile_id === actor.id && task.status !== "reviewed") {
+    await supabase.from("tasks").update({ status: input.done ? "completed" : "in_progress" }).eq("id", task.id);
+  }
+  revalidateTaskViews(task.id);
+  return ok(undefined, input.done ? "Marked done." : "Marked not done.");
+}
+
 export async function setTaskStatus(input: { taskId: string; status: Status; note?: string }): Promise<ActionResult> {
   const { actor } = await getActor();
   if (!uuid.safeParse(input.taskId).success || !TASK_STATUSES.includes(input.status)) return fail("Invalid request.");
@@ -113,7 +131,7 @@ export async function setTaskStatus(input: { taskId: string; status: Status; not
   if (!manager && !canDelegateSetStatus(actor, task, input.status)) {
     return fail(task.status === "reviewed" || task.status === "completed"
       ? "This task has been closed by a chair."
-      : "You can only mark your own task as not started, in progress or submitted.");
+      : "You can only change the status of a task assigned to you.");
   }
 
   const closing = input.status === "reviewed" || input.status === "completed";

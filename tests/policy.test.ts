@@ -34,10 +34,11 @@ describe("delegate task visibility", () => {
   });
   it("delegates may only move their own task through the open statuses", () => {
     expect(canDelegateSetStatus(ayse, aysesTask, "submitted")).toBe(true);
-    expect(canDelegateSetStatus(ayse, aysesTask, "completed")).toBe(false);
+    expect(canDelegateSetStatus(ayse, aysesTask, "completed")).toBe(true);
     expect(canDelegateSetStatus(ayse, aysesTask, "reviewed")).toBe(false);
     expect(canDelegateSetStatus(mehmet, aysesTask, "in_progress")).toBe(false);
-    expect(canDelegateSetStatus(ayse, { ...aysesTask, status: "completed" }, "in_progress")).toBe(false);
+    expect(canDelegateSetStatus(ayse, { ...aysesTask, status: "completed" }, "in_progress")).toBe(true);
+    expect(canDelegateSetStatus(ayse, { ...aysesTask, status: "reviewed" }, "in_progress")).toBe(false);
   });
 });
 
@@ -84,17 +85,17 @@ describe("admin and executive access", () => {
 });
 
 describe("task upload permissions", () => {
-  it("only the assignee (while open) and managers may upload evidence", () => {
+  it("every member may upload evidence", () => {
     expect(canUploadEvidence(ayse, aysesTask)).toBe(true);
-    expect(canUploadEvidence(mehmet, aysesTask)).toBe(false);
-    expect(canUploadEvidence(zeynep, aysesTask)).toBe(false);
+    expect(canUploadEvidence(mehmet, aysesTask)).toBe(true);
+    expect(canUploadEvidence(zeynep, aysesTask)).toBe(true);
     expect(canUploadEvidence(unscChair, aysesTask)).toBe(true);
-    expect(canUploadEvidence(whoChair, aysesTask)).toBe(false);
+    expect(canUploadEvidence(whoChair, aysesTask)).toBe(true);
     expect(canUploadEvidence(admin, aysesTask)).toBe(true);
   });
-  it("uploads close once a chair has reviewed or completed the task", () => {
-    expect(canUploadEvidence(ayse, { ...aysesTask, status: "reviewed" })).toBe(false);
-    expect(canUploadEvidence(ayse, { ...aysesTask, status: "completed" })).toBe(false);
+  it("uploads stay open after review or completion", () => {
+    expect(canUploadEvidence(ayse, { ...aysesTask, status: "reviewed" })).toBe(true);
+    expect(canUploadEvidence(ayse, { ...aysesTask, status: "completed" })).toBe(true);
     expect(canUploadEvidence(unscChair, { ...aysesTask, status: "completed" })).toBe(true);
   });
   it("committee submissions require membership and an open window", () => {

@@ -3,6 +3,7 @@ import { Brand, BrandLogo } from "@/components/shell/brand";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { appName, schoolName } from "@/lib/env";
 import { fmt, zonedNow, zonedInstant } from "@/lib/utils";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { Countdown } from "./countdown";
 
 /** Sessions meet every Tuesday at 10:55 and 15:10 (programme timezone). */
@@ -23,8 +24,17 @@ function nextSessionStart() {
   return zonedInstant(z.getFullYear(), z.getMonth(), z.getDate() + 7, 10, 55);
 }
 
-export default function LandingPage() {
-  const next = nextSessionStart();
+async function nextPublishedSession(): Promise<Date | null> {
+  try {
+    const { data } = await createAdminClient().from("weekly_sessions").select("starts_at").eq("status", "published").gt("starts_at", new Date().toISOString()).order("starts_at").limit(1).maybeSingle();
+    return data ? new Date(data.starts_at) : null;
+  } catch {
+    return null;
+  }
+}
+
+export default async function LandingPage() {
+  const next = (await nextPublishedSession()) ?? nextSessionStart();
   return (
     <>
       <header className="masthead masthead-auth">

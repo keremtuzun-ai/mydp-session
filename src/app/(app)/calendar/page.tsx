@@ -31,11 +31,13 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
   const filtered = status ? scoped.filter((t) => t.status === status) : scoped;
   const ids = filtered.map((t) => t.id);
 
-  const [{ data: uploads }, { data: sessions }, { data: committees }] = await Promise.all([
+  const [{ data: uploads }, { data: sessions }, { data: committees }, { data: myDone }] = await Promise.all([
     ids.length ? supabase.from("task_uploads").select("*").in("task_id", ids).order("created_at", { ascending: false }) : Promise.resolve({ data: [] }),
     supabase.from("weekly_sessions").select("id, title"),
     supabase.from("committees").select("id, acronym"),
+    supabase.from("task_completions").select("task_id").eq("profile_id", viewer.userId),
   ]);
+  const doneSet = new Set((myDone ?? []).map((c) => c.task_id));
   const names = await getNameMap(supabase, [
     ...filtered.map((t) => t.created_by),
     ...filtered.map((t) => t.assigned_to_profile_id),
@@ -55,6 +57,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
       .map((u) => ({ id: u.id, title: u.title, file_name: u.file_name, external_url: u.external_url, created_at: u.created_at, authorName: nameOf(names, u.uploaded_by) })),
     canManage: isManaged(t),
     isAssignee: t.assigned_to_profile_id === viewer.userId,
+    doneByMe: doneSet.has(t.id),
   }));
 
   const scopeTitle = scope === "mine" ? "Your tasks" : scope === "managed" ? "Tasks you manage" : "All tasks";

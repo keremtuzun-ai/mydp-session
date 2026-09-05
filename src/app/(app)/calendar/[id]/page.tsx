@@ -25,22 +25,25 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
   const { data: task } = await supabase.from("tasks").select("*").eq("id", id).maybeSingle();
   if (!task) notFound();
 
-  const [{ data: uploads }, { data: activity }, { data: session }, { data: committee }] = await Promise.all([
+  const [{ data: uploads }, { data: activity }, { data: session }, { data: committee }, { data: completions }] = await Promise.all([
     supabase.from("task_uploads").select("*").eq("task_id", id).order("created_at", { ascending: false }),
     supabase.from("task_activity").select("*").eq("task_id", id).order("created_at", { ascending: false }),
     task.session_id ? supabase.from("weekly_sessions").select("id, title, starts_at").eq("id", task.session_id).maybeSingle() : Promise.resolve({ data: null }),
     task.assigned_committee_id ? supabase.from("committees").select("id, acronym, name, slug").eq("id", task.assigned_committee_id).maybeSingle() : Promise.resolve({ data: null }),
+    supabase.from("task_completions").select("profile_id, completed_at").eq("task_id", id),
   ]);
+  const doneBy = completions ?? [];
+  const doneByMe = doneBy.some((c) => c.profile_id === viewer.userId);
   const names = await getNameMap(supabase, [
     task.created_by,
     task.assigned_to_profile_id,
     task.reviewed_by,
     ...(uploads ?? []).map((u) => u.uploaded_by),
     ...(activity ?? []).map((a) => a.actor_id),
+    ...doneBy.map((c) => c.profile_id),
   ]);
   const manager = canManageTask(actor, task);
   const canUpload = canUploadEvidence(actor, task);
-  const isAssignee = task.assigned_to_profile_id === viewer.userId;
 
   return (
     <div className="flex flex-col gap-7">
@@ -80,6 +83,10 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
                 <dd>{task.author_name ?? nameOf(names, task.created_by)}</dd>
               </div>
               <div>
+                <dt className="label-caps">Marked done by</dt>
+                <dd>{doneBy.length ? doneBy.map((c) => nameOf(names, c.profile_id)).join(", ") : "Nobody yet"}</dd>
+              </div>
+              <div>
                 <dt className="label-caps">Due</dt>
                 <dd>
                   {relativeDue(task.due_at)} <span className="muted">({formatDateTime(task.due_at)})</span>
@@ -116,7 +123,7 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
             <CardTitle>Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <TaskStatusControls taskId={task.id} status={task.status} manager={manager} isAssignee={isAssignee} />
+            <TaskStatusControls taskId={task.id} status={task.status} manager={manager} doneByMe={doneByMe} />
           </CardContent>
         </Card>
       </div>
@@ -176,7 +183,7 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
               return (
                 <li key={a.id} className="text-[0.92rem]">
                   <span className="font-[650]">{nameOf(names, a.actor_id, "System")}</span> {text}
-                  <p className="m-0 dateline">{formatDateTime(a.created_at)}</p>
+                  <p className="m-0 mt-1 dateline !flex">{formatDateTime(a.created_at)}</p>
                 </li>
               );
             })}

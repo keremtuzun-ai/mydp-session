@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getViewer } from "@/lib/auth/session";
+import { isSharedExecAccount } from "@/lib/auth/shared-exec";
 import { PageHeader } from "@/components/mun/page-header";
 import { RoleBadge } from "@/components/mun/role-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +10,7 @@ export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const viewer = await getViewer();
+  const shared = isSharedExecAccount(viewer.profile);
 
   return (
     <div className="flex flex-col gap-6">
@@ -16,6 +18,15 @@ export default async function SettingsPage() {
 
       <div className="two-col-wide grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-6 lg:col-span-2">
+          {shared ? (
+            <Card>
+              <CardHeader>
+                <CardTitle>Shared executive account</CardTitle>
+                <CardDescription>This desk is shared by the whole Secretariat, so its profile and password are managed by the admin. Write your own name and surname on every task or announcement you publish, and sign out when you are done.</CardDescription>
+              </CardHeader>
+            </Card>
+          ) : null}
+          {shared ? null : (
           <Card>
             <CardHeader>
               <CardTitle>Profile</CardTitle>
@@ -25,7 +36,9 @@ export default async function SettingsPage() {
               <ProfileForm profile={viewer.profile} />
             </CardContent>
           </Card>
+          )}
 
+          {shared ? null : (
           <Card id="security">
             <CardHeader>
               <CardTitle>Password</CardTitle>
@@ -35,6 +48,7 @@ export default async function SettingsPage() {
               <PasswordForm />
             </CardContent>
           </Card>
+          )}
 
           <Card>
             <CardHeader>

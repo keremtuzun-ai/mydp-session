@@ -144,7 +144,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
                           {t.title}
                         </Link>
                         <div className="row-sub">
-                          assigned by {nameOf(names, t.created_by)}
+                          assigned by {t.author_name ?? nameOf(names, t.created_by)}
                           {uploadCounts.get(t.id) ? ` · ${uploadCounts.get(t.id)} upload${uploadCounts.get(t.id) === 1 ? "" : "s"}` : ""}
                         </div>
                       </td>
@@ -182,7 +182,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
                   </div>
                   <p className="m-0 mt-1 small muted line-clamp-3">{a.body}</p>
                   <div className="dateline mt-2">
-                    {nameOf(names, a.author_id, "Secretariat")} · {formatDate(a.published_at)}
+                    {a.author_name ?? nameOf(names, a.author_id, "Secretariat")} · {formatDate(a.published_at)}
                   </div>
                 </li>
               ))}

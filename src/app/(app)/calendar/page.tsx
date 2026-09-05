@@ -46,7 +46,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
 
   const rows: TaskRow[] = filtered.map((t) => ({
     ...t,
-    assignedByName: nameOf(names, t.created_by),
+    assignedByName: t.author_name ?? nameOf(names, t.created_by),
     assigneeName: t.assigned_to_profile_id ? nameOf(names, t.assigned_to_profile_id) : t.assigned_role ? `All ${t.assigned_role}s` : "Committee-wide",
     sessionTitle: t.session_id ? sessionMap.get(t.session_id) ?? null : null,
     committeeAcronym: t.committee_label ?? (t.assigned_committee_id ? committeeMap.get(t.assigned_committee_id) ?? null : null),

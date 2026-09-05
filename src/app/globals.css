@@ -262,11 +262,12 @@
     min-width: 0;
   }
   .masthead-brand:hover { color: var(--ink); }
-  .brand-logo { height: 48px; width: auto; display: block; object-fit: contain; }
-  .brand-logo-night { display: none; }
-  :root[data-theme="dark"] .brand-logo-day { display: none; }
-  :root[data-theme="dark"] .brand-logo-night { display: block; }
-  .brand-emblem { height: 72px; width: auto; display: block; }
+  .brand-lockup { --brand-h: 48px; display: inline-flex; align-items: center; gap: calc(var(--brand-h) * 0.22); color: var(--ink); }
+  .brand-logo { height: var(--brand-h); width: var(--brand-h); display: block; border-radius: 50%; flex: none; }
+  .brand-wordmark { display: flex; flex-direction: column; line-height: 1.02; white-space: nowrap; }
+  .brand-wordmark-top { font-family: var(--font-label); font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--ink-2); font-size: clamp(0.56rem, calc(var(--brand-h) * 0.2), 1.05rem); }
+  .brand-wordmark-main { font-family: var(--font-display); font-weight: 700; letter-spacing: -0.01em; font-size: clamp(0.98rem, calc(var(--brand-h) * 0.44), 2.9rem); }
+  .brand-emblem { height: 72px; width: 72px; display: block; border-radius: 50%; }
   .brand-word {
     font-family: var(--font-display);
     font-weight: 640;
@@ -881,7 +882,7 @@
   }
   @media (max-width: 820px) {
     .masthead-inner { padding: 12px 18px 10px; }
-    .brand-logo { height: 38px !important; }
+    .brand-lockup { --brand-h: 38px !important; }
     .masthead-side { display: none; }
     .main-inner { padding: 22px 18px 60px; }
     .rail-inner { padding: 0 10px; }

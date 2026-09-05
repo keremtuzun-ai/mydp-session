@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getViewer } from "@/lib/auth/session";
+import { isSharedExecAccount } from "@/lib/auth/shared-exec";
 import { createClient } from "@/lib/supabase/server";
 import { getNameMap, nameOf } from "@/lib/data/queries";
 import { PageHeader } from "@/components/mun/page-header";
@@ -37,7 +38,7 @@ export default async function AnnouncementsPage({ searchParams }: PageProps<"/an
               <AnnouncementCard
                 key={a.id}
                 announcement={a}
-                authorName={nameOf(names, a.author_id, "Secretariat")}
+                authorName={a.author_name ?? nameOf(names, a.author_id, "Secretariat")}
                 audience={
                   a.target_committee_id ? committeeMap.get(a.target_committee_id) ?? "Committee" : a.target_session_id ? sessionMap.get(a.target_session_id) ?? "Session" : a.target_role ? `All ${a.target_role}s` : "Everyone"
                 }
@@ -52,7 +53,7 @@ export default async function AnnouncementsPage({ searchParams }: PageProps<"/an
         </div>
         {canPost ? (
           <div id="new">
-            <NewAnnouncementForm committees={postCommittees} sessions={sessions ?? []} isStaff={viewer.isStaff} defaultCommittee={typeof sp.committee === "string" ? sp.committee : ""} />
+            <NewAnnouncementForm committees={postCommittees} sessions={sessions ?? []} isStaff={viewer.isStaff} defaultAuthor={isSharedExecAccount(viewer.profile) ? "" : viewer.profile.display_name ?? ""} defaultCommittee={typeof sp.committee === "string" ? sp.committee : ""} />
           </div>
         ) : null}
       </div>

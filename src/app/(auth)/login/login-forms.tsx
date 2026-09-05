@@ -7,16 +7,16 @@ import { Field, FormError } from "@/components/ui/field";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { signInWithEmailPassword } from "@/actions/auth";
 
-export function LoginForms({ next, email = "" }: { next: string; email?: string }) {
+export function LoginForms({ next }: { next: string }) {
   const [state, action] = useActionState(signInWithEmailPassword, null);
   return (
     <form action={action} className="flex flex-col gap-4" noValidate>
       <input type="hidden" name="next" value={next} />
       <Field label="School email" htmlFor="email">
-        <Input id="email" name="email" type="email" autoComplete="email" inputMode="email" defaultValue={email} required autoFocus={!email} />
+        <Input id="email" name="email" type="email" autoComplete="email" inputMode="email" required autoFocus />
       </Field>
       <Field label="Password" htmlFor="password">
-        <Input id="password" name="password" type="password" autoComplete="current-password" required autoFocus={Boolean(email)} />
+        <Input id="password" name="password" type="password" autoComplete="current-password" required />
       </Field>
       <FormError message={state && !state.ok ? state.error : null} />
       <div className="form-actions">

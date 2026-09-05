@@ -72,8 +72,17 @@ const optionalUuid = z.union([uuid, z.literal("")]).transform((v) => (v === "" ?
 const optionalText = (max: number) => z.string().trim().max(max).transform((v) => (v === "" ? null : v));
 const optionalDate = z.string().transform((v) => (v ? new Date(v).toISOString() : null));
 
+/** Name and surname of the person publishing something from the shared executive desk. */
+export const authorNameSchema = z
+  .string()
+  .trim()
+  .min(3, "Enter your name and surname")
+  .max(80)
+  .refine((v) => v.split(/\s+/).length >= 2, "Enter both your name and surname");
+
 export const taskSchema = z.object({
   title: z.string().trim().min(3, "Title is too short").max(140),
+  author_name: authorNameSchema,
   description: optionalText(4000),
   committee_label: optionalText(120),
   assigned_to_profile_id: optionalUuid,
@@ -134,6 +143,7 @@ export const membershipSchema = z.object({
 
 export const announcementSchema = z.object({
   title: z.string().trim().min(3).max(140),
+  author_name: authorNameSchema,
   body: z.string().trim().min(3).max(8000),
   pinned: z.boolean(),
   target_role: z.union([z.enum(USER_ROLE_VALUES), z.literal("")]).transform((v) => (v === "" ? null : v)),

@@ -2,22 +2,31 @@ import Link from "next/link";
 import { appName } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
+const EMBLEM = "/img/koc-mun-club.svg";
+
 /**
- * Official MUNDP 2027 lockup from modelundp.org. The blue edition prints on
- * Day paper, the white edition on Night; CSS swaps them per data-theme.
+ * Koç MUN Club lockup: the club's emblem (the UN-style polar globe used on
+ * @koc_munclub, redrawn as a vector) next to a two-line wordmark. `height`
+ * drives both the emblem and the wordmark through the --brand-h custom
+ * property, so the same component works in the masthead and the hero.
  */
-export function BrandLogo({ className, height = 48 }: { className?: string; height?: number }) {
+export function BrandLogo({ className, height = 48, wordmark = true }: { className?: string; height?: number; wordmark?: boolean }) {
   return (
-    <span className={cn("inline-flex", className)}>
-      <img src="/img/mundp-2027-logo-blue.webp" alt="MUNDP 2027 — Commitment to Development" className="brand-logo brand-logo-day" style={{ height }} />
-      <img src="/img/mundp-2027-logo-white.webp" alt="" aria-hidden className="brand-logo brand-logo-night" style={{ height }} />
+    <span className={cn("brand-lockup", className)} style={{ "--brand-h": `${height}px` } as React.CSSProperties}>
+      <img src={EMBLEM} alt="Koç MUN Club" className="brand-logo" width={height} height={height} />
+      {wordmark ? (
+        <span className="brand-wordmark" aria-hidden>
+          <span className="brand-wordmark-top">Koç School</span>
+          <span className="brand-wordmark-main">MUN Club</span>
+        </span>
+      ) : null}
     </span>
   );
 }
 
-/** The emblem alone (globe over the helix), used as a seal on auth cards. */
+/** The emblem alone, used as a seal on auth cards. */
 export function BrandMark({ className }: { className?: string }) {
-  return <img src="/img/mundp-emblem.svg" alt="MUNDP emblem" className={cn("brand-emblem", className)} />;
+  return <img src={EMBLEM} alt="Koç MUN Club emblem" className={cn("brand-emblem", className)} />;
 }
 
 export function Brand({ href = "/", compact = false }: { href?: string; compact?: boolean }) {

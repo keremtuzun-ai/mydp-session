@@ -18,6 +18,7 @@ import type { Task } from "@/lib/types/database";
 
 const clientSchema = z.object({
   title: z.string().trim().min(3, "Title is too short").max(140),
+  author_name: z.string().trim().min(3, "Enter your name and surname").max(80).refine((v) => v.split(/\s+/).length >= 2, "Enter both your name and surname"),
   description: z.string().max(4000),
   committee_label: z.string().max(120),
   assigned_to_profile_id: z.string(),
@@ -37,9 +38,11 @@ type Props = {
   isStaff: boolean;
   recentLabels?: string[];
   defaults?: { committee?: string; session?: string };
+  /** Prefilled "name and surname"; empty on the shared executive account so each executive types their own. */
+  defaultAuthor?: string;
 };
 
-export function TaskForm({ task, committees, sessions, members, isStaff, recentLabels = [], defaults }: Props) {
+export function TaskForm({ task, committees, sessions, members, isStaff, recentLabels = [], defaults, defaultAuthor = "" }: Props) {
   const router = useRouter();
   const action = task ? updateTask.bind(null, task.id) : createTask;
   const [state, dispatch, pending] = useActionState(action as (p: ActionResult<unknown> | null, f: FormData) => Promise<ActionResult<unknown>>, null);
@@ -51,6 +54,7 @@ export function TaskForm({ task, committees, sessions, members, isStaff, recentL
     resolver: zodResolver(clientSchema),
     defaultValues: {
       title: task?.title ?? "",
+      author_name: task?.author_name ?? defaultAuthor,
       description: task?.description ?? "",
       committee_label: task?.committee_label ?? "",
       assigned_to_profile_id: task?.assigned_to_profile_id ?? "",
@@ -70,6 +74,9 @@ export function TaskForm({ task, committees, sessions, members, isStaff, recentL
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
+      <Field label="Your name and surname" htmlFor="author_name" error={err("author_name")} hint="Shown to delegates as the executive who assigned this.">
+        <Input id="author_name" placeholder="Name Surname" autoComplete="name" aria-invalid={Boolean(err("author_name"))} {...register("author_name")} />
+      </Field>
       <Field label="Title" htmlFor="title" error={err("title")}>
         <Input id="title" placeholder="Submit position paper: …" {...register("title")} aria-invalid={Boolean(err("title"))} />
       </Field>

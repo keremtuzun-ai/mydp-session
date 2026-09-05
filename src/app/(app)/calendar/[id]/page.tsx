@@ -77,7 +77,7 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
               </div>
               <div>
                 <dt className="label-caps">Assigned by</dt>
-                <dd>{nameOf(names, task.created_by)}</dd>
+                <dd>{task.author_name ?? nameOf(names, task.created_by)}</dd>
               </div>
               <div>
                 <dt className="label-caps">Due</dt>

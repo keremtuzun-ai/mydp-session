@@ -18,6 +18,7 @@ function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
 function input(formData: FormData) {
   return {
     title: formData.get("title"),
+    author_name: formData.get("author_name") ?? "",
     body: formData.get("body"),
     pinned: formData.get("pinned") === "on" || formData.get("pinned") === "true",
     target_role: formData.get("target_role") ?? "",

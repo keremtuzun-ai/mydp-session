@@ -56,15 +56,6 @@ export async function signUpWithPassword(_prev: ActionResult | null, formData: F
   redirect("/onboarding");
 }
 
-/** Emails on the executive allow-list (secret invite link) become executives on sign-in. */
-async function promoteIfAllowlisted(userId: string, email: string, from: string) {
-  const admin = createAdminClient();
-  const { data: allowed } = await admin.from("exec_allowlist").select("email").eq("email", email).maybeSingle();
-  if (!allowed) return;
-  const { error } = await admin.from("profiles").update({ role: "executive" }).eq("id", userId);
-  if (!error) await logAudit({ actorId: userId, action: "role.changed", entityType: "profile", entityId: userId, metadata: { from, to: "executive", via: "exec-allowlist" } });
-}
-
 /** Everyday sign-in: school email + password, required on every visit. */
 export async function signInWithEmailPassword(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const parsed = emailPasswordLoginSchema.safeParse({ email: formData.get("email"), password: formData.get("password") });
@@ -75,7 +66,6 @@ export async function signInWithEmailPassword(_prev: ActionResult | null, formDa
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: parsed.data.password });
   if (error || !data.user) return fail("Incorrect email or password.");
-  const { data: profile } = await supabase.from("profiles").select("onboarding_completed_at, role").eq("id", data.user.id).maybeSingle();
-  if (profile && (profile.role === "delegate" || profile.role === "chair")) await promoteIfAllowlisted(data.user.id, email, profile.role);
+  const { data: profile } = await supabase.from("profiles").select("onboarding_completed_at").eq("id", data.user.id).maybeSingle();
   redirect(profile?.onboarding_completed_at ? next : "/onboarding");
 }

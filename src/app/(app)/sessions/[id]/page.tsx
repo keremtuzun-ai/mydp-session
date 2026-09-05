@@ -190,7 +190,7 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
               <Card key={a.id} className="card-tight">
                 <p className="m-0 font-[650]">{a.title}</p>
                 <p className="m-0 mt-1 whitespace-pre-wrap small muted">{a.body}</p>
-                <p className="m-0 mt-2 dateline">{nameOf(names, a.author_id, "Secretariat")} · {formatDateTime(a.published_at)}</p>
+                <p className="m-0 mt-2 dateline">{a.author_name ?? nameOf(names, a.author_id, "Secretariat")} · {formatDateTime(a.published_at)}</p>
               </Card>
             ))}
           </div>

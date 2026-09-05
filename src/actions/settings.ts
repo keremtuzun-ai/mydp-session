@@ -9,8 +9,16 @@ import { AVATAR_TYPES, MAX_AVATAR_BYTES } from "@/lib/validation/files";
 import { fail, ok, type ActionResult } from "@/lib/action-result";
 import { describeDbError } from "@/lib/db-errors";
 import { logAudit } from "@/lib/audit";
+import { isSharedExecAccount } from "@/lib/auth/shared-exec";
+
+const SHARED_MSG = "The shared executive account is managed by the admin. Its profile and password cannot be changed here.";
+async function isSharedViewer() {
+  const viewer = await getViewer();
+  return isSharedExecAccount(viewer.profile);
+}
 
 export async function updateProfile(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  if (await isSharedViewer()) return fail(SHARED_MSG);
   const viewer = await getViewer();
   const parsed = profileUpdateSchema.safeParse({
     display_name: formData.get("display_name"),
@@ -29,6 +37,7 @@ export async function updateProfile(_prev: ActionResult | null, formData: FormDa
 }
 
 export async function updateAvatar(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  if (await isSharedViewer()) return fail(SHARED_MSG);
   const viewer = await getViewer();
   const avatar = formData.get("avatar");
   if (!(avatar instanceof File) || avatar.size === 0) return fail("Choose an image first.");
@@ -47,6 +56,7 @@ export async function updateAvatar(_prev: ActionResult | null, formData: FormDat
 }
 
 export async function changePassword(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+  if (await isSharedViewer()) return fail(SHARED_MSG);
   const viewer = await getViewer();
   const parsed = changePasswordSchema.safeParse({ password: formData.get("password"), confirm_password: formData.get("confirm_password") });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Check the password fields.");

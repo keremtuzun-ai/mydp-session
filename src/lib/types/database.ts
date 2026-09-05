@@ -234,6 +234,7 @@ export type Database = {
           reviewed_at: string | null;
           review_note: string | null;
           committee_label: string | null;
+          author_name: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -242,6 +243,7 @@ export type Database = {
           title: string;
           description?: string | null;
           committee_label?: string | null;
+          author_name?: string | null;
           assigned_to_profile_id?: string | null;
           assigned_role?: Database["public"]["Enums"]["user_role"] | null;
           assigned_committee_id?: string | null;
@@ -261,6 +263,7 @@ export type Database = {
           title?: string;
           description?: string | null;
           committee_label?: string | null;
+          author_name?: string | null;
           assigned_to_profile_id?: string | null;
           assigned_role?: Database["public"]["Enums"]["user_role"] | null;
           assigned_committee_id?: string | null;
@@ -455,6 +458,7 @@ export type Database = {
           title: string;
           body: string;
           author_id: string | null;
+          author_name: string | null;
           pinned: boolean;
           target_role: Database["public"]["Enums"]["user_role"] | null;
           target_committee_id: string | null;
@@ -467,6 +471,7 @@ export type Database = {
           title: string;
           body: string;
           author_id?: string | null;
+          author_name?: string | null;
           pinned?: boolean;
           target_role?: Database["public"]["Enums"]["user_role"] | null;
           target_committee_id?: string | null;
@@ -479,6 +484,7 @@ export type Database = {
           title?: string;
           body?: string;
           author_id?: string | null;
+          author_name?: string | null;
           pinned?: boolean;
           target_role?: Database["public"]["Enums"]["user_role"] | null;
           target_committee_id?: string | null;
@@ -663,14 +669,6 @@ export type Database = {
           { foreignKeyName: "audit_logs_actor_id_fkey"; columns: ["actor_id"]; isOneToOne: false; referencedRelation: "public_profiles"; referencedColumns: ["id"] },
         ];
       };
-      exec_allowlist: {
-        Row: { email: string; note: string | null; added_by: string | null; created_at: string };
-        Insert: { email: string; note?: string | null; added_by?: string | null; created_at?: string };
-        Update: { email?: string; note?: string | null; added_by?: string | null; created_at?: string };
-        Relationships: [
-          { foreignKeyName: "exec_allowlist_added_by_fkey"; columns: ["added_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
-        ];
-      };
     };
     Views: {
       public_profiles: {
@@ -696,7 +694,6 @@ export type Database = {
       can_view_session: { Args: { s: string }; Returns: boolean };
       username_available: { Args: { p_username: string }; Returns: boolean };
       mark_overdue_tasks: { Args: Record<string, never>; Returns: number };
-      promote_allowlisted_executives: { Args: Record<string, never>; Returns: number };
       session_chair_notes: { Args: { sc: string }; Returns: string | null };
     };
     Enums: {

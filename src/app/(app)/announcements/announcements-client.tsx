@@ -61,7 +61,7 @@ export function AnnouncementCard({ announcement: a, authorName, audience, isRead
 
 type Ref = { id: string; acronym?: string; title?: string };
 
-export function NewAnnouncementForm({ sessions, defaultCommittee }: { committees?: Ref[]; sessions: Ref[]; isStaff?: boolean; defaultCommittee: string }) {
+export function NewAnnouncementForm({ sessions, defaultCommittee, defaultAuthor = "" }: { committees?: Ref[]; sessions: Ref[]; isStaff?: boolean; defaultCommittee: string; defaultAuthor?: string }) {
   const [state, action] = useActionState(createAnnouncement, null);
   const formRef = useRef<HTMLFormElement>(null);
   useActionFeedback(state, () => formRef.current?.reset());
@@ -70,6 +70,9 @@ export function NewAnnouncementForm({ sessions, defaultCommittee }: { committees
       <div className="section-head"><h2>Post an announcement</h2></div>
       <p className="mb-4 small muted">Target everyone, a role or a session.</p>
       <form ref={formRef} action={action} className="flex flex-col gap-4">
+        <Field label="Your name and surname" htmlFor="a-author" error={fieldError(state, "author_name")} hint="Shown under the announcement as its author.">
+          <Input id="a-author" name="author_name" placeholder="Name Surname" autoComplete="name" defaultValue={defaultAuthor} required />
+        </Field>
         <Field label="Title" htmlFor="a-title" error={fieldError(state, "title")}>
           <Input id="a-title" name="title" required />
         </Field>

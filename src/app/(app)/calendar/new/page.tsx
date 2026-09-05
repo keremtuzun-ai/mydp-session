@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getViewer } from "@/lib/auth/session";
+import { isSharedExecAccount } from "@/lib/auth/shared-exec";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/mun/page-header";
 import { PermissionDenied } from "@/components/mun/permission-denied";
@@ -19,7 +20,7 @@ export default async function NewTaskPage({ searchParams }: PageProps<"/calendar
     <div>
       <PageHeader eyebrow="Calendar" title="Assign a task" description="Tasks appear on each member's calendar and can be reviewed once submitted." />
       <Card>
-        <TaskForm {...data} isStaff={viewer.isStaff} defaults={{ committee: typeof sp.committee === "string" ? sp.committee : undefined, session: typeof sp.session === "string" ? sp.session : undefined }} />
+        <TaskForm {...data} isStaff={viewer.isStaff} defaultAuthor={isSharedExecAccount(viewer.profile) ? "" : viewer.profile.display_name ?? ""} defaults={{ committee: typeof sp.committee === "string" ? sp.committee : undefined, session: typeof sp.session === "string" ? sp.session : undefined }} />
       </Card>
     </div>
   );

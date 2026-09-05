@@ -7,16 +7,16 @@ import { SubmitButton } from "@/components/forms/submit-button";
 import { signUpWithPassword } from "@/actions/auth";
 import { fieldError } from "@/hooks/use-action-feedback";
 
-export function SignUpForm({ email = "" }: { email?: string }) {
+export function SignUpForm() {
   const [state, action] = useActionState(signUpWithPassword, null);
   return (
     <form action={action} className="flex flex-col gap-4" noValidate>
       <Field label="School email" htmlFor="email" error={fieldError(state, "email")}>
-        <Input id="email" name="email" type="email" autoComplete="email" inputMode="email" placeholder="name@school.edu" defaultValue={email} required autoFocus={!email} aria-invalid={Boolean(fieldError(state, "email"))} />
+        <Input id="email" name="email" type="email" autoComplete="email" inputMode="email" placeholder="name@school.edu" required autoFocus aria-invalid={Boolean(fieldError(state, "email"))} />
       </Field>
       <div className="form-grid">
         <Field label="Password" htmlFor="password" error={fieldError(state, "password")} hint="At least 8 characters, with a letter and a number.">
-          <Input id="password" name="password" type="password" autoComplete="new-password" required autoFocus={Boolean(email)} aria-invalid={Boolean(fieldError(state, "password"))} />
+          <Input id="password" name="password" type="password" autoComplete="new-password" required aria-invalid={Boolean(fieldError(state, "password"))} />
         </Field>
         <Field label="Confirm password" htmlFor="confirm_password" error={fieldError(state, "confirm_password")}>
           <Input id="confirm_password" name="confirm_password" type="password" autoComplete="new-password" required aria-invalid={Boolean(fieldError(state, "confirm_password"))} />

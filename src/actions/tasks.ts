@@ -21,6 +21,7 @@ function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
 function taskFormInput(formData: FormData) {
   return {
     title: formData.get("title"),
+    author_name: formData.get("author_name") ?? "",
     description: formData.get("description") ?? "",
     committee_label: formData.get("committee_label") ?? "",
     assigned_to_profile_id: formData.get("assigned_to_profile_id") ?? "",
@@ -202,7 +203,7 @@ export async function deleteUpload(uploadId: string): Promise<ActionResult> {
 }
 
 export async function assignFromTemplate(input: { templateId: string; assigneeIds: string[]; committeeId: string | null; sessionId: string | null }): Promise<ActionResult> {
-  const { actor } = await getActor();
+  const { actor, viewer } = await getActor();
   if (!canCreateTask(actor, input.committeeId)) return fail("You cannot assign tasks here.");
   const supabase = await createClient();
   const { data: template } = await supabase.from("task_templates").select("*").eq("id", input.templateId).maybeSingle();
@@ -218,6 +219,7 @@ export async function assignFromTemplate(input: { templateId: string; assigneeId
     session_id: input.sessionId,
     due_at: due.toISOString(),
     created_by: actor.id,
+    author_name: viewer.profile.display_name,
   }));
   if (rows.length === 0) return fail("Choose at least one member.");
   const { error } = await supabase.from("tasks").insert(rows);

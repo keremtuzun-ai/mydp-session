@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getViewer } from "@/lib/auth/session";
+import { isSharedExecAccount } from "@/lib/auth/shared-exec";
 import { createClient } from "@/lib/supabase/server";
 import { toActor } from "@/lib/auth/actor";
 import { canManageTask } from "@/lib/policy";
@@ -24,7 +25,7 @@ export default async function EditTaskPage({ params }: PageProps<"/calendar/[id]
     <div>
       <PageHeader eyebrow="Calendar" title={`Edit: ${task.title}`} />
       <Card>
-        <TaskForm task={task} {...data} isStaff={viewer.isStaff} />
+        <TaskForm task={task} {...data} isStaff={viewer.isStaff} defaultAuthor={isSharedExecAccount(viewer.profile) ? "" : viewer.profile.display_name ?? ""} />
       </Card>
     </div>
   );

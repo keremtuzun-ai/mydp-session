@@ -5,7 +5,7 @@ import { AdminNav } from "./admin-nav";
 
 export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
   const viewer = await getViewer();
-  if (!viewer.isAdmin) return <PermissionDenied message="Administration is reserved for admins." />;
+  if (!viewer.isStaff) return <PermissionDenied message="Administration is reserved for the admin and the executive desk." />;
   return (
     <div>
       <PageHeader eyebrow="Secretariat" title="Administration" description="Users, roles, committees, sessions, templates, domains and the audit log." />

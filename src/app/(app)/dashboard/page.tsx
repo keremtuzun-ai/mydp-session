@@ -22,8 +22,8 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
 
   const [upcoming, { data: tasks }, { data: announcements }, { data: attendance }, { data: sessionsDone }] = await Promise.all([
     listSessionsWithCoverage(supabase, { from: now, order: "asc", limit: 1 }),
-    supabase.from("tasks").select("*").not("status", "in", "(completed,reviewed)").order("due_at", { ascending: true, nullsFirst: false }).limit(6),
-    supabase.from("announcements").select("*").lte("published_at", now).order("pinned", { ascending: false }).order("published_at", { ascending: false }).limit(4),
+    supabase.from("tasks").select("*").not("status", "in", "(completed,reviewed)").order("created_at", { ascending: false }).limit(8),
+    supabase.from("announcements").select("*").lte("published_at", now).order("pinned", { ascending: false }).order("published_at", { ascending: false }).limit(5),
     supabase.from("attendance_records").select("status, session_id").eq("profile_id", viewer.userId),
     supabase.from("weekly_sessions").select("id").eq("status", "completed"),
   ]);
@@ -66,7 +66,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile label="Attendance" value={rate === null ? "—" : `${rate}%`} hint={recorded ? `${attended} of ${recorded} recorded` : `${held} session${held === 1 ? "" : "s"} held`} />
-        <StatTile label="Open tasks" value={taskList.length} hint="on your calendar" />
+        <StatTile label="Open tasks" value={taskList.length} hint="newest first" />
         <StatTile label="Sessions held" value={held} hint="this year so far" />
         <StatTile label="Notices" value={(announcements ?? []).length} hint="recent announcements" />
       </div>
@@ -119,7 +119,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
       <div className="two-col-wide grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] mt-5">
         <section className="card">
           <div className="section-head">
-            <h2>Upcoming tasks</h2>
+            <h2>Latest tasks</h2>
             <span className="tab-count">{taskList.length}</span>
             <Link href="/calendar" className="section-tail prose-link">
               Open calendar

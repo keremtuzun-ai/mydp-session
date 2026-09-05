@@ -136,6 +136,7 @@ Authorization is enforced in the database (RLS + triggers) and again in server a
 | `/welcome` | Create an account: school email + password (no verification email) |
 | `/login` | School email + password, required on every visit (session ends when the browser closes) |
 | `/reset-password` | Explains that executives/admins set temporary passwords from the admin console |
+| `/admin` | Users & roles, sessions, templates, domains, audit: the admin and the executive desk (only admins grant or remove the admin role) |
 | `/exec-invite/[token]` | Secret executive link: enter the shared executive password (`EXEC_SHARED_PASSWORD`) to open the shared executive desk |
 | `/onboarding` | Name, grade, phone, unique username, password, photo (only after email verification) |
 | `/dashboard` | Next session, committee, upcoming tasks, announcements, attendance, quick links |

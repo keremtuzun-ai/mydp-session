@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Calendar" };
 export default async function CalendarPage({ searchParams }: PageProps<"/calendar">) {
   const sp = await searchParams;
   const status = typeof sp.status === "string" ? sp.status : "";
-  const scope = sp.scope === "managed" ? "managed" : sp.scope === "all" ? "all" : "mine";
+  const scope = sp.scope === "managed" ? "managed" : sp.scope === "mine" ? "mine" : "all";
 
   const viewer = await getViewer();
   const supabase = await createClient();
@@ -57,7 +57,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
     isAssignee: t.assigned_to_profile_id === viewer.userId,
   }));
 
-  const scopeTitle = scope === "mine" ? "Your tasks" : scope === "managed" ? "Tasks you manage" : "All visible tasks";
+  const scopeTitle = scope === "mine" ? "Your tasks" : scope === "managed" ? "Tasks you manage" : "All tasks";
 
   return (
     <>

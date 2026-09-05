@@ -18,12 +18,13 @@ function revalidate() {
 
 export async function setUserRole(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const { actor } = await getActor();
-  if (!isAdmin(actor)) return fail("Only admins can change roles.");
+  if (!isStaff(actor)) return fail("Only the admin and executives can change roles.");
   const parsed = adminUserSchema.safeParse({ profile_id: formData.get("profile_id"), role: formData.get("role") });
   if (!parsed.success) return fail("Invalid request.");
   if (parsed.data.profile_id === actor.id && parsed.data.role !== "admin") return fail("You cannot remove your own admin role.");
   const supabase = await createClient();
   const { data: before } = await supabase.from("profiles").select("role").eq("id", parsed.data.profile_id).maybeSingle();
+  if (!isAdmin(actor) && (before?.role === "admin" || parsed.data.role === "admin")) return fail("Only an admin can grant or remove the admin role.");
   const { error } = await supabase.from("profiles").update({ role: parsed.data.role }).eq("id", parsed.data.profile_id);
   if (error) return fail(describeDbError(error));
   await logAudit({ actorId: actor.id, action: "user.role_changed", entityType: "profile", entityId: parsed.data.profile_id, metadata: { from: before?.role ?? null, to: parsed.data.role } });
@@ -52,12 +53,13 @@ export async function setTemporaryPassword(profileId: string): Promise<ActionRes
 /** Removes the auth user (profile cascades). Admin only, service-role required. */
 export async function deleteUser(profileId: string): Promise<ActionResult> {
   const { actor } = await getActor();
-  if (!isAdmin(actor)) return fail("Only admins can remove members.");
+  if (!isStaff(actor)) return fail("Only the admin and executives can remove members.");
   if (!uuid.safeParse(profileId).success) return fail("Invalid member.");
   if (profileId === actor.id) return fail("You cannot remove yourself.");
   const supabase = await createClient();
-  const { data: target } = await supabase.from("profiles").select("school_email, username").eq("id", profileId).maybeSingle();
+  const { data: target } = await supabase.from("profiles").select("school_email, username, role").eq("id", profileId).maybeSingle();
   if (!target) return fail("Member not found.");
+  if (target.role === "admin" && !isAdmin(actor)) return fail("Only an admin can remove an admin.");
   const admin = createAdminClient();
   const { error } = await admin.auth.admin.deleteUser(profileId);
   if (error) return fail(error.message);
@@ -99,7 +101,7 @@ const domainSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9.-]+\.[a-z]{
 
 export async function addAllowedDomain(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const { actor } = await getActor();
-  if (!isAdmin(actor)) return fail("Only admins can manage domains.");
+  if (!isStaff(actor)) return fail("Only the admin and executives can manage domains.");
   const parsed = domainSchema.safeParse(formData.get("domain"));
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Invalid domain.");
   const supabase = await createClient();
@@ -112,7 +114,7 @@ export async function addAllowedDomain(_prev: ActionResult | null, formData: For
 
 export async function removeAllowedDomain(domain: string): Promise<ActionResult> {
   const { actor } = await getActor();
-  if (!isAdmin(actor)) return fail("Only admins can manage domains.");
+  if (!isStaff(actor)) return fail("Only the admin and executives can manage domains.");
   const supabase = await createClient();
   const { error } = await supabase.from("allowed_email_domains").delete().eq("domain", domain);
   if (error) return fail(describeDbError(error));

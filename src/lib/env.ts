@@ -10,7 +10,7 @@ export function getAllowedSchoolDomains(source: string | undefined = process.env
     .filter((d) => d.length > 0);
 }
 
-export const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "MUN Session Hub";
+export const appName = process.env.NEXT_PUBLIC_APP_NAME ?? "MUN Workspace";
 export const schoolName = process.env.NEXT_PUBLIC_SCHOOL_NAME ?? "the school";
 export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -23,6 +23,9 @@ export const MAX_UPLOAD_BYTES = Number(process.env.MAX_UPLOAD_BYTES ?? 15 * 1024
 export function getExecInviteToken(): string {
   return (process.env.EXEC_INVITE_TOKEN ?? "").trim();
 }
+
+/** Origin the executive desk lives on (its own host, so its login never replaces a delegate's login in the same browser). */
+export const execOrigin = (process.env.NEXT_PUBLIC_EXEC_ORIGIN ?? "").replace(/\/$/, "");
 
 /** Password of the shared executive account, asked for on the secret link. Server only. */
 export function getExecSharedPassword(): string {

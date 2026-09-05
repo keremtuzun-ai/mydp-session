@@ -29,7 +29,7 @@ async function main() {
   }
   const { error } = await admin
     .from("profiles")
-    .update({ display_name: "Executive Board", username: "executive", grade: "12", role: "executive", onboarding_completed_at: new Date().toISOString() })
+    .update({ display_name: null, username: "executive", grade: "12", role: "executive", onboarding_completed_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw error;
   console.log(`Shared executive account ready: ${email} (${existing ? "password updated" : "created"})`);

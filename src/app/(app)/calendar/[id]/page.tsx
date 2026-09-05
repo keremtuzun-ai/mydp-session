@@ -5,7 +5,7 @@ import { Pencil } from "lucide-react";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { toActor } from "@/lib/auth/actor";
-import { canManageTask, canUploadEvidence } from "@/lib/policy";
+import { canManageTask } from "@/lib/policy";
 import { getNameMap, nameOf } from "@/lib/data/queries";
 import { PageHeader } from "@/components/mun/page-header";
 import { TaskStatusBadge } from "@/components/mun/task-status-badge";
@@ -13,7 +13,8 @@ import { PriorityBadge } from "@/components/mun/priority-badge";
 import { UploadList } from "@/components/mun/upload-list";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDateTime, relativeDue, humanize } from "@/lib/utils";
-import { TaskStatusControls, EvidenceUploadForm, DeleteUploadButton, DeleteTaskButton } from "./task-controls";
+import { TaskStatusControls, DeleteUploadButton, DeleteTaskButton } from "./task-controls";
+import { UploadDialog } from "@/components/mun/upload-dialog";
 
 export const metadata: Metadata = { title: "Task" };
 
@@ -43,7 +44,6 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
     ...doneBy.map((c) => c.profile_id),
   ]);
   const manager = canManageTask(actor, task);
-  const canUpload = canUploadEvidence(actor, task);
 
   return (
     <div className="flex flex-col gap-7">
@@ -132,9 +132,12 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
         <div className="section-head">
           <h2 id="evidence">Uploads</h2>
           <span className="tab-count">{(uploads ?? []).length}</span>
+          <div className="section-tail">
+            <UploadDialog taskId={task.id} />
+          </div>
         </div>
-        <div className="grid gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2">
+        <div>
+          <div>
             <UploadList
               items={(uploads ?? []).map((u) => ({
                 id: u.id,
@@ -149,12 +152,11 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
                 downloadHref: u.external_url && !u.storage_path ? u.external_url : `/api/files/task-uploads/${u.id}`,
               }))}
               emptyTitle="No evidence uploaded"
-              emptyDescription={canUpload ? "Upload a file (PDF, PNG, JPG, DOCX) or paste the link to your Google Doc." : undefined}
+              emptyDescription="Use Upload to paste a link or add a file."
             >
               {(item) => ((uploads ?? []).find((u) => u.id === item.id)?.uploaded_by === viewer.userId || manager ? <DeleteUploadButton id={item.id} /> : null)}
             </UploadList>
           </div>
-          {canUpload ? <EvidenceUploadForm taskId={task.id} /> : null}
         </div>
       </section>
 

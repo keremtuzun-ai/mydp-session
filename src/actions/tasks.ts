@@ -189,7 +189,7 @@ export async function uploadEvidence(_prev: ActionResult | null, formData: FormD
   const { error } = await supabase.from("task_uploads").insert({
     task_id: taskId,
     uploaded_by: actor.id,
-    title: meta.data.title,
+    title: meta.data.title || (hasFile ? file.name : "Document link"),
     delegation: meta.data.delegation,
     notes: meta.data.notes || null,
     storage_path: path,

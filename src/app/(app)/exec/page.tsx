@@ -7,7 +7,7 @@ import { StatTile } from "@/components/mun/stat-tile";
 import { TaskTable, type TaskRow } from "../calendar/task-table";
 import { TASK_STATUS_LABEL } from "@/components/mun/task-status-badge";
 import { Progress } from "@/components/ui/progress";
-import { execAccountEmail, getExecInviteToken, getExecSharedPassword, siteUrl } from "@/lib/env";
+import { execOrigin, getExecInviteToken, getExecSharedPassword, siteUrl } from "@/lib/env";
 
 export const metadata: Metadata = { title: "Executive desk" };
 
@@ -27,7 +27,7 @@ export default async function ExecPage({ searchParams }: PageProps<"/exec">) {
   ]);
   const doneKeys = new Set((completions ?? []).map((c) => `${c.task_id}:${c.profile_id}`));
   const inviteToken = viewer.isStaff ? getExecInviteToken() : "";
-  const inviteUrl = inviteToken ? `${siteUrl.replace(/\/$/, "")}/exec-invite/${inviteToken}` : null;
+  const inviteUrl = inviteToken ? `${execOrigin || siteUrl.replace(/\/$/, "")}/exec-invite/${inviteToken}` : null;
   const sharedPassword = viewer.isStaff ? getExecSharedPassword() : "";
   const all = tasks ?? [];
   const names = await getNameMap(supabase, [...all.map((t) => t.created_by), ...all.map((t) => t.assigned_to_profile_id), ...(uploads ?? []).map((u) => u.uploaded_by)]);
@@ -124,7 +124,6 @@ export default async function ExecPage({ searchParams }: PageProps<"/exec">) {
           <div className="section-head">
             <h2>Executive access</h2>
           </div>
-          <p className="small muted mt-0">One shared account (<span className="mono">{execAccountEmail()}</span>). Rotate the token or password to revoke access.</p>
           <dl className="ledger m-0">
             <div>
               <dt className="label-caps">Secret link</dt>

@@ -1,20 +1,14 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2, Undo2, CheckCheck, RotateCcw } from "lucide-react";
 import { ActionButton } from "@/components/forms/action-button";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Field, FormError } from "@/components/ui/field";
-import { SubmitButton } from "@/components/forms/submit-button";
-import { Card } from "@/components/ui/card";
-import { setTaskStatus, toggleTaskDone, uploadEvidence, deleteUpload, deleteTask } from "@/actions/tasks";
-import { useActionFeedback } from "@/hooks/use-action-feedback";
-import { ACCEPT_ATTRIBUTE } from "@/lib/validation/files";
-import { MAX_UPLOAD_BYTES } from "@/lib/env";
+import { Field } from "@/components/ui/field";
+import { setTaskStatus, toggleTaskDone, deleteUpload, deleteTask } from "@/actions/tasks";
 import type { Enums } from "@/lib/types/database";
 
 type Status = Enums<"task_status">;
@@ -78,40 +72,6 @@ export function TaskStatusControls({ taskId, status, manager, doneByMe }: { task
         </div>
       ) : null}
     </div>
-  );
-}
-
-export function EvidenceUploadForm({ taskId }: { taskId: string }) {
-  const [state, action] = useActionState(uploadEvidence, null);
-  useActionFeedback(state);
-  return (
-    <Card className="card-tight">
-      <form action={action} className="flex flex-col gap-3">
-        <input type="hidden" name="task_id" value={taskId} />
-        <span className="section-label m-0">Submit your work</span>
-        <Field label="Title" htmlFor="up-title">
-          <Input id="up-title" name="title" placeholder="Position paper (final)" required />
-        </Field>
-        <Field label="Delegation" htmlFor="up-delegation" hint="If this isn't affiliated with a delegation, write N/A.">
-          <Input id="up-delegation" name="delegation" placeholder="e.g. France" required />
-        </Field>
-        <Field label="Notes" htmlFor="up-notes" optional>
-          <Textarea id="up-notes" name="notes" rows={2} placeholder="Anything your chair should know." />
-        </Field>
-        <Field label="Google Doc or other link" htmlFor="up-url" optional hint="Share it as “Anyone with the link”.">
-          <Input id="up-url" name="external_url" type="url" inputMode="url" placeholder="https://docs.google.com/document/d/…" />
-        </Field>
-        <Field label="File" htmlFor="up-file" optional hint={`PDF, PNG, JPG or DOCX up to ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB. Attach a file, a link, or both.`}>
-          <Input id="up-file" name="file" type="file" accept={ACCEPT_ATTRIBUTE} />
-        </Field>
-        <FormError message={state && !state.ok ? state.error : null} />
-        <div className="flex justify-end">
-          <SubmitButton size="sm" pendingText="Saving…">
-            Submit
-          </SubmitButton>
-        </div>
-      </form>
-    </Card>
   );
 }
 

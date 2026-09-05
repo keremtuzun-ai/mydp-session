@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getViewer } from "@/lib/auth/session";
 import { isSharedExecAccount } from "@/lib/auth/shared-exec";
+import { getExecSharedPassword } from "@/lib/env";
 import { PageHeader } from "@/components/mun/page-header";
 import { RoleBadge } from "@/components/mun/role-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,9 +22,20 @@ export default async function SettingsPage() {
           {shared ? (
             <Card>
               <CardHeader>
-                <CardTitle>Shared executive account</CardTitle>
-                <CardDescription>Managed by the admin. Sign out when you are done.</CardDescription>
+                <CardTitle>Executive account</CardTitle>
               </CardHeader>
+              <CardContent>
+                <dl className="m-0">
+                  <div className="settings-row">
+                    <dt>Username</dt>
+                    <dd><span className="code-pill">{viewer.profile.username}</span></dd>
+                  </div>
+                  <div className="settings-row !border-b-0">
+                    <dt>Password</dt>
+                    <dd><span className="code-pill">{getExecSharedPassword() || "not set"}</span></dd>
+                  </div>
+                </dl>
+              </CardContent>
             </Card>
           ) : null}
           {shared ? null : (
@@ -61,6 +73,7 @@ export default async function SettingsPage() {
           </Card>
         </div>
 
+        {shared ? null : (
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
@@ -95,6 +108,7 @@ export default async function SettingsPage() {
             </CardContent>
           </Card>
         </div>
+        )}
       </div>
     </div>
   );

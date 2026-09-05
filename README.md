@@ -1,4 +1,4 @@
-# MUN Session Hub
+# MUN Workspace
 
 An internal platform for running a school's weekly Model United Nations sessions. Delegates see their committee, their tasks and their attendance. Chairs run their committee. The Secretariat (executives and admins) runs the programme.
 
@@ -71,7 +71,8 @@ Storage buckets (`task-evidence`, `materials`, `committee-submissions`, `avatars
 | `EXEC_SHARED_PASSWORD` | server | Password asked for on the executive link. The whole Secretariat shares one executive account (`secretariat@<first domain>`, or `EXEC_ACCOUNT_EMAIL`); create or update it with `npm run exec:account` after setting or rotating this. |
 | `ALLOWED_SCHOOL_DOMAINS` | server | Comma-separated email domains allowed to create accounts, e.g. `school.edu,stu.school.edu`. Subdomains must be listed explicitly. Empty means nobody can register. |
 | `NEXT_PUBLIC_SITE_URL` | browser + server | Public origin, used in auth redirect links |
-| `NEXT_PUBLIC_APP_NAME` | browser + server | Display name (default "MUN Session Hub") |
+| `NEXT_PUBLIC_APP_NAME` | browser + server | Display name (default "MUN Workspace") |
+| `NEXT_PUBLIC_EXEC_ORIGIN` | browser + server | Second domain of the same deployment for the executive desk. Browsers keep one login per host, so the desk gets its own host and a delegate can stay signed in on the main one. |
 | `NEXT_PUBLIC_SCHOOL_NAME` | browser + server | School name shown in the shell |
 | `MAX_UPLOAD_BYTES` | server | Evidence upload limit (default 15 MB) |
 | `SEED_PASSWORD` | seed only | Password given to seeded accounts |

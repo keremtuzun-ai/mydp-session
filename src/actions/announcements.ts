@@ -36,6 +36,7 @@ function revalidate() {
 
 export async function createAnnouncement(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const { actor } = await getActor();
+  if (!isStaff(actor)) return fail("Only the executive desk posts announcements.");
   const parsed = announcementSchema.safeParse(input(formData));
   if (!parsed.success) return fail("Check the highlighted fields.", fieldErrors(parsed.error.issues));
   if (!canPostAnnouncement(actor, parsed.data.target_committee_id)) {

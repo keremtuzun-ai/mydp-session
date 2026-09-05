@@ -4,10 +4,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useTransition } from "react";
-import { TaskStatusBadge, TASK_STATUS_LABEL } from "@/components/mun/task-status-badge";
+import { TaskStatusBadge } from "@/components/mun/task-status-badge";
 import { PriorityBadge } from "@/components/mun/priority-badge";
 import { EmptyState } from "@/components/mun/empty-state";
 import { setTaskStatus, toggleTaskDone } from "@/actions/tasks";
+import { UploadDialog } from "@/components/mun/upload-dialog";
 import { cn, formatDateTime, fmt } from "@/lib/utils";
 import type { Task } from "@/lib/types/database";
 
@@ -66,46 +67,11 @@ function RowAction({ row }: { row: TaskRow }) {
   );
 }
 
-export function TaskTable({ rows, scope, status, showScope, basePath }: { rows: TaskRow[]; scope: string; status: string; showScope: boolean; basePath?: string }) {
-  const router = useRouter();
-  const currentPath = usePathname();
-  const pathname = basePath ?? currentPath;
-  const update = (patch: Record<string, string>) => {
-    const params = new URLSearchParams({ scope, status, ...patch });
-    for (const [k, v] of Array.from(params.entries())) if (!v || (k === "scope" && !showScope)) params.delete(k);
-    router.push(`${pathname}?${params.toString()}`);
-  };
-
+export function TaskTable({ rows }: { rows: TaskRow[]; scope?: string; status?: string; showScope?: boolean; basePath?: string }) {
   return (
     <>
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        {showScope ? (
-          <div role="tablist" aria-label="Scope" className="filter-pills">
-            {[
-              ["mine", "Mine"],
-              ["managed", "I manage"],
-              ["all", "All"],
-            ].map(([v, l]) => (
-              <button key={v} type="button" role="tab" aria-selected={scope === v} className={cn("filter-pill", scope === v && "active")} onClick={() => update({ scope: v! })}>
-                {l}
-              </button>
-            ))}
-          </div>
-        ) : null}
-        <div role="tablist" aria-label="Status" className="filter-pills">
-          <button type="button" role="tab" aria-selected={!status} className={cn("filter-pill", !status && "active")} onClick={() => update({ status: "" })}>
-            Any status
-          </button>
-          {Object.entries(TASK_STATUS_LABEL).map(([k, v]) => (
-            <button key={k} type="button" role="tab" aria-selected={status === k} className={cn("filter-pill", status === k && "active")} onClick={() => update({ status: k })}>
-              {v}
-            </button>
-          ))}
-        </div>
-      </div>
-
       {rows.length === 0 ? (
-        <EmptyState title="No tasks here" description={status ? "Nothing matches this status." : "Nothing assigned right now."} />
+        <EmptyState title="No tasks yet" />
       ) : (
         <div className="table-scroll">
           <table className="data-table stack">
@@ -156,7 +122,10 @@ function Row({ row: t }: { row: TaskRow }) {
           <TaskStatusBadge status={t.status} />
         </td>
         <td className="actions">
-          <RowAction row={t} />
+          <div className="flex flex-wrap justify-end gap-1">
+            <UploadDialog taskId={t.id} size="sm" variant="outline" />
+            <RowAction row={t} />
+          </div>
         </td>
       </tr>
       <tr className="task-files-row">

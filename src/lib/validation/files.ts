@@ -27,7 +27,7 @@ export function validateEvidenceFile(file: FileMeta, maxBytes = MAX_UPLOAD_BYTES
 }
 
 export const uploadMetaSchema = z.object({
-  title: z.string().trim().min(2, "Give the upload a title").max(120),
+  title: z.string().trim().max(120).optional().or(z.literal("")),
   notes: z.string().trim().max(2000).optional().or(z.literal("")),
   delegation: z.string().trim().min(1, "Enter your delegation, or N/A").max(80),
   external_url: z

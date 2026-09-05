@@ -9,7 +9,7 @@ import { PriorityBadge } from "@/components/mun/priority-badge";
 import { EmptyState } from "@/components/mun/empty-state";
 import { setTaskStatus, toggleTaskDone } from "@/actions/tasks";
 import { UploadDialog } from "@/components/mun/upload-dialog";
-import { cn, formatDateTime, fmt } from "@/lib/utils";
+import { formatDateTime, fmt } from "@/lib/utils";
 import type { Task } from "@/lib/types/database";
 
 export type TaskRow = Task & {

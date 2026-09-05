@@ -27,7 +27,6 @@ export default async function MaterialsPage({ searchParams }: PageProps<"/materi
       <PageHeader
         eyebrow="Library"
         title="Materials"
-        description="Study guides, rules of procedure, topic briefs, templates, slides and recordings shared by the executives."
         actions={canUpload ? <NewMaterialDialog committees={uploadCommittees} sessions={sessions ?? []} isStaff={viewer.isStaff} /> : null}
       />
       {list.length ? (

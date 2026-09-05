@@ -149,7 +149,7 @@ export function MaterialsBrowser({ items, committees, sessions, initial }: { ite
           ))}
         </ul>
       ) : (
-        <EmptyState title="No materials match" description="Try a broader filter." className="empty-state-sm" />
+        <EmptyState title="No materials" className="empty-state-sm" />
       )}
     </div>
   );
@@ -204,7 +204,7 @@ export function NewMaterialDialog({ sessions }: { committees?: Ref[]; sessions: 
               </NativeSelect>
             </Field>
           </div>
-          <Field label="File" htmlFor="m-file" optional hint="PDF, DOCX, PPTX, PNG, JPG, MP4 or MP3.">
+          <Field label="File" htmlFor="m-file" optional>
             <Input id="m-file" name="file" type="file" />
           </Field>
           <Field label="Or a link" htmlFor="m-url" optional error={fieldError(state, "external_url")}>

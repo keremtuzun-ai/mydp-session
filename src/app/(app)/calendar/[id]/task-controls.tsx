@@ -45,7 +45,7 @@ export function TaskStatusControls({ taskId, status, manager, isAssignee }: { ta
         </div>
       ) : null}
       {isAssignee && closed && !manager ? <p className="m-0 small muted">This task has been {status === "completed" ? "completed" : "returned"} by your chair.</p> : null}
-      {isAssignee && status === "reviewed" ? <p className="m-0 small muted">Read the chair&apos;s note, then ask your chair to reopen it if you need to resubmit.</p> : null}
+      {isAssignee && status === "reviewed" ? <p className="m-0 small muted">Ask an executive to reopen it to resubmit.</p> : null}
 
       {manager ? (
         <div className="flex flex-col gap-2 border-t border-line pt-3">
@@ -101,7 +101,7 @@ export function EvidenceUploadForm({ taskId }: { taskId: string }) {
         <Field label="Notes" htmlFor="up-notes" optional>
           <Textarea id="up-notes" name="notes" rows={2} placeholder="Anything your chair should know." />
         </Field>
-        <Field label="Google Doc or other link" htmlFor="up-url" optional hint="Set sharing to “Anyone with the link” so your chair can open it.">
+        <Field label="Google Doc or other link" htmlFor="up-url" optional hint="Share it as “Anyone with the link”.">
           <Input id="up-url" name="external_url" type="url" inputMode="url" placeholder="https://docs.google.com/document/d/…" />
         </Field>
         <Field label="File" htmlFor="up-file" optional hint={`PDF, PNG, JPG or DOCX up to ${Math.round(MAX_UPLOAD_BYTES / 1024 / 1024)} MB. Attach a file, a link, or both.`}>

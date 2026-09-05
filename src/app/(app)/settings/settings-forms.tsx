@@ -55,7 +55,7 @@ export function AvatarForm({ avatarUrl, name }: { avatarUrl: string | null; name
           {avatarUrl ? <AvatarImage src={avatarUrl} alt="" /> : null}
           <AvatarFallback className="text-lg">{initials(name)}</AvatarFallback>
         </Avatar>
-        <Field label="New photo" htmlFor="avatar" hint="PNG, JPG or WebP under 2 MB." className="flex-1">
+        <Field label="New photo" htmlFor="avatar" hint="Under 2 MB." className="flex-1">
           <Input id="avatar" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" />
         </Field>
       </div>
@@ -75,7 +75,7 @@ export function PasswordForm() {
   return (
     <form action={action} className="flex flex-col gap-4">
       <div className="form-grid">
-        <Field label="New password" htmlFor="password" hint="At least 8 characters with a letter and a number.">
+        <Field label="New password" htmlFor="password" hint="8+ characters, a letter and a number.">
           <Input id="password" name="password" type="password" autoComplete="new-password" required />
         </Field>
         <Field label="Confirm" htmlFor="confirm_password">

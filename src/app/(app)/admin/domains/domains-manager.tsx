@@ -42,7 +42,7 @@ export function DomainsManager({ dbDomains, envDomains }: { dbDomains: string[];
       <Card className="card-tight">
         <form action={action} className="flex flex-col gap-3">
           <span className="section-label m-0">Add a domain to the database list</span>
-          <Field label="Domain" htmlFor="domain" hint="Lowercase, without @. Subdomains are separate entries.">
+          <Field label="Domain" htmlFor="domain" hint="Without @.">
             <Input id="domain" name="domain" placeholder="stu.school.edu" required />
           </Field>
           <FormError message={state && !state.ok ? state.error : null} />

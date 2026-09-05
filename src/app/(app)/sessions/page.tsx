@@ -26,7 +26,7 @@ export default async function SessionsPage({ searchParams }: PageProps<"/session
       <PageHeader
         eyebrow="Weekly programme"
         title="Sessions"
-        description="Every weekly session with its room, agenda and attendance. Tuesdays at 10:55 in 1S and 15:10 in the Library."
+        description="Tuesdays, 10:55 in 1S and 15:10 in the Library."
         actions={
           viewer.isStaff ? (
             <Link href="/sessions/new" className="btn">

@@ -18,7 +18,7 @@ export default async function NewTaskPage({ searchParams }: PageProps<"/calendar
   const data = await loadTaskFormData(supabase, viewer);
   return (
     <div>
-      <PageHeader eyebrow="Calendar" title="Assign a task" description="Tasks appear on each member's calendar and can be reviewed once submitted." />
+      <PageHeader eyebrow="Calendar" title="Assign a task" />
       <Card>
         <TaskForm {...data} isStaff={viewer.isStaff} defaultAuthor={isSharedExecAccount(viewer.profile) ? "" : viewer.profile.display_name ?? ""} defaults={{ committee: typeof sp.committee === "string" ? sp.committee : undefined, session: typeof sp.session === "string" ? sp.session : undefined }} />
       </Card>

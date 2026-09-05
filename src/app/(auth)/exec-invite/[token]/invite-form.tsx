@@ -11,7 +11,7 @@ export function ExecPasswordForm({ token }: { token: string }) {
   return (
     <form action={action} className="flex flex-col gap-4" noValidate>
       <input type="hidden" name="token" value={token} />
-      <Field label="Executive password" htmlFor="password" hint="Shared by the whole Secretariat. Ask the admin if you do not have it.">
+      <Field label="Executive password" htmlFor="password">
         <Input id="password" name="password" type="password" autoComplete="off" required autoFocus />
       </Field>
       <FormError message={state && !state.ok ? state.error : null} />

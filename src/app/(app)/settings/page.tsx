@@ -14,7 +14,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader eyebrow="Account" title="Settings" description="Your profile, sign-in details and active sessions." />
+      <PageHeader eyebrow="Account" title="Settings" />
 
       <div className="two-col-wide grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-6 lg:col-span-2">
@@ -22,7 +22,7 @@ export default async function SettingsPage() {
             <Card>
               <CardHeader>
                 <CardTitle>Shared executive account</CardTitle>
-                <CardDescription>This desk is shared by the whole Secretariat, so its profile and password are managed by the admin. Write your own name and surname on every task or announcement you publish, and sign out when you are done.</CardDescription>
+                <CardDescription>Managed by the admin. Sign out when you are done.</CardDescription>
               </CardHeader>
             </Card>
           ) : null}
@@ -30,7 +30,7 @@ export default async function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Profile</CardTitle>
-              <CardDescription>Your name and grade are visible to your committee. Your phone number is visible only to chairs and the Secretariat.</CardDescription>
+              <CardDescription>Phone is visible only to the Secretariat.</CardDescription>
             </CardHeader>
             <CardContent>
               <ProfileForm profile={viewer.profile} />
@@ -42,7 +42,7 @@ export default async function SettingsPage() {
           <Card id="security">
             <CardHeader>
               <CardTitle>Password</CardTitle>
-              <CardDescription>Used together with your school email to sign in. If you forget it, an executive or admin can set a temporary one.</CardDescription>
+              <CardDescription>Forgot it? An executive can set a temporary one.</CardDescription>
             </CardHeader>
             <CardContent>
               <PasswordForm />
@@ -53,7 +53,7 @@ export default async function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Sessions</CardTitle>
-              <CardDescription>Sign out here, or sign out every other device that is signed in to your account.</CardDescription>
+              <CardDescription>Sign out here or on every other device.</CardDescription>
             </CardHeader>
             <CardContent>
               <SessionControls />

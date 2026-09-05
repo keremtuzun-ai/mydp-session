@@ -40,7 +40,7 @@ export default async function OnboardingPage() {
           <section className="auth-card !max-w-[680px]">
             <span className="page-kicker">Step 2 of 2 · profile</span>
             <h1>Complete your profile</h1>
-            <p className="muted mt-[-0.5rem] mb-5">Your account is ready. Tell us who you are and pick a username; your school email and password are what you sign in with.</p>
+            <p className="muted mt-[-0.5rem] mb-5">Your name, grade and a username.</p>
             <OnboardingForm />
           </section>
         </div>

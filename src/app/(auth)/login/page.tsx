@@ -16,7 +16,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const error = typeof sp.error === "string" ? ERRORS[sp.error] : undefined;
   const signedOut = sp.signedout === "1";
   return (
-    <AuthCard eyebrow="Welcome back" title="Sign in" description="Sign in with your school email and password. You are asked every time you open the site.">
+    <AuthCard eyebrow="Welcome back" title="Sign in">
       <div className="flex flex-col gap-2 mb-4">
         <FormError message={error} />
         <FormSuccess message={signedOut ? "You have been signed out." : null} />

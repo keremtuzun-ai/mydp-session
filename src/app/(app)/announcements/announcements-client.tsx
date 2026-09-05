@@ -68,9 +68,8 @@ export function NewAnnouncementForm({ sessions, defaultCommittee, defaultAuthor 
   return (
     <Card>
       <div className="section-head"><h2>Post an announcement</h2></div>
-      <p className="mb-4 small muted">Target everyone, a role or a session.</p>
       <form ref={formRef} action={action} className="flex flex-col gap-4">
-        <Field label="Your name and surname" htmlFor="a-author" error={fieldError(state, "author_name")} hint="Shown under the announcement as its author.">
+        <Field label="Your name and surname" htmlFor="a-author" error={fieldError(state, "author_name")}>
           <Input id="a-author" name="author_name" placeholder="Name Surname" autoComplete="name" defaultValue={defaultAuthor} required />
         </Field>
         <Field label="Title" htmlFor="a-title" error={fieldError(state, "title")}>

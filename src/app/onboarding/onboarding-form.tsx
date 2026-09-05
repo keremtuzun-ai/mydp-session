@@ -76,7 +76,7 @@ export function OnboardingForm() {
         </Field>
       </div>
 
-      <Field label="Username" htmlFor="username" error={err("username") ?? (availability.status === "taken" ? availability.reason : undefined)} hint="3 to 24 characters: lowercase letters, numbers, hyphens. This cannot be changed later.">
+      <Field label="Username" htmlFor="username" error={err("username") ?? (availability.status === "taken" ? availability.reason : undefined)} hint="Lowercase letters, numbers, hyphens.">
         <div className="relative">
           <Input id="username" autoComplete="username" autoCapitalize="none" spellCheck={false} className="pr-9" aria-invalid={Boolean(err("username")) || availability.status === "taken"} {...register("username", { setValueAs: (v: string) => v.trim().toLowerCase() })} />
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2" aria-live="polite">
@@ -87,7 +87,7 @@ export function OnboardingForm() {
         </div>
       </Field>
 
-      <Field label="Profile photo" htmlFor="avatar" optional error={err("avatar")} hint="PNG, JPG or WebP, under 2 MB.">
+      <Field label="Profile photo" htmlFor="avatar" optional error={err("avatar")} hint="Under 2 MB.">
         <Input id="avatar" name="avatar" type="file" accept="image/png,image/jpeg,image/webp" />
       </Field>
 

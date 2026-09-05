@@ -55,7 +55,6 @@ export default async function AdminSessionsPage() {
           ))}
         </TableBody>
       </Table>
-      <p className="m-0 small muted">Announcements and materials are managed from their own pages; admins and executives can delete any item there.</p>
     </div>
   );
 }

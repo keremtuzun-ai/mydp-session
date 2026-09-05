@@ -63,7 +63,6 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
     <>
       <PageHeader
         title="Calendar"
-        description={canManageAny ? "Tasks assigned to you and to the committees you run." : "Tasks assigned to you and your committee. Ask your chair if something's missing."}
         actions={
           canManageAny ? (
             <Link href="/calendar/new" className="btn">

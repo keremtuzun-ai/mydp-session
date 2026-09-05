@@ -30,7 +30,7 @@ export default async function AnnouncementsPage({ searchParams }: PageProps<"/an
 
   return (
     <div>
-      <PageHeader eyebrow="Notice board" title="Announcements" description={unread ? `${unread} unread` : "You are up to date."} />
+      <PageHeader eyebrow="Notice board" title="Announcements" description={unread ? `${unread} unread` : undefined} />
       <div className="two-col-wide grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <div className="flex flex-col gap-4 lg:col-span-2">
           {list.length ? (

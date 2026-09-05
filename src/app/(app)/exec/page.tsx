@@ -60,9 +60,9 @@ export default async function ExecPage({ searchParams }: PageProps<"/exec">) {
     <div className="flex flex-col gap-5">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile label="Completion" value={`${pct}%`} hint={`${done} of ${all.length} tasks done`} />
-        <StatTile label="Awaiting review" value={submitted} hint="submitted by delegates" />
-        <StatTile label="Overdue" value={counts.overdue ?? 0} hint="past due, still open" />
-        <StatTile label="Delegates" value={delegates.length} hint="registered" />
+        <StatTile label="Awaiting review" value={submitted} />
+        <StatTile label="Overdue" value={counts.overdue ?? 0} />
+        <StatTile label="Delegates" value={delegates.length} />
       </div>
 
       <section className="card">
@@ -120,9 +120,7 @@ export default async function ExecPage({ searchParams }: PageProps<"/exec">) {
           <div className="section-head">
             <h2>Executive access</h2>
           </div>
-          <p className="small muted mt-0">
-            The whole Secretariat shares one executive account (<span className="mono">{execAccountEmail()}</span>). Give new executives the secret link and the executive password; they write their own name on everything they publish. Rotate <code className="mono">EXEC_INVITE_TOKEN</code> or <code className="mono">EXEC_SHARED_PASSWORD</code> to revoke access (then run <code className="mono">npm run exec:account</code>).
-          </p>
+          <p className="small muted mt-0">One shared account (<span className="mono">{execAccountEmail()}</span>). Rotate the token or password to revoke access.</p>
           <dl className="ledger m-0">
             <div>
               <dt className="label-caps">Secret link</dt>

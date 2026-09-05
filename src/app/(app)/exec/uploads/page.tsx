@@ -23,7 +23,7 @@ export default async function ExecUploadsPage() {
     <div className="flex flex-col gap-5">
       {byTask.length === 0 ? (
         <section className="card">
-          <EmptyState title="No submissions yet" description="Files and document links delegates submit on their tasks appear here." className="empty-state-sm" />
+          <EmptyState title="No submissions yet" className="empty-state-sm" />
         </section>
       ) : (
         byTask.map(({ task, items }) => (

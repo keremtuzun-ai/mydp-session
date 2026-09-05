@@ -10,7 +10,7 @@ export default async function ExecInvitePage({ params }: PageProps<"/exec-invite
   const { token } = await params;
   if (!(await isValidExecInviteToken(token))) notFound();
   return (
-    <AuthCard eyebrow="Secretariat" title="Executive desk" description="One shared desk for the whole Secretariat. Enter the executive password to assign tasks, publish announcements, review submissions and take attendance. Write your name and surname on everything you publish.">
+    <AuthCard eyebrow="Secretariat" title="Executive desk" description="Enter the executive password.">
       <ExecPasswordForm token={token} />
     </AuthCard>
   );

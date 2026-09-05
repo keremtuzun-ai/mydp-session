@@ -45,7 +45,6 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
       <PageHeader
         eyebrow={fmt(new Date(), "EEEE, d MMMM yyyy")}
         title={`Good to see you, ${firstName}.`}
-        description="Your next session, your responsibilities and your committee, at a glance."
         actions={
           <>
             {viewer.isStaff ? (
@@ -66,9 +65,9 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatTile label="Attendance" value={rate === null ? "—" : `${rate}%`} hint={recorded ? `${attended} of ${recorded} recorded` : `${held} session${held === 1 ? "" : "s"} held`} />
-        <StatTile label="Open tasks" value={taskList.length} hint="newest first" />
-        <StatTile label="Sessions held" value={held} hint="this year so far" />
-        <StatTile label="Notices" value={(announcements ?? []).length} hint="recent announcements" />
+        <StatTile label="Open tasks" value={taskList.length} />
+        <StatTile label="Sessions held" value={held} />
+        <StatTile label="Notices" value={(announcements ?? []).length} />
       </div>
 
       <div className="two-col-wide grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] mt-5">
@@ -84,7 +83,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
               <SessionCard session={nextSession} highlight agendaPreview={nextSession.general_agenda} />
             </>
           ) : (
-            <EmptyState title="No session scheduled" description="The Secretariat has not published the next weekly session yet." className="empty-state-sm" />
+            <EmptyState title="No session scheduled" className="empty-state-sm" />
           )}
         </section>
 
@@ -93,7 +92,6 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
             <h2>{viewer.isStaff ? "Executive desk" : "Quick links"}</h2>
           </div>
           {viewer.isStaff ? (
-            <p className="m-0 mb-3 small muted">Assign tasks, follow every delegate&apos;s progress, review submissions and take attendance.</p>
           ) : (
             <p className="m-0 mb-3 small muted">Your tasks, sessions and materials.</p>
           )}
@@ -161,7 +159,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
               </table>
             </div>
           ) : (
-            <EmptyState title="Nothing due" description="You have no open tasks." className="empty-state-sm" />
+            <EmptyState title="No open tasks" className="empty-state-sm" />
           )}
         </section>
 

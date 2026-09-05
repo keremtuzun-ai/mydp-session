@@ -15,7 +15,7 @@ export function SignUpForm() {
         <Input id="email" name="email" type="email" autoComplete="email" inputMode="email" placeholder="name@school.edu" required autoFocus aria-invalid={Boolean(fieldError(state, "email"))} />
       </Field>
       <div className="form-grid">
-        <Field label="Password" htmlFor="password" error={fieldError(state, "password")} hint="At least 8 characters, with a letter and a number.">
+        <Field label="Password" htmlFor="password" error={fieldError(state, "password")} hint="8+ characters, a letter and a number.">
           <Input id="password" name="password" type="password" autoComplete="new-password" required aria-invalid={Boolean(fieldError(state, "password"))} />
         </Field>
         <Field label="Confirm password" htmlFor="confirm_password" error={fieldError(state, "confirm_password")}>

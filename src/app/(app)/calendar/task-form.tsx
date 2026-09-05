@@ -74,7 +74,7 @@ export function TaskForm({ task, committees, sessions, members, isStaff, recentL
 
   return (
     <form ref={formRef} onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
-      <Field label="Your name and surname" htmlFor="author_name" error={err("author_name")} hint="Shown to delegates as the executive who assigned this.">
+      <Field label="Your name and surname" htmlFor="author_name" error={err("author_name")}>
         <Input id="author_name" placeholder="Name Surname" autoComplete="name" aria-invalid={Boolean(err("author_name"))} {...register("author_name")} />
       </Field>
       <Field label="Title" htmlFor="title" error={err("title")}>
@@ -84,7 +84,7 @@ export function TaskForm({ task, committees, sessions, members, isStaff, recentL
         <Textarea id="description" rows={4} {...register("description")} />
       </Field>
       <div className="form-grid">
-        <Field label="Committee / clause" htmlFor="committee_label" optional error={err("committee_label")} hint="Free text: the committee, clause or topic this task belongs to.">
+        <Field label="Committee / clause" htmlFor="committee_label" optional error={err("committee_label")}>
           <Input id="committee_label" list="recent-labels" placeholder="e.g. UNHCR · Clause 3" {...register("committee_label")} />
           <datalist id="recent-labels">
             {recentLabels.map((l) => (
@@ -105,7 +105,7 @@ export function TaskForm({ task, committees, sessions, members, isStaff, recentL
             </NativeSelect>
           </Field>
         )}
-        <Field label="Assign to" htmlFor="assigned_to_profile_id" error={err("assigned_to_profile_id")} hint="Pick one member, or leave it on “Everyone” for all delegates.">
+        <Field label="Assign to" htmlFor="assigned_to_profile_id" error={err("assigned_to_profile_id")}>
           <NativeSelect id="assigned_to_profile_id" {...register("assigned_to_profile_id")}>
             <option value="">Everyone (all delegates)</option>
             {uniqueEligible.map((m) => (

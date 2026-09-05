@@ -32,7 +32,6 @@ export default async function AttendancePage() {
       <PageHeader
         eyebrow="Records"
         title="Attendance"
-        description="Your attendance across weekly sessions."
       />
 
       <section aria-labelledby="my-attendance" className="card">

@@ -54,14 +54,14 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="flex flex-col gap-7">
-      <PageHeader eyebrow="Secretariat" title="Analytics" description="Attendance, task flow and engagement across the programme." />
+      <PageHeader eyebrow="Secretariat" title="Analytics" />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <StatTile label="Attendance" value={byWeek.length ? `${Math.round(byWeek.reduce((a, b) => a + b.rate, 0) / byWeek.length)}%` : "—"} hint="average over completed sessions" />
+        <StatTile label="Attendance" value={byWeek.length ? `${Math.round(byWeek.reduce((a, b) => a + b.rate, 0) / byWeek.length)}%` : "—"} />
         <StatTile label="Task completion" value={`${completionRate}%`} hint={`${completed} of ${taskList.length} tasks`} />
-        <StatTile label="Overdue" value={overdue} hint="open tasks past due" />
+        <StatTile label="Overdue" value={overdue} />
         <StatTile label="Active members" value={activeIds.size} hint={`of ${onboarded} onboarded`} />
-        <StatTile label="Awaiting review" value={awaitingReview} hint="submitted, not yet reviewed" />
+        <StatTile label="Awaiting review" value={awaitingReview} />
       </div>
 
       <div className="grid gap-6">

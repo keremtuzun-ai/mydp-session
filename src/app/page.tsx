@@ -51,10 +51,7 @@ export default function LandingPage() {
               <h1 className="front-hero-title">
                 The weekly <span className="accent-line">session</span> hub.
               </h1>
-              <p className="front-hero-standfirst">
-                <strong>{appName}</strong> organises every weekly session: who is meeting, what is on the agenda, which position papers are due and where the materials are.
-                Delegates see their committee. Chairs run it. The Secretariat sees the whole programme.
-              </p>
+              <p className="front-hero-standfirst">Sessions, tasks, materials and announcements for the Koç MUN Club.</p>
               <div className="front-hero-actions">
                 <Link href="/welcome" className="btn btn-lg">
                   Create account
@@ -67,20 +64,6 @@ export default function LandingPage() {
             <div className="front-hero-logo"><BrandLogo height={110} className="w-full" /></div>
           </section>
 
-          <section className="grid gap-4 py-10 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ["Sessions", "Two every Tuesday, 10:55 and 15:10: each with a room, an agenda and a committee line-up."],
-              ["Calendar", "Position papers, speeches and research briefs assigned, tracked and reviewed by your chair."],
-              ["Committees", "Topic, background guide, chair team, members, resources and submissions in one workspace."],
-              ["School accounts", "Only school email addresses can register. Chairs see their committee; delegates see their own work."],
-            ].map(([t, b]) => (
-              <div key={t} className="card-rule bg-surface border border-line">
-                <span className="section-label">{t}</span>
-                <p className="m-0 small muted">{b}</p>
-              </div>
-            ))}
-          </section>
-
           <section className="front-countdown">
             <p className="countdown-label">Next weekly session · {fmt(next, "EEEE d MMMM, HH:mm")}</p>
             <Countdown target={next.toISOString()} />
@@ -89,7 +72,7 @@ export default function LandingPage() {
       </main>
       <footer className="main-inner !pt-0 !pb-8 flex items-center justify-between label-caps">
         <span>{appName}</span>
-        <span>Internal platform · access by verified school email</span>
+        <span>School accounts only</span>
       </footer>
     </>
   );

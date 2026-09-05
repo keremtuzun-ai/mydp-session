@@ -11,8 +11,8 @@ export function SignUpForm() {
   const [state, action] = useActionState(signUpWithPassword, null);
   return (
     <form action={action} className="flex flex-col gap-4" noValidate>
-      <Field label="School email" htmlFor="email" error={fieldError(state, "email")}>
-        <Input id="email" name="email" type="email" autoComplete="email" inputMode="email" placeholder="name@school.edu" required autoFocus aria-invalid={Boolean(fieldError(state, "email"))} />
+      <Field label="Email" htmlFor="email" error={fieldError(state, "email")}>
+        <Input id="email" name="email" type="email" autoComplete="email" inputMode="email" placeholder="name@example.com" required autoFocus aria-invalid={Boolean(fieldError(state, "email"))} />
       </Field>
       <div className="form-grid">
         <Field label="Password" htmlFor="password" error={fieldError(state, "password")} hint="8+ characters, a letter and a number.">

@@ -2,7 +2,6 @@ import { fmt } from "@/lib/utils";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getAuthState } from "@/lib/auth/session";
-import { isAllowedSchoolEmail } from "@/lib/auth/domains";
 import { Brand } from "@/components/shell/brand";
 import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { OnboardingForm } from "./onboarding-form";
@@ -13,7 +12,6 @@ export default async function OnboardingPage() {
   const { user, profile } = await getAuthState();
   if (!user) redirect("/welcome");
   if (profile?.onboarding_completed_at) redirect("/dashboard");
-  if (!user.email || !isAllowedSchoolEmail(user.email)) redirect("/login?error=domain");
 
   return (
     <>

@@ -60,7 +60,7 @@ export function UsersTable({ rows, selfId }: { rows: Row[]; selfId: string }) {
         <TableHeader>
           <TableRow>
             <TableHead>Member</TableHead>
-            <TableHead>School email</TableHead>
+            <TableHead>Email</TableHead>
             <TableHead>Grade</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Joined</TableHead>

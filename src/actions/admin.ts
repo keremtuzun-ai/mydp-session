@@ -97,28 +97,3 @@ export async function deleteTaskTemplate(id: string): Promise<ActionResult> {
   return ok(undefined, "Template deleted.");
 }
 
-const domainSchema = z.string().trim().toLowerCase().regex(/^[a-z0-9.-]+\.[a-z]{2,}$/, "Enter a domain like school.edu");
-
-export async function addAllowedDomain(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
-  const { actor } = await getActor();
-  if (!isStaff(actor)) return fail("Only the admin and executives can manage domains.");
-  const parsed = domainSchema.safeParse(formData.get("domain"));
-  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Invalid domain.");
-  const supabase = await createClient();
-  const { error } = await supabase.from("allowed_email_domains").upsert({ domain: parsed.data });
-  if (error) return fail(describeDbError(error));
-  await logAudit({ actorId: actor.id, action: "domain.added", entityType: "allowed_email_domain", metadata: { domain: parsed.data } });
-  revalidate();
-  return ok(undefined, `${parsed.data} added. Remember to add it to ALLOWED_SCHOOL_DOMAINS as well.`);
-}
-
-export async function removeAllowedDomain(domain: string): Promise<ActionResult> {
-  const { actor } = await getActor();
-  if (!isStaff(actor)) return fail("Only the admin and executives can manage domains.");
-  const supabase = await createClient();
-  const { error } = await supabase.from("allowed_email_domains").delete().eq("domain", domain);
-  if (error) return fail(describeDbError(error));
-  await logAudit({ actorId: actor.id, action: "domain.removed", entityType: "allowed_email_domain", metadata: { domain } });
-  revalidate();
-  return ok(undefined, `${domain} removed.`);
-}

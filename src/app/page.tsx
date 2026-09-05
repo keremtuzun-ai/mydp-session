@@ -82,7 +82,6 @@ export default async function LandingPage() {
       </main>
       <footer className="main-inner !pt-0 !pb-8 flex items-center justify-between label-caps">
         <span>{appName}</span>
-        <span>School accounts only</span>
       </footer>
     </>
   );

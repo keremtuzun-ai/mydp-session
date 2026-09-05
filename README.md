@@ -69,7 +69,7 @@ Storage buckets (`task-evidence`, `materials`, `committee-submissions`, `avatars
 | `SUPABASE_SERVICE_ROLE_KEY` | **server only** | Username → email lookup at sign-in, signed download URLs, audit log, seed, admin user deletion. Never shipped to the browser. |
 | `EXEC_INVITE_TOKEN` | server | Secret path segment of the executive link `/exec-invite/<token>`. Rotate to revoke. Empty disables the link. |
 | `EXEC_SHARED_PASSWORD` | server | Password asked for on the executive link. The whole Secretariat shares one executive account (`secretariat@<first domain>`, or `EXEC_ACCOUNT_EMAIL`); create or update it with `npm run exec:account` after setting or rotating this. |
-| `ALLOWED_SCHOOL_DOMAINS` | server | Comma-separated email domains allowed to create accounts, e.g. `school.edu,stu.school.edu`. Subdomains must be listed explicitly. Empty means nobody can register. |
+| `ALLOWED_SCHOOL_DOMAINS` | server | Only used to derive the shared executive account's address (`secretariat@<first domain>`). Sign-up accepts any email since migration 0012. |
 | `NEXT_PUBLIC_SITE_URL` | browser + server | Public origin, used in auth redirect links |
 | `NEXT_PUBLIC_APP_NAME` | browser + server | Display name (default "MUN Workspace") |
 | `NEXT_PUBLIC_EXEC_ORIGIN` | browser + server | Second domain of the same deployment for the executive desk. Browsers keep one login per host, so the desk gets its own host and a delegate can stay signed in on the main one. |

@@ -91,7 +91,7 @@ export default async function SettingsPage() {
             <CardContent>
               <dl className="m-0">
                 <div className="settings-row">
-                  <dt>School email</dt>
+                  <dt>Email</dt>
                   <dd className="break-all">{viewer.profile.school_email} <span className="muted small">read-only · contact an admin to correct</span></dd>
                 </div>
                 <div className="settings-row">

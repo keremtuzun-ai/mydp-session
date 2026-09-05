@@ -3,16 +3,10 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { isAllowedSchoolEmail, normalizeEmail } from "@/lib/auth/domains";
-import { getAllowedSchoolDomains } from "@/lib/env";
+import { normalizeEmail } from "@/lib/auth/domains";
 import { signUpSchema, emailPasswordLoginSchema, authorNameSchema } from "@/lib/validation/schemas";
 import { fail, type ActionResult } from "@/lib/action-result";
 import { logAudit } from "@/lib/audit";
-
-function domainList() {
-  const d = getAllowedSchoolDomains();
-  return d.length ? d.map((x) => `@${x}`).join(", ") : "the school's domains";
-}
 
 function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
   const out: Record<string, string[]> = {};
@@ -26,16 +20,14 @@ function safeNext(value: FormDataEntryValue | null) {
 }
 
 /**
- * Create an account with a school email and a password. No verification
- * email: the account is created server-side (already confirmed) as long as
- * the domain is on the school allow-list, then the member is signed in and
- * sent to onboarding.
+ * Create an account with an email and a password. No verification email:
+ * the account is created server-side (already confirmed), then the member is
+ * signed in and sent to onboarding.
  */
 export async function signUpWithPassword(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const parsed = signUpSchema.safeParse({ email: formData.get("email"), password: formData.get("password"), confirm_password: formData.get("confirm_password") });
   if (!parsed.success) return fail("Check the highlighted fields.", fieldErrors(parsed.error.issues));
   const email = normalizeEmail(parsed.data.email);
-  if (!isAllowedSchoolEmail(email)) return fail("Check the highlighted fields.", { email: [`Only school addresses can join. Use your ${domainList()} email.`] });
 
   const admin = createAdminClient();
   const { data: existing } = await admin.from("profiles").select("id, onboarding_completed_at").eq("school_email", email).maybeSingle();
@@ -56,7 +48,7 @@ export async function signUpWithPassword(_prev: ActionResult | null, formData: F
   redirect("/onboarding");
 }
 
-/** Everyday sign-in: school email + password, required on every visit. */
+/** Everyday sign-in: name, email + password, required on every visit. */
 export async function signInWithEmailPassword(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const parsed = emailPasswordLoginSchema.safeParse({ email: formData.get("email"), password: formData.get("password") });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Enter your email and password.");

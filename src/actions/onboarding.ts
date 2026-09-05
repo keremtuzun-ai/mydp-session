@@ -2,7 +2,6 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { isAllowedSchoolEmail } from "@/lib/auth/domains";
 import { onboardingSchema } from "@/lib/validation/schemas";
 import { AVATAR_TYPES, MAX_AVATAR_BYTES } from "@/lib/validation/files";
 import { fail, type ActionResult } from "@/lib/action-result";
@@ -29,7 +28,6 @@ export async function completeOnboarding(_prev: ActionResult | null, formData: F
   } = await supabase.auth.getUser();
   if (!user) redirect("/welcome");
 
-  if (!user.email || !isAllowedSchoolEmail(user.email)) return fail("Your email is not from an approved school domain.");
 
   const { data: profile } = await supabase.from("profiles").select("onboarding_completed_at").eq("id", user.id).maybeSingle();
   if (profile?.onboarding_completed_at) redirect("/dashboard");

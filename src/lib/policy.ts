@@ -59,7 +59,9 @@ export function canDelegateSetStatus(a: Actor, t: TaskLike & Pick<Task, "status"
 }
 
 /** Every member may submit work on any task. */
-export function canUploadEvidence(): boolean {
+export function canUploadEvidence(a: Actor, t: TaskLike & Pick<Task, "status">): boolean {
+  void a;
+  void t;
   return true;
 }
 

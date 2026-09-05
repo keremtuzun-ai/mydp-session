@@ -140,7 +140,6 @@ export type Database = {
           starts_at: string;
           ends_at: string;
           location: string | null;
-          meeting_url: string | null;
           dress_code: string | null;
           general_agenda: string | null;
           status: Database["public"]["Enums"]["session_status"];
@@ -156,7 +155,6 @@ export type Database = {
           starts_at: string;
           ends_at: string;
           location?: string | null;
-          meeting_url?: string | null;
           dress_code?: string | null;
           general_agenda?: string | null;
           status?: Database["public"]["Enums"]["session_status"];
@@ -172,7 +170,6 @@ export type Database = {
           starts_at?: string;
           ends_at?: string;
           location?: string | null;
-          meeting_url?: string | null;
           dress_code?: string | null;
           general_agenda?: string | null;
           status?: Database["public"]["Enums"]["session_status"];
@@ -296,6 +293,7 @@ export type Database = {
           uploaded_by: string;
           title: string;
           notes: string | null;
+          delegation: string | null;
           storage_path: string | null;
           external_url: string | null;
           file_name: string | null;
@@ -309,6 +307,7 @@ export type Database = {
           uploaded_by: string;
           title: string;
           notes?: string | null;
+          delegation?: string | null;
           storage_path?: string | null;
           external_url?: string | null;
           file_name?: string | null;
@@ -322,6 +321,7 @@ export type Database = {
           uploaded_by?: string;
           title?: string;
           notes?: string | null;
+          delegation?: string | null;
           storage_path?: string | null;
           external_url?: string | null;
           file_name?: string | null;
@@ -510,7 +510,8 @@ export type Database = {
       attendance_records: {
         Row: {
           id: string;
-          session_id: string;
+          session_id: string | null;
+          attended_on: string;
           profile_id: string;
           status: Database["public"]["Enums"]["attendance_status"];
           note: string | null;
@@ -519,7 +520,8 @@ export type Database = {
         };
         Insert: {
           id?: string;
-          session_id: string;
+          session_id?: string | null;
+          attended_on: string;
           profile_id: string;
           status: Database["public"]["Enums"]["attendance_status"];
           note?: string | null;
@@ -528,7 +530,8 @@ export type Database = {
         };
         Update: {
           id?: string;
-          session_id?: string;
+          session_id?: string | null;
+          attended_on?: string;
           profile_id?: string;
           status?: Database["public"]["Enums"]["attendance_status"];
           note?: string | null;

@@ -5,6 +5,7 @@ export type UploadListItem = {
   id: string;
   title: string;
   notes: string | null;
+  delegation?: string | null;
   file_name: string | null;
   mime_type: string | null;
   size_bytes: number | null;
@@ -48,7 +49,7 @@ export function UploadList({ items, emptyTitle = "No uploads yet", emptyDescript
               </a>
             ) : null}
             <div className="muted small">
-              Submitted {formatDateTime(u.created_at)} · {u.authorName}
+              Submitted {formatDateTime(u.created_at)} · {u.authorName}{u.delegation ? ` · Delegation: ${u.delegation}` : ""}
             </div>
             {u.notes ? <div className="small mt-1">{u.notes}</div> : null}
           </div>

@@ -25,7 +25,6 @@ function sessionInput(formData: FormData) {
     starts_at: formData.get("starts_at") ?? "",
     ends_at: formData.get("ends_at") ?? "",
     location: formData.get("location") ?? "",
-    meeting_url: formData.get("meeting_url") ?? "",
     dress_code: formData.get("dress_code") ?? "",
     general_agenda: formData.get("general_agenda") ?? "",
     status: formData.get("status") ?? "draft",

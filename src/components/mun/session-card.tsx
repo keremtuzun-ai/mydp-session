@@ -4,7 +4,7 @@ import type { WeeklySession } from "@/lib/types/database";
 import { formatTimeRange, formatDate } from "@/lib/utils";
 
 type Props = {
-  session: Pick<WeeklySession, "id" | "title" | "theme" | "starts_at" | "ends_at" | "location" | "meeting_url" | "status">;
+  session: Pick<WeeklySession, "id" | "title" | "theme" | "starts_at" | "ends_at" | "location" | "status">;
   committeeAcronyms?: string[];
   attendanceSummary?: string;
   highlight?: boolean;
@@ -28,8 +28,8 @@ export function SessionCard({ session, committeeAcronyms = [], attendanceSummary
           <span className="text-[0.9rem]">{formatDate(session.starts_at)}</span>
         </li>
         <li>
-          <span className="schedule-time">{session.location ? "Room" : session.meeting_url ? "Online" : "Venue"}</span>
-          <span className="text-[0.9rem] truncate">{session.location ?? (session.meeting_url ? "Meeting link on the session page" : "To be announced")}</span>
+          <span className="schedule-time">{session.location ? "Room" : "Venue"}</span>
+          <span className="text-[0.9rem] truncate">{session.location ?? "To be announced"}</span>
         </li>
         {agendaPreview ? (
           <li>

@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isAllowedSchoolEmail, normalizeEmail } from "@/lib/auth/domains";
 import { getAllowedSchoolDomains } from "@/lib/env";
-import { signUpSchema, emailPasswordLoginSchema } from "@/lib/validation/schemas";
+import { signUpSchema, emailPasswordLoginSchema, authorNameSchema } from "@/lib/validation/schemas";
 import { fail, type ActionResult } from "@/lib/action-result";
 import { logAudit } from "@/lib/audit";
 
@@ -60,12 +60,15 @@ export async function signUpWithPassword(_prev: ActionResult | null, formData: F
 export async function signInWithEmailPassword(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const parsed = emailPasswordLoginSchema.safeParse({ email: formData.get("email"), password: formData.get("password") });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Enter your email and password.");
+  const name = authorNameSchema.safeParse(formData.get("full_name") ?? "");
+  if (!name.success) return fail(name.error.issues[0]?.message ?? "Enter your name and surname.");
   const email = normalizeEmail(parsed.data.email);
   const next = safeNext(formData.get("next"));
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: parsed.data.password });
   if (error || !data.user) return fail("Incorrect email or password.");
-  const { data: profile } = await supabase.from("profiles").select("onboarding_completed_at").eq("id", data.user.id).maybeSingle();
+  const { data: profile } = await supabase.from("profiles").select("onboarding_completed_at, display_name").eq("id", data.user.id).maybeSingle();
+  if (profile && profile.display_name !== name.data) await supabase.from("profiles").update({ display_name: name.data }).eq("id", data.user.id);
   redirect(profile?.onboarding_completed_at ? next : "/onboarding");
 }

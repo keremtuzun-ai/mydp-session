@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarDays, MapPin, Video, Shirt, Pencil, Megaphone, ListChecks, Library, MessageSquare } from "lucide-react";
+import { CalendarDays, MapPin, Shirt, Pencil, Megaphone, ListChecks, Library, MessageSquare } from "lucide-react";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { getNameMap, nameOf, getUploadCounts } from "@/lib/data/queries";
 import { PageHeader } from "@/components/mun/page-header";
-import { SessionStatusBadge, AttendanceBadge } from "@/components/mun/session-status-badge";
+import { SessionStatusBadge } from "@/components/mun/session-status-badge";
 import { TaskStatusBadge } from "@/components/mun/task-status-badge";
 import { PriorityBadge } from "@/components/mun/priority-badge";
 import { EmptyState } from "@/components/mun/empty-state";
@@ -24,11 +24,10 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
   const { data: session } = await supabase.from("weekly_sessions").select("*").eq("id", id).maybeSingle();
   if (!session) notFound();
 
-  const [{ data: announcements }, { data: tasks }, { data: materials }, { data: myAttendance }, { data: feedback }] = await Promise.all([
+  const [{ data: announcements }, { data: tasks }, { data: materials }, { data: feedback }] = await Promise.all([
     supabase.from("announcements").select("*").eq("target_session_id", id).order("pinned", { ascending: false }).order("published_at", { ascending: false }),
     supabase.from("tasks").select("*").eq("session_id", id).order("due_at", { ascending: true, nullsFirst: false }),
     supabase.from("materials").select("*").eq("session_id", id).order("created_at", { ascending: false }),
-    supabase.from("attendance_records").select("status, note").eq("session_id", id).eq("profile_id", viewer.userId).maybeSingle(),
     supabase.from("session_feedback").select("*").eq("session_id", id).order("created_at", { ascending: false }),
   ]);
 
@@ -84,14 +83,6 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
                 <MapPin className="size-4 text-gold-deep" aria-hidden /> {session.location}
               </p>
             ) : null}
-            {session.meeting_url ? (
-              <p className="inline-flex items-center gap-2">
-                <Video className="size-4 text-gold-deep" aria-hidden />
-                <a href={session.meeting_url} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:underline">
-                  Join online
-                </a>
-              </p>
-            ) : null}
             {session.dress_code ? (
               <p className="inline-flex items-center gap-2">
                 <Shirt className="size-4 text-gold-deep" aria-hidden /> {session.dress_code}
@@ -103,21 +94,6 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
                 <span className="section-label">General agenda</span>
                 <pre className="whitespace-pre-wrap rounded-[7px] border border-line-soft bg-surface-2 p-3 font-sans text-[0.9rem]">{session.general_agenda}</pre>
               </div>
-            ) : null}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Your attendance</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2 text-sm">
-            <AttendanceBadge status={myAttendance?.status} />
-            {myAttendance?.note ? <p className="muted">Note: {myAttendance.note}</p> : null}
-            {viewer.isStaff ? (
-              <Button asChild variant="outline" size="sm" className="mt-2">
-                <Link href={`/exec/attendance?session=${session.id}`}>Take attendance</Link>
-              </Button>
             ) : null}
           </CardContent>
         </Card>

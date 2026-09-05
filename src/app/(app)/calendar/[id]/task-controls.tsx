@@ -98,6 +98,9 @@ export function EvidenceUploadForm({ taskId }: { taskId: string }) {
         <Field label="Title" htmlFor="up-title">
           <Input id="up-title" name="title" placeholder="Position paper (final)" required />
         </Field>
+        <Field label="Delegation" htmlFor="up-delegation" hint="If this isn't affiliated with a delegation, write N/A.">
+          <Input id="up-delegation" name="delegation" placeholder="e.g. France" required />
+        </Field>
         <Field label="Notes" htmlFor="up-notes" optional>
           <Textarea id="up-notes" name="notes" rows={2} placeholder="Anything your chair should know." />
         </Field>

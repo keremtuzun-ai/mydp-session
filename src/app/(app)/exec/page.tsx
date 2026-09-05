@@ -24,9 +24,9 @@ export default async function ExecPage({ searchParams }: PageProps<"/exec">) {
     supabase.from("weekly_sessions").select("id, title"),
     supabase.from("public_profiles").select("id, display_name, username, role"),
   ]);
-  const inviteToken = viewer.isAdmin ? getExecInviteToken() : "";
+  const inviteToken = viewer.isStaff ? getExecInviteToken() : "";
   const inviteUrl = inviteToken ? `${siteUrl.replace(/\/$/, "")}/exec-invite/${inviteToken}` : null;
-  const sharedPassword = viewer.isAdmin ? getExecSharedPassword() : "";
+  const sharedPassword = viewer.isStaff ? getExecSharedPassword() : "";
   const all = tasks ?? [];
   const names = await getNameMap(supabase, [...all.map((t) => t.created_by), ...all.map((t) => t.assigned_to_profile_id), ...(uploads ?? []).map((u) => u.uploaded_by)]);
   const sessionMap = new Map((sessions ?? []).map((s) => [s.id, s.title]));
@@ -115,7 +115,7 @@ export default async function ExecPage({ searchParams }: PageProps<"/exec">) {
         )}
       </section>
 
-      {viewer.isAdmin ? (
+      {viewer.isStaff ? (
         <section className="card">
           <div className="section-head">
             <h2>Executive access</h2>

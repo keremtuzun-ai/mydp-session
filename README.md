@@ -85,6 +85,8 @@ supabase/
   migrations/0003_storage.sql   buckets and storage policies
   migrations/0007_exec_allowlist.sql  (superseded) executive allow-list
   migrations/0008_shared_exec_account.sql  drops the allow-list; author_name on tasks and announcements
+  migrations/0009_visible_to_everyone.sql  every member reads every task/announcement; admin section for staff
+  migrations/0010_attendance_by_date_delegation.sql  attendance keyed by a typed date; delegation on submissions; no meeting links
   templates/*.html              email templates for the local stack
   config.toml                   local CLI config (OTP length, template paths)
 scripts/seed.ts                 development data (idempotent)
@@ -134,7 +136,7 @@ Authorization is enforced in the database (RLS + triggers) and again in server a
 | --- | --- |
 | `/` | Landing page with "First-time setup" and "Sign in" |
 | `/welcome` | Create an account: school email + password (no verification email) |
-| `/login` | School email + password, required on every visit (session ends when the browser closes) |
+| `/login` | Name and surname, school email + password, required on every visit (session ends when the browser closes) |
 | `/reset-password` | Explains that executives/admins set temporary passwords from the admin console |
 | `/admin` | Users & roles, sessions, templates, domains, audit: the admin and the executive desk (only admins grant or remove the admin role) |
 | `/exec-invite/[token]` | Secret executive link: enter the shared executive password (`EXEC_SHARED_PASSWORD`) to open the shared executive desk |

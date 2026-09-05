@@ -46,7 +46,7 @@ export default async function ExecUploadsPage() {
               items={items.map((u) => ({
                 id: u.id,
                 title: u.title,
-                notes: u.notes,
+                notes: u.notes, delegation: u.delegation,
                 file_name: u.file_name,
                 mime_type: u.mime_type,
                 size_bytes: u.size_bytes,

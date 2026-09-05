@@ -145,7 +145,7 @@ export async function uploadEvidence(_prev: ActionResult | null, formData: FormD
   const { actor } = await getActor();
   const taskId = String(formData.get("task_id") ?? "");
   if (!uuid.safeParse(taskId).success) return fail("Invalid task.");
-  const meta = uploadMetaSchema.safeParse({ title: formData.get("title"), notes: formData.get("notes") ?? "", external_url: formData.get("external_url") ?? "" });
+  const meta = uploadMetaSchema.safeParse({ title: formData.get("title"), notes: formData.get("notes") ?? "", delegation: formData.get("delegation") ?? "", external_url: formData.get("external_url") ?? "" });
   if (!meta.success) return fail(meta.error.issues[0]?.message ?? "Check the upload details.");
   const file = formData.get("file");
   const hasFile = file instanceof File && file.size > 0;
@@ -172,6 +172,7 @@ export async function uploadEvidence(_prev: ActionResult | null, formData: FormD
     task_id: taskId,
     uploaded_by: actor.id,
     title: meta.data.title,
+    delegation: meta.data.delegation,
     notes: meta.data.notes || null,
     storage_path: path,
     external_url: link,

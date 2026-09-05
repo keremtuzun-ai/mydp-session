@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NativeSelect } from "@/components/ui/native-select";
 import { Label } from "@/components/ui/label";
 import { bulkRecordAttendance } from "@/actions/attendance";
 import { cn } from "@/lib/utils";
@@ -21,25 +20,19 @@ const TONE: Record<string, string> = {
 
 type Member = { profileId: string; name: string; role: string; status: Status | null; note: string | null };
 
-export function SessionPicker({ sessions, selected, basePath }: { sessions: { id: string; title: string; starts_at: string }[]; selected: string; basePath: string }) {
+export function DatePicker({ date, basePath }: { date: string; basePath: string }) {
   const router = useRouter();
   return (
-    <div className="sm:w-80">
-      <Label htmlFor="session-pick" className="mb-1 block">
-        Session
+    <div className="sm:w-56">
+      <Label htmlFor="date-pick" className="mb-1 block">
+        Date
       </Label>
-      <NativeSelect id="session-pick" value={selected} onChange={(e) => router.push(`${basePath}?session=${e.target.value}`)}>
-        {sessions.map((s) => (
-          <option key={s.id} value={s.id}>
-            {s.title} · {new Date(s.starts_at).toLocaleDateString()}
-          </option>
-        ))}
-      </NativeSelect>
+      <Input id="date-pick" type="date" defaultValue={date} onChange={(e) => e.target.value && router.push(`${basePath}?date=${e.target.value}`)} />
     </div>
   );
 }
 
-export function RollCallEveryone({ sessionId, members }: { sessionId: string; members: Member[] }) {
+export function RollCallEveryone({ attendedOn, members }: { attendedOn: string; members: Member[] }) {
   const [rows, setRows] = useState<Record<string, { status: Status | null; note: string }>>(() => Object.fromEntries(members.map((m) => [m.profileId, { status: m.status, note: m.note ?? "" }])));
   const [pending, startTransition] = useTransition();
   const router = useRouter();
@@ -49,7 +42,7 @@ export function RollCallEveryone({ sessionId, members }: { sessionId: string; me
     startTransition(async () => {
       const entries = members.filter((m) => rows[m.profileId]?.status).map((m) => ({ profile_id: m.profileId, status: rows[m.profileId]!.status as Status, note: rows[m.profileId]!.note || undefined }));
       if (!entries.length) return void toast.error("Mark at least one member first.");
-      const result = await bulkRecordAttendance({ session_id: sessionId, entries });
+      const result = await bulkRecordAttendance({ attended_on: attendedOn, entries });
       if (result.ok) {
         toast.success(result.message ?? "Saved.");
         router.refresh();

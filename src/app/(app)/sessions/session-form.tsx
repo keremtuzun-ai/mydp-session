@@ -22,7 +22,6 @@ const clientSchema = z
     starts_at: z.string().min(1, "Choose a start time"),
     ends_at: z.string().min(1, "Choose an end time"),
     location: z.string().max(200),
-    meeting_url: z.string(),
     dress_code: z.string().max(120),
     description: z.string().max(4000),
     general_agenda: z.string().max(6000),
@@ -45,7 +44,6 @@ export function SessionForm({ session }: Props) {
       starts_at: toDatetimeLocal(session?.starts_at),
       ends_at: toDatetimeLocal(session?.ends_at),
       location: session?.location ?? "1S",
-      meeting_url: session?.meeting_url ?? "",
       dress_code: session?.dress_code ?? "",
       description: session?.description ?? "",
       general_agenda: session?.general_agenda ?? "1. Roll call\n2. Announcements from the Secretariat\n3. Committee time\n4. Chair debrief",
@@ -73,9 +71,6 @@ export function SessionForm({ session }: Props) {
         </Field>
         <Field label="Location" htmlFor="location" optional error={err("location")}>
           <Input id="location" {...register("location")} />
-        </Field>
-        <Field label="Online link" htmlFor="meeting_url" optional error={err("meeting_url")}>
-          <Input id="meeting_url" type="url" placeholder="https://" {...register("meeting_url")} />
         </Field>
         <Field label="Dress code" htmlFor="dress_code" optional error={err("dress_code")}>
           <Input id="dress_code" placeholder="Western business attire" {...register("dress_code")} />

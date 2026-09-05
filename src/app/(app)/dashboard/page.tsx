@@ -24,7 +24,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
     listSessionsWithCoverage(supabase, { from: now, order: "asc", limit: 1 }),
     supabase.from("tasks").select("*").not("status", "in", "(completed,reviewed)").order("created_at", { ascending: false }).limit(8),
     supabase.from("announcements").select("*").lte("published_at", now).order("pinned", { ascending: false }).order("published_at", { ascending: false }).limit(5),
-    supabase.from("attendance_records").select("status, session_id").eq("profile_id", viewer.userId),
+    supabase.from("attendance_records").select("status, attended_on").eq("profile_id", viewer.userId),
     supabase.from("weekly_sessions").select("id").eq("status", "completed"),
   ]);
 

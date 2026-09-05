@@ -164,7 +164,6 @@ async function main() {
       starts_at: iso(start),
       ends_at: iso(plusMinutes(start, 45)),
       location: i % 2 === 0 ? "1S" : "Library",
-      meeting_url: null,
       dress_code: i >= 2 ? "Western business attire" : null,
       general_agenda: "1. Roll call\n2. Announcements from the Secretariat\n3. Committee time\n4. Chair debrief",
       status: (past ? "completed" : i === 7 ? "draft" : "published") as Enums<"session_status">,
@@ -244,7 +243,7 @@ async function main() {
   for (let i = 0; i < 4; i++) {
     for (const m of members) {
       const status = pattern[m]![i]!;
-      attendance.push({ session_id: sid(i), profile_id: id(m), status, note: status === "excused" ? "School trip" : null, recorded_by: id("exec"), recorded_at: sorted[i]!.starts_at });
+      attendance.push({ session_id: sid(i), attended_on: sorted[i]!.starts_at.slice(0, 10), profile_id: id(m), status, note: status === "excused" ? "School trip" : null, recorded_by: id("exec"), recorded_at: sorted[i]!.starts_at });
     }
   }
   {

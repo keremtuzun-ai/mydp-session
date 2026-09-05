@@ -20,22 +20,21 @@ export default async function AnalyticsPage() {
   if (!viewer.isStaff) return <PermissionDenied message="Analytics are available to executives and admins." />;
   const supabase = await createClient();
 
-  const [{ data: sessions }, { data: attendance }, { data: tasks }, { data: profiles }] = await Promise.all([
-    supabase.from("weekly_sessions").select("id, title, starts_at, status").eq("status", "completed").order("starts_at"),
-    supabase.from("attendance_records").select("session_id, profile_id, status"),
+  const [{ data: attendance }, { data: tasks }, { data: profiles }] = await Promise.all([
+    supabase.from("attendance_records").select("attended_on, profile_id, status"),
     supabase.from("tasks").select("id, status, due_at, assigned_committee_id"),
     supabase.from("profiles").select("id, role, onboarding_completed_at"),
   ]);
 
-  const sessionList = sessions ?? [];
   const att = attendance ?? [];
   const attended = (s: string) => s === "present" || s === "late";
 
   // Attendance by week
-  const byWeek = sessionList.map((s) => {
-    const rows = att.filter((a) => a.session_id === s.id);
+  const days = Array.from(new Set(att.map((a) => a.attended_on))).sort();
+  const byWeek = days.map((d) => {
+    const rows = att.filter((a) => a.attended_on === d);
     const yes = rows.filter((a) => attended(a.status)).length;
-    return { week: fmt(s.starts_at, "d MMM"), title: s.title, rate: rows.length ? Math.round((yes / rows.length) * 100) : 0, present: yes, total: rows.length };
+    return { week: fmt(`${d}T12:00:00Z`, "d MMM"), title: fmt(`${d}T12:00:00Z`, "EEEE d MMMM yyyy"), rate: rows.length ? Math.round((yes / rows.length) * 100) : 0, present: yes, total: rows.length };
   });
 
 
@@ -48,8 +47,8 @@ export default async function AnalyticsPage() {
   const statusCounts = ["not_started", "in_progress", "submitted", "reviewed", "completed", "overdue"].map((s) => ({ status: humanize(s), count: taskList.filter((t) => t.status === s).length }));
 
   // Active members: attended at least one of the last 4 completed sessions
-  const recent = sessionList.slice(-4).map((s) => s.id);
-  const activeIds = new Set(att.filter((a) => recent.includes(a.session_id) && attended(a.status)).map((a) => a.profile_id));
+  const recent = days.slice(-4);
+  const activeIds = new Set(att.filter((a) => recent.includes(a.attended_on) && attended(a.status)).map((a) => a.profile_id));
   const onboarded = (profiles ?? []).filter((p) => p.onboarding_completed_at).length;
 
   return (

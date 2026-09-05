@@ -107,7 +107,6 @@ export const sessionSchema = z
     starts_at: z.string().min(1, "Choose a start time").transform((v) => new Date(v).toISOString()),
     ends_at: z.string().min(1, "Choose an end time").transform((v) => new Date(v).toISOString()),
     location: optionalText(200),
-    meeting_url: z.union([z.string().trim().url("Enter a valid link"), z.literal("")]).transform((v) => v || null),
     dress_code: optionalText(120),
     general_agenda: optionalText(6000),
     status: z.enum(SESSION_STATUSES),

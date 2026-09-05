@@ -18,3 +18,8 @@ export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:300
 export const APP_TIMEZONE = process.env.NEXT_PUBLIC_TIMEZONE ?? "Europe/Istanbul";
 
 export const MAX_UPLOAD_BYTES = Number(process.env.MAX_UPLOAD_BYTES ?? 15 * 1024 * 1024);
+
+/** Secret path segment of the executive invite link (/exec-invite/<token>). Empty disables the link. */
+export function getExecInviteToken(): string {
+  return (process.env.EXEC_INVITE_TOKEN ?? "").trim();
+}

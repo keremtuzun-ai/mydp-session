@@ -34,6 +34,8 @@ describe("username rules", () => {
     expect(signUpSchema.safeParse({ email: "a@school.edu", password: "Delegate2026", confirm_password: "Delegate2026" }).success).toBe(true);
     expect(signUpSchema.safeParse({ email: "a@school.edu", password: "Delegate2026", confirm_password: "other" }).success).toBe(false);
     expect(signUpSchema.safeParse({ email: "a@school.edu", password: "short", confirm_password: "short" }).success).toBe(false);
+    expect(signUpSchema.safeParse({ email: "a@school.edu", password: "Mun2027x", confirm_password: "Mun2027x" }).success).toBe(true);
+    expect(signUpSchema.safeParse({ email: "a@school.edu", password: "Mun2027", confirm_password: "Mun2027" }).success).toBe(false);
     expect(signUpSchema.safeParse({ email: "not-an-email", password: "Delegate2026", confirm_password: "Delegate2026" }).success).toBe(false);
   });
 });

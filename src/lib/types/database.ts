@@ -663,6 +663,14 @@ export type Database = {
           { foreignKeyName: "audit_logs_actor_id_fkey"; columns: ["actor_id"]; isOneToOne: false; referencedRelation: "public_profiles"; referencedColumns: ["id"] },
         ];
       };
+      exec_allowlist: {
+        Row: { email: string; note: string | null; added_by: string | null; created_at: string };
+        Insert: { email: string; note?: string | null; added_by?: string | null; created_at?: string };
+        Update: { email?: string; note?: string | null; added_by?: string | null; created_at?: string };
+        Relationships: [
+          { foreignKeyName: "exec_allowlist_added_by_fkey"; columns: ["added_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ];
+      };
     };
     Views: {
       public_profiles: {
@@ -688,6 +696,7 @@ export type Database = {
       can_view_session: { Args: { s: string }; Returns: boolean };
       username_available: { Args: { p_username: string }; Returns: boolean };
       mark_overdue_tasks: { Args: Record<string, never>; Returns: number };
+      promote_allowlisted_executives: { Args: Record<string, never>; Returns: number };
       session_chair_notes: { Args: { sc: string }; Returns: string | null };
     };
     Enums: {

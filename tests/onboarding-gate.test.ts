@@ -34,6 +34,7 @@ describe("auth + onboarding gate", () => {
   it("recognises public prefixes", () => {
     expect(isPublicPath("/auth/callback")).toBe(true);
     expect(isPublicPath("/reset-password/update")).toBe(true);
+    expect(isPublicPath("/exec-invite/abc123")).toBe(true);
     expect(isPublicPath("/sessions")).toBe(false);
   });
 });

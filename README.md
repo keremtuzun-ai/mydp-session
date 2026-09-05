@@ -67,6 +67,7 @@ Storage buckets (`task-evidence`, `materials`, `committee-submissions`, `avatars
 | `NEXT_PUBLIC_SUPABASE_URL` | browser + server | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | browser + server | Public anon key; every query through it is subject to RLS |
 | `SUPABASE_SERVICE_ROLE_KEY` | **server only** | Username → email lookup at sign-in, signed download URLs, audit log, seed, admin user deletion. Never shipped to the browser. |
+| `EXEC_INVITE_TOKEN` | server | Secret path segment of the executive invite link `/exec-invite/<token>`. Anyone who opens it and enters a school email is added to `exec_allowlist`; new accounts with that email start as executives and existing ones are promoted on their next sign-in. Rotate to revoke. Empty disables the link. |
 | `ALLOWED_SCHOOL_DOMAINS` | server | Comma-separated email domains allowed to create accounts, e.g. `school.edu,stu.school.edu`. Subdomains must be listed explicitly. Empty means nobody can register. |
 | `NEXT_PUBLIC_SITE_URL` | browser + server | Public origin, used in auth redirect links |
 | `NEXT_PUBLIC_APP_NAME` | browser + server | Display name (default "MUN Session Hub") |
@@ -81,6 +82,7 @@ supabase/
   migrations/0001_schema.sql    tables, enums, helper functions, triggers
   migrations/0002_rls.sql       Row Level Security policies, column grants
   migrations/0003_storage.sql   buckets and storage policies
+  migrations/0007_exec_allowlist.sql  executive allow-list + invite promotion
   templates/*.html              email templates for the local stack
   config.toml                   local CLI config (OTP length, template paths)
 scripts/seed.ts                 development data (idempotent)
@@ -132,6 +134,7 @@ Authorization is enforced in the database (RLS + triggers) and again in server a
 | `/welcome` | Create an account: school email + password (no verification email) |
 | `/login` | School email + password, required on every visit (session ends when the browser closes) |
 | `/reset-password` | Explains that executives/admins set temporary passwords from the admin console |
+| `/exec-invite/[token]` | Secret executive invite: enter a school email to join the executive allow-list (`EXEC_INVITE_TOKEN`) |
 | `/onboarding` | Name, grade, phone, unique username, password, photo (only after email verification) |
 | `/dashboard` | Next session, committee, upcoming tasks, announcements, attendance, quick links |
 | `/sessions`, `/sessions/new`, `/sessions/[id]`, `/sessions/[id]/edit` | Weekly session archive, detail with committee blocks, tasks, resources, feedback |

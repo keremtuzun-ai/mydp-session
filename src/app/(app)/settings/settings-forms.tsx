@@ -75,7 +75,7 @@ export function PasswordForm() {
   return (
     <form action={action} className="flex flex-col gap-4">
       <div className="form-grid">
-        <Field label="New password" htmlFor="password" hint="At least 10 characters with a letter and a number.">
+        <Field label="New password" htmlFor="password" hint="At least 8 characters with a letter and a number.">
           <Input id="password" name="password" type="password" autoComplete="new-password" required />
         </Field>
         <Field label="Confirm" htmlFor="confirm_password">

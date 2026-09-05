@@ -54,7 +54,8 @@ tests/                        unit tests + opt-in live RLS tests
 2. **Onboarding** (`/onboarding`): reachable only with a session whose profile has `onboarding_completed_at IS NULL`; collects name, grade, phone, unique username (live check via `/api/username-available`, unique index) and photo.
 3. **Gate**: `lib/auth/gate.ts` is a pure function used by `proxy.ts` and by `getViewer()`. Signed out → `/login?next=`; signed in but not onboarded → `/onboarding`; onboarded → cannot revisit onboarding or the sign-in pages.
 4. **Every visit**: auth cookies are session cookies (`lib/supabase/cookies.ts` strips max-age/expires in the server, proxy and browser clients), so closing the browser ends the session and members sign in again with email + password. All progress lives in Postgres, never in the cookie.
-5. **Forgotten passwords**: executives and admins set a temporary password from the admin console (`setTemporaryPassword`, audited); members change it in Settings.
+5. **Executive invite** (`/exec-invite/<EXEC_INVITE_TOKEN>`): the page renders only when the path segment matches the env token (constant-time compare). Submitting a school email upserts `exec_allowlist` with the service role. `handle_new_auth_user` creates profiles for allow-listed emails with role `executive`; existing delegate/chair profiles are promoted immediately by the invite action and again defensively at sign-in. Admins see the link and the list on the executive desk.
+6. **Forgotten passwords**: executives and admins set a temporary password from the admin console (`setTemporaryPassword`, audited); members change it in Settings.
 
 ## Permission model
 

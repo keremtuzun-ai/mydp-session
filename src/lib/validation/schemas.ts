@@ -10,7 +10,7 @@ export const otpSchema = z.object({
 
 export const passwordSchema = z
   .string()
-  .min(10, "Use at least 10 characters")
+  .min(8, "Use at least 8 characters")
   .max(128)
   .refine((v) => /[a-zA-Z]/.test(v) && /\d/.test(v), "Include at least one letter and one number");
 

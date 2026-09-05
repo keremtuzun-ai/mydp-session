@@ -61,7 +61,7 @@ export default function LandingPage() {
                 </Link>
               </div>
             </div>
-            <div className="front-hero-logo"><BrandLogo height={110} className="w-full" /></div>
+            <div className="front-hero-logo"><BrandLogo height={150} wordmark={false} /></div>
           </section>
 
           <section className="front-countdown">

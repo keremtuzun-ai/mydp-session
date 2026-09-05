@@ -91,10 +91,6 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
           <div className="section-head">
             <h2>{viewer.isStaff ? "Executive desk" : "Quick links"}</h2>
           </div>
-          {viewer.isStaff ? (
-          ) : (
-            <p className="m-0 mb-3 small muted">Your tasks, sessions and materials.</p>
-          )}
           <div className="filter-pills">
             {[
               ...(viewer.isStaff ? [["/exec", "Tasks & progress"], ["/exec/uploads", "Submissions"], ["/exec/attendance", "Attendance"], ["/calendar/new", "Assign task"]] : []),

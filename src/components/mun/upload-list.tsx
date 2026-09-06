@@ -48,8 +48,11 @@ export function UploadList({ items, emptyTitle = "No uploads yet", emptyDescript
                 {u.external_url}
               </a>
             ) : null}
-            <div className="muted small">
-              Submitted {formatDateTime(u.created_at)} · {u.authorName}{u.delegation ? ` · Delegation: ${u.delegation}` : ""}
+            <div className="muted small flex flex-wrap items-center gap-x-2 gap-y-1">
+              <span>
+                Submitted {formatDateTime(u.created_at)} · <strong className="text-ink">{u.authorName}</strong>
+              </span>
+              {u.delegation ? <span className="chip chip-navy">{u.delegation}</span> : null}
             </div>
             {u.notes ? <div className="small mt-1">{u.notes}</div> : null}
           </div>

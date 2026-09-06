@@ -79,7 +79,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
           <h2>{scopeTitle}</h2>
           <span className="tab-count">{rows.length}</span>
         </div>
-        <TaskTable rows={rows} scope={scope} status={status} showScope={canManageAny} />
+        <TaskTable rows={rows} scope={scope} status={status} showScope={canManageAny} defaultDelegation={viewer.profile.delegation} />
       </section>
     </>
   );

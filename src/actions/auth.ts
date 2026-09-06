@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { normalizeEmail } from "@/lib/auth/domains";
-import { signUpSchema, emailPasswordLoginSchema, authorNameSchema } from "@/lib/validation/schemas";
+import { signUpSchema, emailPasswordLoginSchema, signInNameSchema } from "@/lib/validation/schemas";
 import { fail, type ActionResult } from "@/lib/action-result";
 import { logAudit } from "@/lib/audit";
 
@@ -48,19 +48,27 @@ export async function signUpWithPassword(_prev: ActionResult | null, formData: F
   redirect("/onboarding");
 }
 
-/** Everyday sign-in: name, email + password, required on every visit. */
+/**
+ * Everyday sign-in: name, surname, email + password, required on every visit.
+ * The name and surname are stored on the account's profile (and shown to the
+ * executive desk next to every submission).
+ */
 export async function signInWithEmailPassword(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const parsed = emailPasswordLoginSchema.safeParse({ email: formData.get("email"), password: formData.get("password") });
   if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Enter your email and password.");
-  const name = authorNameSchema.safeParse(formData.get("full_name") ?? "");
-  if (!name.success) return fail(name.error.issues[0]?.message ?? "Enter your name and surname.");
+  const name = signInNameSchema.safeParse({ first_name: formData.get("first_name") ?? "", last_name: formData.get("last_name") ?? "" });
+  if (!name.success) return fail(name.error.issues[0]?.message ?? "Enter your name and surname.", fieldErrors(name.error.issues));
   const email = normalizeEmail(parsed.data.email);
   const next = safeNext(formData.get("next"));
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password: parsed.data.password });
   if (error || !data.user) return fail("Incorrect email or password.");
-  const { data: profile } = await supabase.from("profiles").select("onboarding_completed_at, display_name").eq("id", data.user.id).maybeSingle();
-  if (profile && profile.display_name !== name.data) await supabase.from("profiles").update({ display_name: name.data }).eq("id", data.user.id);
+  const { first_name, last_name } = name.data;
+  const displayName = `${first_name} ${last_name}`;
+  const { data: profile } = await supabase.from("profiles").select("onboarding_completed_at, display_name, first_name, last_name").eq("id", data.user.id).maybeSingle();
+  if (profile && (profile.first_name !== first_name || profile.last_name !== last_name || profile.display_name !== displayName)) {
+    await supabase.from("profiles").update({ first_name, last_name, display_name: displayName }).eq("id", data.user.id);
+  }
   redirect(profile?.onboarding_completed_at ? next : "/onboarding");
 }

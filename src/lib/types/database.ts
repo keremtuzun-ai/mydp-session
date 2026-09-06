@@ -22,6 +22,9 @@ export type Database = {
           school_email: string;
           username: string | null;
           display_name: string | null;
+          first_name: string | null;
+          last_name: string | null;
+          delegation: string | null;
           grade: string | null;
           phone: string | null;
           avatar_url: string | null;
@@ -35,6 +38,9 @@ export type Database = {
           school_email: string;
           username?: string | null;
           display_name?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          delegation?: string | null;
           grade?: string | null;
           phone?: string | null;
           avatar_url?: string | null;
@@ -48,6 +54,9 @@ export type Database = {
           school_email?: string;
           username?: string | null;
           display_name?: string | null;
+          first_name?: string | null;
+          last_name?: string | null;
+          delegation?: string | null;
           grade?: string | null;
           phone?: string | null;
           avatar_url?: string | null;
@@ -681,6 +690,15 @@ export type Database = {
           { foreignKeyName: "task_completions_profile_id_fkey"; columns: ["profile_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
         ];
       };
+      resolution_publications: {
+        Row: { delegation_key: string; delegation: string; upload_id: string; published_by: string | null; published_at: string };
+        Insert: { delegation_key: string; delegation: string; upload_id: string; published_by?: string | null; published_at?: string };
+        Update: { delegation_key?: string; delegation?: string; upload_id?: string; published_by?: string | null; published_at?: string };
+        Relationships: [
+          { foreignKeyName: "resolution_publications_upload_id_fkey"; columns: ["upload_id"]; isOneToOne: false; referencedRelation: "task_uploads"; referencedColumns: ["id"] },
+          { foreignKeyName: "resolution_publications_published_by_fkey"; columns: ["published_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ];
+      };
     };
     Views: {
       public_profiles: {
@@ -691,6 +709,9 @@ export type Database = {
           grade: string | null;
           avatar_url: string | null;
           role: Database["public"]["Enums"]["user_role"];
+          first_name: string | null;
+          last_name: string | null;
+          delegation: string | null;
         };
         Relationships: [];
       };
@@ -752,6 +773,7 @@ export type CommitteeSubmission = Tables<"committee_submissions">;
 export type TaskTemplate = Tables<"task_templates">;
 export type SessionFeedback = Tables<"session_feedback">;
 export type ResolutionLink = Tables<"resolution_links">;
+export type ResolutionPublication = Tables<"resolution_publications">;
 
 // Unused helper kept for parity with generated files.
 export type { Timestamps as _Timestamps };

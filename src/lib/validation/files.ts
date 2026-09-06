@@ -31,8 +31,11 @@ export const uploadMetaSchema = z.object({
   notes: z.string().trim().max(2000).optional().or(z.literal("")),
   delegation: z.string().trim().min(1, "Enter your delegation, or N/A").max(80),
   external_url: z
-    .union([z.string().trim().url("Paste the full link, starting with https://").refine((v) => v.startsWith("https://"), "Links must start with https://"), z.literal("")])
-    .optional(),
+    .string()
+    .trim()
+    .min(1, "Paste the link to your document")
+    .url("Paste the full link, starting with https://")
+    .refine((v) => v.startsWith("https://"), "Links must start with https://"),
 });
 
 export function safeFileName(name: string) {

@@ -93,7 +93,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
           </div>
           <div className="filter-pills">
             {[
-              ...(viewer.isStaff ? [["/exec", "Tasks & progress"], ["/exec/uploads", "Submissions"], ["/exec/attendance", "Attendance"], ["/calendar/new", "Assign task"]] : []),
+              ...(viewer.isStaff ? [["/exec", "Tasks & progress"], ["/exec/uploads", "Submissions"], ["/resolutions", "Resolutions"], ["/exec/attendance", "Attendance"], ["/calendar/new", "Assign task"]] : []),
               ["/calendar", "Calendar"],
               ["/sessions", "Sessions"],
               ["/materials", "Materials"],

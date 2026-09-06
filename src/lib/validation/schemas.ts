@@ -27,6 +27,18 @@ export const signUpSchema = z
 
 export const emailPasswordLoginSchema = z.object({ email: emailSchema, password: z.string().min(1, "Enter your password") });
 
+/** One part of a person's name, as typed at sign-in. */
+export const namePartSchema = (what: string) =>
+  z
+    .string()
+    .trim()
+    .min(1, `Enter your ${what}`)
+    .max(60, `Your ${what} is too long`)
+    .refine((v) => /\p{L}/u.test(v), `Enter your ${what}`);
+
+/** Sign-in asks for the member's name and surname, kept on the profile per account. */
+export const signInNameSchema = z.object({ first_name: namePartSchema("name"), last_name: namePartSchema("surname") });
+
 export const onboardingSchema = z.object({
   display_name: z.string().trim().min(2, "Enter your full name").max(80),
   grade: z.enum(GRADES, { message: "Select your grade" }),

@@ -130,10 +130,10 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
 
       <section aria-labelledby="evidence">
         <div className="section-head">
-          <h2 id="evidence">Uploads</h2>
+          <h2 id="evidence">Submissions</h2>
           <span className="tab-count">{(uploads ?? []).length}</span>
           <div className="section-tail">
-            <UploadDialog taskId={task.id} />
+            <UploadDialog taskId={task.id} defaultDelegation={viewer.profile.delegation} />
           </div>
         </div>
         <div>
@@ -151,8 +151,8 @@ export default async function TaskPage({ params }: PageProps<"/calendar/[id]">) 
                 authorName: nameOf(names, u.uploaded_by),
                 downloadHref: u.external_url && !u.storage_path ? u.external_url : `/api/files/task-uploads/${u.id}`,
               }))}
-              emptyTitle="No evidence uploaded"
-              emptyDescription="Use Upload to paste a link or add a file."
+              emptyTitle="No submissions yet"
+              emptyDescription="Use Submit to add the link and the file for your delegation."
             >
               {(item) => ((uploads ?? []).find((u) => u.id === item.id)?.uploaded_by === viewer.userId || manager ? <DeleteUploadButton id={item.id} /> : null)}
             </UploadList>

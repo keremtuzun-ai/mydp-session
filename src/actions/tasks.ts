@@ -11,6 +11,7 @@ import { fail, ok, type ActionResult } from "@/lib/action-result";
 import { describeDbError } from "@/lib/db-errors";
 import { logAudit } from "@/lib/audit";
 import type { Enums } from "@/lib/types/database";
+import { displayDelegation, isNoDelegation } from "@/lib/resolutions";
 
 function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
   const out: Record<string, string[]> = {};
@@ -158,52 +159,51 @@ export async function setTaskStatus(input: { taskId: string; status: Status; not
   return ok(undefined, "Status updated.");
 }
 
-/** Submit work on a task: a file (PDF, PNG, JPG, DOCX) and/or a document link such as a Google Doc. */
+/** Submit work on a task: the file (PDF, PNG, JPG, DOCX) AND the document link (a Google Doc), for a delegation. */
 export async function uploadEvidence(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
   const { actor } = await getActor();
   const taskId = String(formData.get("task_id") ?? "");
   if (!uuid.safeParse(taskId).success) return fail("Invalid task.");
-  const meta = uploadMetaSchema.safeParse({ title: formData.get("title"), notes: formData.get("notes") ?? "", delegation: formData.get("delegation") ?? "", external_url: formData.get("external_url") ?? "" });
-  if (!meta.success) return fail(meta.error.issues[0]?.message ?? "Check the upload details.");
+  const meta = uploadMetaSchema.safeParse({ title: formData.get("title") ?? "", notes: formData.get("notes") ?? "", delegation: formData.get("delegation") ?? "", external_url: formData.get("external_url") ?? "" });
+  if (!meta.success) return fail(meta.error.issues[0]?.message ?? "Check the submission details.");
   const file = formData.get("file");
   const hasFile = file instanceof File && file.size > 0;
-  const link = meta.data.external_url || null;
-  if (!hasFile && !link) return fail("Attach a file or paste a document link.");
-  if (hasFile) {
-    const valid = validateEvidenceFile({ name: file.name, type: file.type, size: file.size });
-    if (!valid.ok) return fail(valid.error);
-  }
+  if (!hasFile) return fail("Attach the file as well as the link. Both are required.");
+  const link = meta.data.external_url;
+  const valid = validateEvidenceFile({ name: file.name, type: file.type, size: file.size });
+  if (!valid.ok) return fail(valid.error);
+  const delegation = isNoDelegation(meta.data.delegation) ? "N/A" : displayDelegation(meta.data.delegation);
 
   const supabase = await createClient();
   const { data: task } = await supabase.from("tasks").select("*").eq("id", taskId).maybeSingle();
   if (!task || !canViewTask(actor, task)) return fail("Task not found.");
   if (!canUploadEvidence(actor, task)) return fail("Uploads are closed for this task.");
 
-  let path: string | null = null;
-  if (hasFile) {
-    path = `${taskId}/${randomUUID()}-${safeFileName(file.name)}`;
-    const { error: upErr } = await supabase.storage.from("task-evidence").upload(path, file, { contentType: file.type, upsert: false });
-    if (upErr) return fail(`Upload failed: ${upErr.message}`);
-  }
+  const path = `${taskId}/${randomUUID()}-${safeFileName(file.name)}`;
+  const { error: upErr } = await supabase.storage.from("task-evidence").upload(path, file, { contentType: file.type, upsert: false });
+  if (upErr) return fail(`Upload failed: ${upErr.message}`);
 
   const { error } = await supabase.from("task_uploads").insert({
     task_id: taskId,
     uploaded_by: actor.id,
-    title: meta.data.title || (hasFile ? file.name : "Document link"),
-    delegation: meta.data.delegation,
+    title: meta.data.title || file.name,
+    delegation,
     notes: meta.data.notes || null,
     storage_path: path,
     external_url: link,
-    file_name: hasFile ? file.name : null,
-    mime_type: hasFile ? file.type : null,
-    size_bytes: hasFile ? file.size : null,
+    file_name: file.name,
+    mime_type: file.type,
+    size_bytes: file.size,
   });
   if (error) {
-    if (path) await supabase.storage.from("task-evidence").remove([path]);
+    await supabase.storage.from("task-evidence").remove([path]);
     return fail(describeDbError(error));
   }
+  // Remember the delegation so the next submission is pre-filled.
+  if (delegation !== "N/A") await supabase.from("profiles").update({ delegation }).eq("id", actor.id);
   revalidateTaskViews(taskId);
-  return ok(undefined, hasFile ? "Work uploaded." : "Document link saved.");
+  revalidatePath("/resolutions", "layout");
+  return ok(undefined, "Submitted.");
 }
 
 export async function deleteUpload(uploadId: string): Promise<ActionResult> {

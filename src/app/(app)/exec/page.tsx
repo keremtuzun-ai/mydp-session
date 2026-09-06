@@ -77,7 +77,7 @@ export default async function ExecPage({ searchParams }: PageProps<"/exec">) {
             Assign task
           </Link>
         </div>
-        <TaskTable rows={rows} scope="all" status={status} showScope={false} basePath="/exec" />
+        <TaskTable rows={rows} scope="all" status={status} showScope={false} basePath="/exec" defaultDelegation={viewer.profile.delegation} />
       </section>
 
       <section className="card">

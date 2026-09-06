@@ -67,7 +67,7 @@ function RowAction({ row }: { row: TaskRow }) {
   );
 }
 
-export function TaskTable({ rows }: { rows: TaskRow[]; scope?: string; status?: string; showScope?: boolean; basePath?: string }) {
+export function TaskTable({ rows, defaultDelegation }: { rows: TaskRow[]; scope?: string; status?: string; showScope?: boolean; basePath?: string; defaultDelegation?: string | null }) {
   return (
     <>
       {rows.length === 0 ? (
@@ -86,7 +86,7 @@ export function TaskTable({ rows }: { rows: TaskRow[]; scope?: string; status?: 
             </thead>
             <tbody>
               {rows.map((t) => (
-                <Row key={t.id} row={t} />
+                <Row key={t.id} row={t} defaultDelegation={defaultDelegation} />
               ))}
             </tbody>
           </table>
@@ -96,7 +96,7 @@ export function TaskTable({ rows }: { rows: TaskRow[]; scope?: string; status?: 
   );
 }
 
-function Row({ row: t }: { row: TaskRow }) {
+function Row({ row: t, defaultDelegation }: { row: TaskRow; defaultDelegation?: string | null }) {
   return (
     <>
       <tr>
@@ -123,7 +123,7 @@ function Row({ row: t }: { row: TaskRow }) {
         </td>
         <td className="actions">
           <div className="flex flex-wrap justify-end gap-1">
-            <UploadDialog taskId={t.id} size="sm" variant="outline" />
+            <UploadDialog taskId={t.id} size="sm" variant="outline" defaultDelegation={defaultDelegation} />
             <RowAction row={t} />
           </div>
         </td>
@@ -132,7 +132,7 @@ function Row({ row: t }: { row: TaskRow }) {
         <td colSpan={5}>
           <details className="task-files">
             <summary>
-              Uploads <span className="tab-count">{t.uploads.length}</span>
+              Submissions <span className="tab-count">{t.uploads.length}</span>
             </summary>
             {t.uploads.length ? (
               <ul className="task-file-list">
@@ -152,11 +152,7 @@ function Row({ row: t }: { row: TaskRow }) {
               </ul>
             ) : (
               <p className="muted small mt-2 mb-0">
-                No uploads yet.{" "}
-                <Link href={`/calendar/${t.id}`} className="prose-link">
-                  Open the task
-                </Link>{" "}
-                to add evidence.
+                No submissions yet. Use Submit to add the link and the file.
               </p>
             )}
           </details>

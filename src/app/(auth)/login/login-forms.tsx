@@ -6,15 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Field, FormError } from "@/components/ui/field";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { signInWithEmailPassword } from "@/actions/auth";
+import { fieldError } from "@/hooks/use-action-feedback";
 
 export function LoginForms({ next }: { next: string }) {
   const [state, action] = useActionState(signInWithEmailPassword, null);
   return (
     <form action={action} className="flex flex-col gap-4" noValidate>
       <input type="hidden" name="next" value={next} />
-      <Field label="Name and surname" htmlFor="full_name">
-        <Input id="full_name" name="full_name" autoComplete="name" placeholder="Name Surname" required autoFocus />
-      </Field>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Name" htmlFor="first_name" error={fieldError(state, "first_name")}>
+          <Input id="first_name" name="first_name" autoComplete="given-name" placeholder="Name" required autoFocus />
+        </Field>
+        <Field label="Surname" htmlFor="last_name" error={fieldError(state, "last_name")}>
+          <Input id="last_name" name="last_name" autoComplete="family-name" placeholder="Surname" required />
+        </Field>
+      </div>
       <Field label="Email" htmlFor="email">
         <Input id="email" name="email" type="email" autoComplete="email" inputMode="email" required />
       </Field>

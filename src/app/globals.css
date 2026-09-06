@@ -978,6 +978,44 @@
   .doc-prose td, .doc-prose th { border: 1px solid #c9c9cf; padding: 4px 8px; vertical-align: top; }
   .doc-prose img { max-width: 100%; height: auto; }
   .doc-prose a { color: #1b3a6b; }
+  /* Voting: live tally for the desk, three big buttons for members */
+  .voting-panel { display: flex; flex-direction: column; gap: 12px; }
+  .voting-head { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .voting-count { font-family: var(--font-label); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); }
+  .voting-count strong { font-family: var(--font-display, inherit); font-size: 1.4rem; letter-spacing: -0.02em; color: var(--ink); margin-right: 4px; }
+  .voting-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; margin-right: 6px; animation: voting-pulse 1.2s ease-in-out infinite; }
+  @keyframes voting-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+  .vote-buttons { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+  .vote-btn {
+    appearance: none;
+    border: 2px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--ink);
+    padding: 18px 10px;
+    font-family: var(--font-label);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform var(--t-fast) var(--ease), border-color var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+  }
+  .vote-btn:hover { transform: translateY(-1px); border-color: var(--ink); }
+  .vote-btn:disabled { opacity: 0.6; cursor: progress; transform: none; }
+  .vote-btn.vote-favour.active { background: var(--navy); border-color: var(--navy); color: #fff; }
+  .vote-btn.vote-against.active { background: var(--red); border-color: var(--red); color: #fff; }
+  .vote-btn.vote-abstain.active { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .tally { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+  .tally li { display: grid; grid-template-columns: 96px 1fr 40px; align-items: center; gap: 10px; }
+  .tally-label { font-family: var(--font-label); font-size: 0.66rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+  .tally-bar { display: block; height: 14px; background: var(--paper-2, var(--navy-soft)); border-radius: 3px; overflow: hidden; }
+  .tally-bar > span { display: block; height: 100%; background: var(--ink); transition: width 0.4s var(--ease); }
+  .tally-favour .tally-bar > span { background: var(--navy); }
+  .tally-against .tally-bar > span { background: var(--red); }
+  .tally-num { font-family: var(--font-mono); font-size: 0.95rem; font-weight: 600; text-align: right; }
+  .is-compact .tally li { grid-template-columns: 84px 1fr 32px; }
+  .is-compact .tally-bar { height: 10px; }
   @media print {
     .masthead-side, .rail, .nav-hamburger, .ambient-waves, .header-actions { display: none !important; }
     body { background: #fff; color: #000; }

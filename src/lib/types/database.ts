@@ -699,6 +699,23 @@ export type Database = {
           { foreignKeyName: "resolution_publications_published_by_fkey"; columns: ["published_by"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
         ];
       };
+      resolution_votings: {
+        Row: { delegation_key: string; upload_id: string; status: string; opened_by: string | null; opened_at: string; closed_at: string | null };
+        Insert: { delegation_key: string; upload_id: string; status?: string; opened_by?: string | null; opened_at?: string; closed_at?: string | null };
+        Update: { delegation_key?: string; upload_id?: string; status?: string; opened_by?: string | null; opened_at?: string; closed_at?: string | null };
+        Relationships: [
+          { foreignKeyName: "resolution_votings_delegation_key_fkey"; columns: ["delegation_key"]; isOneToOne: true; referencedRelation: "resolution_publications"; referencedColumns: ["delegation_key"] },
+        ];
+      };
+      resolution_votes: {
+        Row: { delegation_key: string; profile_id: string; choice: string; voter_delegation: string | null; voted_at: string };
+        Insert: { delegation_key: string; profile_id: string; choice: string; voter_delegation?: string | null; voted_at?: string };
+        Update: { delegation_key?: string; profile_id?: string; choice?: string; voter_delegation?: string | null; voted_at?: string };
+        Relationships: [
+          { foreignKeyName: "resolution_votes_delegation_key_fkey"; columns: ["delegation_key"]; isOneToOne: false; referencedRelation: "resolution_votings"; referencedColumns: ["delegation_key"] },
+          { foreignKeyName: "resolution_votes_profile_id_fkey"; columns: ["profile_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ];
+      };
     };
     Views: {
       public_profiles: {
@@ -728,6 +745,7 @@ export type Database = {
       username_available: { Args: { p_username: string }; Returns: boolean };
       mark_overdue_tasks: { Args: Record<string, never>; Returns: number };
       session_chair_notes: { Args: { sc: string }; Returns: string | null };
+      resolution_vote_counts: { Args: { k: string }; Returns: { favour: number; against: number; abstain: number; total: number }[] };
     };
     Enums: {
       user_role: "admin" | "executive" | "chair" | "delegate";
@@ -774,6 +792,8 @@ export type TaskTemplate = Tables<"task_templates">;
 export type SessionFeedback = Tables<"session_feedback">;
 export type ResolutionLink = Tables<"resolution_links">;
 export type ResolutionPublication = Tables<"resolution_publications">;
+export type ResolutionVoting = Tables<"resolution_votings">;
+export type ResolutionVote = Tables<"resolution_votes">;
 
 // Unused helper kept for parity with generated files.
 export type { Timestamps as _Timestamps };

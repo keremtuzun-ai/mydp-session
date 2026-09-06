@@ -9,6 +9,7 @@ import { delegationKey, previewKind, sanitizeDocHtml } from "@/lib/resolutions";
 import { uuid } from "@/lib/validation/schemas";
 import { PageHeader } from "@/components/mun/page-header";
 import { DocumentViewer } from "../document-viewer";
+import { VotingPanel } from "../voting-panel";
 import { fmt } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Resolution" };
@@ -78,6 +79,11 @@ export default async function ResolutionPage({ params, searchParams }: PageProps
           </>
         }
       />
+      {isPublished ? (
+        <section className="card card-tight" aria-label="Voting">
+          <VotingPanel delegationKey={key} delegation={delegation} canManage={viewer.isStaff} canVote={!viewer.isStaff} />
+        </section>
+      ) : null}
       <DocumentViewer uploadId={doc.uploadId} kind={kind} fileName={doc.fileName} docxHtml={docxHtml} />
     </div>
   );

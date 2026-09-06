@@ -23,6 +23,7 @@ export type DelegationGroup = {
   docs: ResolutionDoc[];
   published: ResolutionDoc | null;
   publishedAt: string | null;
+  voting: "open" | "closed" | null;
 };
 
 type UploadRow = {
@@ -67,17 +68,19 @@ async function toDocs(db: Db, rows: UploadRow[]): Promise<ResolutionDoc[]> {
  * sees everything.
  */
 export async function listDelegationGroups(db: Db): Promise<DelegationGroup[]> {
-  const [{ data: uploads }, { data: pubs }] = await Promise.all([
+  const [{ data: uploads }, { data: pubs }, { data: votings }] = await Promise.all([
     db.from("task_uploads").select("id, task_id, uploaded_by, title, delegation, storage_path, external_url, file_name, mime_type, size_bytes, created_at").not("storage_path", "is", null).order("created_at", { ascending: false }),
     db.from("resolution_publications").select("*"),
+    db.from("resolution_votings").select("delegation_key, status"),
   ]);
+  const votingByKey = new Map((votings ?? []).map((v) => [v.delegation_key, v.status === "open" ? ("open" as const) : ("closed" as const)]));
   const rows = (uploads ?? []).filter((u) => !isNoDelegation(u.delegation));
   const docs = await toDocs(db, rows);
   const pubByKey = new Map((pubs ?? []).map((p) => [p.delegation_key, p]));
   const groups = new Map<string, DelegationGroup>();
   for (const d of docs) {
     const key = delegationKey(d.delegation);
-    const g = groups.get(key) ?? { key, delegation: d.delegation, docs: [], published: null, publishedAt: null };
+    const g = groups.get(key) ?? { key, delegation: d.delegation, docs: [], published: null, publishedAt: null, voting: null };
     g.docs.push(d);
     groups.set(key, g);
   }
@@ -87,28 +90,33 @@ export async function listDelegationGroups(db: Db): Promise<DelegationGroup[]> {
       g.published = g.docs.find((d) => d.uploadId === p.upload_id) ?? null;
       g.publishedAt = g.published ? p.published_at : null;
       g.delegation = displayDelegation(p.delegation);
+      g.voting = votingByKey.get(g.key) ?? null;
     }
   }
   return Array.from(groups.values()).sort((a, b) => a.delegation.localeCompare(b.delegation, "en"));
 }
 
-export type PublishedResolution = { key: string; delegation: string; publishedAt: string; doc: ResolutionDoc };
+export type PublishedResolution = { key: string; delegation: string; publishedAt: string; doc: ResolutionDoc; voting: "open" | "closed" | null };
 
 /** Delegations the desk has made visible, alphabetically. */
 export async function listPublishedResolutions(db: Db): Promise<PublishedResolution[]> {
   const { data: pubs } = await db.from("resolution_publications").select("*").order("delegation");
   const list = pubs ?? [];
   if (list.length === 0) return [];
-  const { data: uploads } = await db
-    .from("task_uploads")
-    .select("id, task_id, uploaded_by, title, delegation, storage_path, external_url, file_name, mime_type, size_bytes, created_at")
-    .in("id", list.map((p) => p.upload_id));
+  const [{ data: uploads }, { data: votings }] = await Promise.all([
+    db
+      .from("task_uploads")
+      .select("id, task_id, uploaded_by, title, delegation, storage_path, external_url, file_name, mime_type, size_bytes, created_at")
+      .in("id", list.map((p) => p.upload_id)),
+    db.from("resolution_votings").select("delegation_key, status"),
+  ]);
+  const votingByKey = new Map((votings ?? []).map((v) => [v.delegation_key, v.status === "open" ? ("open" as const) : ("closed" as const)]));
   const docs = await toDocs(db, uploads ?? []);
   const byId = new Map(docs.map((d) => [d.uploadId, d]));
   return list
     .map((p) => {
       const doc = byId.get(p.upload_id);
-      return doc ? { key: p.delegation_key, delegation: displayDelegation(p.delegation), publishedAt: p.published_at, doc } : null;
+      return doc ? { key: p.delegation_key, delegation: displayDelegation(p.delegation), publishedAt: p.published_at, doc, voting: votingByKey.get(p.delegation_key) ?? null } : null;
     })
     .filter((x): x is PublishedResolution => x !== null);
 }

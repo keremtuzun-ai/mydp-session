@@ -47,7 +47,7 @@ export default async function ResolutionsPage() {
   const published = await listPublishedResolutions(supabase);
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader eyebrow="Committee" title="Resolutions" description="Resolutions the executive desk has opened for reading. Choose a delegation to read its document here." />
+      <PageHeader eyebrow="Committee" title="Resolutions" description="Resolutions the executive desk has opened for reading. Choose a delegation to read its document here and, when the desk opens voting, cast your vote." />
       {published.length === 0 ? (
         <section className="card">
           <EmptyState title="No resolutions shared yet" description="The executive desk decides which delegations' resolutions are visible. Check back after the session." className="empty-state-sm" />
@@ -57,6 +57,7 @@ export default async function ResolutionsPage() {
           {published.map((p) => (
             <Link key={p.key} href={`/resolutions/${encodeURIComponent(p.key)}`} className="card delegation-card delegation-link">
               <span className="delegation-name">{p.delegation}</span>
+              {p.voting === "open" ? <span className="chip chip-red self-start">Voting open</span> : p.voting === "closed" ? <span className="chip chip-navy self-start">Voting closed</span> : null}
               <span className="small muted">
                 {p.doc.title} · {p.doc.authorName}
               </span>

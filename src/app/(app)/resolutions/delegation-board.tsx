@@ -6,8 +6,8 @@ import { useTransition } from "react";
 import { toast } from "sonner";
 import { Eye, EyeOff } from "lucide-react";
 import { publishResolution, unpublishResolution } from "@/actions/resolutions";
-import { fmt } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { fmt, cn } from "@/lib/utils";
+import { VotingPanel } from "./voting-panel";
 
 type Doc = { uploadId: string; title: string; fileName: string | null; createdAt: string; authorName: string; taskTitle: string };
 export type BoardGroup = { key: string; delegation: string; docs: Doc[]; published: Doc | null; publishedAt: string | null };
@@ -48,10 +48,15 @@ function DelegationCard({ group: g }: { group: BoardGroup }) {
       </button>
       <div className="delegation-body">
         {visible && g.published ? (
-          <p className="m-0 small">
-            Showing <strong>{g.published.title}</strong> by {g.published.authorName}
-            {g.publishedAt ? <span className="muted"> · shared {fmt(g.publishedAt, "d MMM HH:mm")}</span> : null}
-          </p>
+          <>
+            <p className="m-0 small">
+              Showing <strong>{g.published.title}</strong> by {g.published.authorName}
+              {g.publishedAt ? <span className="muted"> · shared {fmt(g.publishedAt, "d MMM HH:mm")}</span> : null}
+            </p>
+            <div className="mt-3">
+              <VotingPanel delegationKey={g.key} delegation={g.delegation} canManage canVote={false} compact />
+            </div>
+          </>
         ) : (
           <p className="m-0 small muted">Press the delegation to show its latest document to every delegate.</p>
         )}

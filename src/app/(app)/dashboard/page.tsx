@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
+import { ensureUpcomingSessions } from "@/lib/data/rolling-sessions";
 import { listSessionsWithCoverage, getUploadCounts, getNameMap, nameOf } from "@/lib/data/queries";
 import { PageHeader } from "@/components/mun/page-header";
 import { SessionCard } from "@/components/mun/session-card";
@@ -19,6 +20,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
   const viewer = await getViewer();
   const supabase = await createClient();
   const now = new Date().toISOString();
+  await ensureUpcomingSessions();
 
   const [upcoming, { data: tasks }, { data: announcements }, { data: attendance }, { data: sessionsDone }] = await Promise.all([
     listSessionsWithCoverage(supabase, { from: now, order: "asc", limit: 1 }),
@@ -47,11 +49,6 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
         title={`Good to see you, ${firstName}.`}
         actions={
           <>
-            {viewer.isStaff ? (
-              <Link href="/sessions/new" className="btn">
-                New session
-              </Link>
-            ) : null}
             {viewer.isStaff || viewer.isChair ? (
               <Link href="/calendar/new" className="btn btn-outline">
                 Assign task
@@ -70,7 +67,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
         <StatTile label="Notices" value={(announcements ?? []).length} />
       </div>
 
-      <div className="two-col-wide grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] mt-5">
+      <div className="mt-5">
         <section className="card">
           <div className="section-head">
             <h2>Next weekly session</h2>
@@ -87,22 +84,6 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
           )}
         </section>
 
-        <section className="card">
-          <div className="section-head">
-            <h2>{viewer.isStaff ? "Executive desk" : "Quick links"}</h2>
-          </div>
-          <div className="filter-pills">
-            {[
-              ...(viewer.isStaff
-                ? [["/calendar/new", "Assign task"], ["/exec/uploads", "Submissions"], ["/exec/attendance", "Roll call"], ["/analytics", "Analytics"], ["/admin", "Members"]]
-                : [["/attendance", "My attendance"], ["/settings", "Profile"]]),
-            ].map(([href, label]) => (
-              <Link key={href} href={href!} className="filter-pill">
-                {label}
-              </Link>
-            ))}
-          </div>
-        </section>
       </div>
 
       <div className="two-col-wide grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] mt-5">

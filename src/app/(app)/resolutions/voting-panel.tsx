@@ -75,7 +75,6 @@ export function VotingPanel({ delegationKey, delegation, canManage, canVote, com
           <button type="button" className="btn btn-sm" disabled={pending} onClick={() => run(() => openVoting({ key: delegationKey }))}>
             Open voting
           </button>
-          <span className="small muted">Delegates will be asked to vote in favour, against or abstain.</span>
         </div>
       );
     }
@@ -122,7 +121,7 @@ export function VotingPanel({ delegationKey, delegation, canManage, canVote, com
         </div>
       ) : null}
       {canVote && status === "open" ? (
-        <p className="m-0 small muted">{snap.myVote ? `Your vote: ${VOTE_LABEL[snap.myVote]}. You can change it until the desk closes voting.` : "Choose one. You can change it until the desk closes voting."}</p>
+        <p className="m-0 small muted">{snap.myVote ? `Your vote: ${VOTE_LABEL[snap.myVote]}.` : "You can change your vote until voting closes."}</p>
       ) : null}
       {canVote && status === "closed" && snap.myVote ? <p className="m-0 small muted">Your vote: {VOTE_LABEL[snap.myVote]}.</p> : null}
 

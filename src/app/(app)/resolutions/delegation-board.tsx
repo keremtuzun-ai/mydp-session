@@ -50,7 +50,7 @@ function DelegationCard({ group: g }: { group: BoardGroup }) {
         {visible && g.published ? (
           <>
             <p className="m-0 small">
-              Showing <strong>{g.published.title}</strong> by {g.published.authorName}
+              <strong>{g.published.authorName}</strong>
               {g.publishedAt ? <span className="muted"> · shared {fmt(g.publishedAt, "d MMM HH:mm")}</span> : null}
             </p>
             <div className="mt-3">
@@ -58,7 +58,7 @@ function DelegationCard({ group: g }: { group: BoardGroup }) {
             </div>
           </>
         ) : (
-          <p className="m-0 small muted">Press the delegation to show its latest document to every delegate.</p>
+          <p className="m-0 small muted">{g.docs[0]!.authorName}</p>
         )}
         <details className="task-files mt-2">
           <summary>
@@ -70,10 +70,8 @@ function DelegationCard({ group: g }: { group: BoardGroup }) {
               return (
                 <li key={d.uploadId} className="task-file">
                   <div className="task-file-meta">
-                    <strong>{d.title}</strong>
-                    <span className="muted small">
-                      {d.taskTitle} · {d.authorName} · {fmt(d.createdAt, "d MMM HH:mm")}
-                    </span>
+                    <strong>{d.authorName}</strong>
+                    <span className="muted small">{fmt(d.createdAt, "d MMM yyyy, HH:mm")}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Link href={`/resolutions/${encodeURIComponent(g.key)}?upload=${d.uploadId}`} className="btn btn-quiet btn-sm">

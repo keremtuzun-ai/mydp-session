@@ -19,15 +19,10 @@ export default async function ResolutionsPage() {
     const visible = groups.filter((g) => g.published).length;
     return (
       <div className="flex flex-col gap-6">
-        <PageHeader
-          eyebrow="Secretariat"
-          title="Resolutions"
-          description="Every delegation that has submitted a document. Press a delegation to make its resolution readable by all delegates; press again to hide it. Everything is hidden until you choose."
-          actions={<span className="chip chip-navy">{visible} of {groups.length} visible</span>}
-        />
+        <PageHeader eyebrow="Secretariat" title="Resolutions" actions={<span className="chip chip-navy">{visible} of {groups.length} visible</span>} />
         {groups.length === 0 ? (
           <section className="card">
-            <EmptyState title="No delegations yet" description="Delegations appear here as soon as a member submits a file for one." className="empty-state-sm" />
+            <EmptyState title="No delegations yet" className="empty-state-sm" />
           </section>
         ) : (
           <DelegationBoard
@@ -47,10 +42,10 @@ export default async function ResolutionsPage() {
   const published = await listPublishedResolutions(supabase);
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader eyebrow="Committee" title="Resolutions" description="Resolutions the executive desk has opened for reading. Choose a delegation to read its document here and, when the desk opens voting, cast your vote." />
+      <PageHeader eyebrow="Committee" title="Resolutions" />
       {published.length === 0 ? (
         <section className="card">
-          <EmptyState title="No resolutions shared yet" description="The executive desk decides which delegations' resolutions are visible. Check back after the session." className="empty-state-sm" />
+          <EmptyState title="No resolutions shared yet" className="empty-state-sm" />
         </section>
       ) : (
         <div className="delegation-grid">
@@ -58,9 +53,7 @@ export default async function ResolutionsPage() {
             <Link key={p.key} href={`/resolutions/${encodeURIComponent(p.key)}`} className="card delegation-card delegation-link">
               <span className="delegation-name">{p.delegation}</span>
               {p.voting === "open" ? <span className="chip chip-red self-start">Voting open</span> : p.voting === "closed" ? <span className="chip chip-navy self-start">Voting closed</span> : null}
-              <span className="small muted">
-                {p.doc.title} · {p.doc.authorName}
-              </span>
+              <span className="small">{p.doc.authorName}</span>
               <span className="small muted">Shared {fmt(p.publishedAt, "d MMM yyyy, HH:mm")}</span>
             </Link>
           ))}

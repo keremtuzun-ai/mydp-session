@@ -4,6 +4,7 @@ import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { appName, schoolName } from "@/lib/env";
 import { fmt, zonedNow, zonedInstant } from "@/lib/utils";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ensureUpcomingSessions } from "@/lib/data/rolling-sessions";
 import { Countdown } from "./countdown";
 
 /** Sessions meet every Tuesday at 10:55 and 15:10 (programme timezone). */
@@ -34,6 +35,7 @@ async function nextPublishedSession(): Promise<Date | null> {
 }
 
 export default async function LandingPage() {
+  await ensureUpcomingSessions();
   const next = (await nextPublishedSession()) ?? nextSessionStart();
   return (
     <>
@@ -60,9 +62,6 @@ export default async function LandingPage() {
             <h1 className="front-hero-title">
               Where the session <span className="accent-line">happens.</span>
             </h1>
-            <p className="front-hero-standfirst">
-              Sessions, tasks, materials, resolutions and votes for the <strong>Koç MUN Club</strong>, in one place.
-            </p>
             <div className="front-hero-actions">
               <Link href="/welcome" className="btn btn-cream btn-lg">
                 Create account

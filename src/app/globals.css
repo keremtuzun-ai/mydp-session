@@ -862,8 +862,8 @@
   .front-band-inner { max-width: var(--content-w); margin: 0 auto; padding: clamp(56px, 9vw, 120px) 32px clamp(48px, 7vw, 96px); display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(180px, 0.7fr); gap: 40px; align-items: center; }
   .front-hero-kicker { font-family: var(--font-label); font-size: 0.66rem; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: var(--band-accent); margin: 0 0 26px; display: flex; align-items: center; gap: 14px; }
   .front-hero-kicker::before { content: ""; width: 34px; height: 2px; background: var(--band-accent); flex: none; }
-  .front-hero-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(3rem, 8.4vw, 6.2rem); line-height: 0.98; letter-spacing: -0.045em; margin: 0 0 28px; color: var(--band-ink); }
-  .front-hero-title .accent-line { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: -0.02em; color: var(--band-accent); }
+  .front-hero-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(3rem, 8.4vw, 6.2rem); line-height: 0.98; letter-spacing: -0.045em; margin: 0 0 34px; color: var(--band-ink); }
+  .front-hero-title .accent-line { color: var(--band-accent); }
   .front-hero-standfirst { font-size: clamp(1.05rem, 1.6vw, 1.2rem); line-height: 1.7; color: var(--band-ink-2); max-width: 46ch; margin: 0 0 34px; }
   .front-hero-standfirst strong { color: var(--band-ink); }
   .front-hero-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }

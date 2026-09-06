@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { listSessionsWithCoverage, attendanceSummaryText } from "@/lib/data/queries";
+import { ensureUpcomingSessions } from "@/lib/data/rolling-sessions";
 import { PageHeader } from "@/components/mun/page-header";
 import { SessionCard } from "@/components/mun/session-card";
 import { EmptyState } from "@/components/mun/empty-state";
@@ -11,6 +12,7 @@ import { SessionFilters } from "./session-filters";
 export const metadata: Metadata = { title: "Sessions" };
 
 export default async function SessionsPage({ searchParams }: PageProps<"/sessions">) {
+  await ensureUpcomingSessions();
   const sp = await searchParams;
   const scope = sp.scope === "past" ? "past" : sp.scope === "all" ? "all" : "upcoming";
   const status = typeof sp.status === "string" ? sp.status : "";

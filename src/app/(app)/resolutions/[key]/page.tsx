@@ -65,9 +65,9 @@ export default async function ResolutionPage({ params, searchParams }: PageProps
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        eyebrow={`Resolution · ${delegation}`}
-        title={doc.title}
-        description={`Submitted by ${doc.authorName} for “${doc.taskTitle}” on ${fmt(doc.createdAt, "d MMMM yyyy, HH:mm")}.`}
+        eyebrow="Resolution"
+        title={delegation}
+        description={`${doc.authorName} · ${fmt(doc.createdAt, "d MMMM yyyy, HH:mm")}`}
         actions={
           <>
             {viewer.isStaff ? (
@@ -84,7 +84,7 @@ export default async function ResolutionPage({ params, searchParams }: PageProps
           <VotingPanel delegationKey={key} delegation={delegation} canManage={viewer.isStaff} canVote={!viewer.isStaff} />
         </section>
       ) : null}
-      <DocumentViewer uploadId={doc.uploadId} kind={kind} fileName={doc.fileName} docxHtml={docxHtml} />
+      <DocumentViewer uploadId={doc.uploadId} kind={kind} fileName={null} docxHtml={docxHtml} />
     </div>
   );
 }

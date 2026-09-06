@@ -93,14 +93,9 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
           </div>
           <div className="filter-pills">
             {[
-              ...(viewer.isStaff ? [["/exec", "Tasks & progress"], ["/exec/uploads", "Submissions"], ["/resolutions", "Resolutions"], ["/exec/attendance", "Attendance"], ["/calendar/new", "Assign task"]] : []),
-              ["/calendar", "Calendar"],
-              ["/sessions", "Sessions"],
-              ["/materials", "Materials"],
-              ["/announcements", "Announcements"],
-              ["/attendance", "My attendance"],
-              ["/settings", "Profile"],
-              ...(viewer.isStaff ? [["/analytics", "Analytics"]] : []),
+              ...(viewer.isStaff
+                ? [["/calendar/new", "Assign task"], ["/exec/uploads", "Submissions"], ["/exec/attendance", "Roll call"], ["/analytics", "Analytics"], ["/admin", "Members"]]
+                : [["/attendance", "My attendance"], ["/settings", "Profile"]]),
             ].map(([href, label]) => (
               <Link key={href} href={href!} className="filter-pill">
                 {label}

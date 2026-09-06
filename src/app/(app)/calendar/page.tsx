@@ -6,7 +6,7 @@ import { getNameMap, nameOf } from "@/lib/data/queries";
 import { PageHeader } from "@/components/mun/page-header";
 import { TaskTable, type TaskRow } from "./task-table";
 
-export const metadata: Metadata = { title: "Calendar" };
+export const metadata: Metadata = { title: "Tasks" };
 
 export default async function CalendarPage({ searchParams }: PageProps<"/calendar">) {
   const sp = await searchParams;
@@ -65,7 +65,7 @@ export default async function CalendarPage({ searchParams }: PageProps<"/calenda
   return (
     <>
       <PageHeader
-        title="Calendar"
+        title="Tasks"
         actions={
           canManageAny ? (
             <Link href="/calendar/new" className="btn">

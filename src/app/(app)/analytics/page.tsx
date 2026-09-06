@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/mun/page-header";
+import { ExecNav } from "../exec/exec-nav";
 import { PermissionDenied } from "@/components/mun/permission-denied";
 import { StatTile } from "@/components/mun/stat-tile";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -53,7 +54,8 @@ export default async function AnalyticsPage() {
 
   return (
     <div className="flex flex-col gap-7">
-      <PageHeader eyebrow="Secretariat" title="Analytics" />
+      <PageHeader eyebrow="Secretariat" title="Executive desk" />
+      <ExecNav />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <StatTile label="Attendance" value={byWeek.length ? `${Math.round(byWeek.reduce((a, b) => a + b.rate, 0) / byWeek.length)}%` : "—"} />

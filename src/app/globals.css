@@ -9,47 +9,47 @@
    Swiss editorial: warm paper, near-black ink, navy as the working accent,
    one bronze signal colour. Hairline rules, flat surfaces, tight grid.
    ========================================================================== */
-/* Day edition: warm paper, stone ink, deep blue as the working colour and
-   wine as the single signal colour. Square corners, hairlines, Manrope. */
+/* Day edition: white paper, deep blue as the working colour and light blue
+   as the single signal colour. Square corners, hairlines, Manrope. */
 :root {
   color-scheme: light;
-  --paper: #f8f5f0;
-  --paper-2: #efe9e1;
-  --surface: #fffdfa;
-  --surface-2: #f8f5f0;
-  --ink: #2f2c27;
-  --ink-2: #5e574f;
-  --ink-3: #857c71;
-  --ink-rev: #efe9e1;
-  --line: #d9d2c8;
-  --line-soft: #e9e3db;
-  --rule-strong: #2f2c27;
-  --navy: #1e3358;
-  --navy-2: #172847;
-  --navy-soft: rgba(30, 51, 88, 0.08);
-  --navy-line: rgba(30, 51, 88, 0.32);
-  --link: #1e3358;
-  --red: #72383d;
-  --red-deep: #5a2b30;
-  --red-soft: rgba(114, 56, 61, 0.1);
-  --success: #2e6b45;
-  --success-soft: rgba(46, 107, 69, 0.1);
-  --danger: #a8332a;
-  --danger-soft: rgba(168, 51, 42, 0.09);
-  --warn: #8a5a12;
-  --warn-soft: rgba(138, 90, 18, 0.11);
-  --band: #322d29;
-  --band-2: #282320;
-  --band-ink: #efe9e1;
-  --band-ink-2: #d1c7bd;
-  --band-ink-3: #ac9c8d;
-  --band-line: rgba(239, 233, 225, 0.14);
-  --band-accent: #c9949a;
+  --paper: #f7f7f4;
+  --paper-2: #eeeeea;
+  --surface: #ffffff;
+  --surface-2: #f7f7f4;
+  --ink: #14162a;
+  --ink-2: #4a4d63;
+  --ink-3: #7d8097;
+  --ink-rev: #f7f7f4;
+  --line: #d7d9e0;
+  --line-soft: #e7e8ee;
+  --rule-strong: #14162a;
+  --navy: #07054d;
+  --navy-2: #191670;
+  --navy-soft: rgba(7, 5, 77, 0.07);
+  --navy-line: rgba(7, 5, 77, 0.3);
+  --link: #07054d;
+  --red: #2a6ba6;
+  --red-deep: #1f5182;
+  --red-soft: rgba(42, 107, 166, 0.1);
+  --success: #07054d;
+  --success-soft: rgba(7, 5, 77, 0.08);
+  --danger: #1f5182;
+  --danger-soft: rgba(31, 81, 130, 0.1);
+  --warn: #2a6ba6;
+  --warn-soft: rgba(42, 107, 166, 0.12);
+  --band: #07054d;
+  --band-2: #0b0960;
+  --band-ink: #f7f7f4;
+  --band-ink-2: #c9cde6;
+  --band-ink-3: #9aa1cc;
+  --band-line: rgba(247, 247, 244, 0.14);
+  --band-accent: #7fb2e6;
   --btn-fill: var(--navy);
   --btn-fill-hover: var(--navy-2);
-  --btn-ink: #efe9e1;
-  --on-fill: #fffdfa;
-  --focus-ring: rgba(30, 51, 88, 0.55);
+  --btn-ink: #f7f7f4;
+  --on-fill: #ffffff;
+  --focus-ring: rgba(42, 107, 166, 0.6);
   --font-text: var(--font-manrope), "Manrope", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-display: var(--font-text);
   --font-serif: var(--font-playfair), "Playfair Display", Georgia, "Times New Roman", serif;
@@ -65,49 +65,49 @@
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
   --t-fast: 160ms;
   --t-med: 260ms;
-  --shadow-pop: 0 2px 6px rgba(47, 44, 39, 0.08), 0 24px 60px -18px rgba(47, 44, 39, 0.28);
+  --shadow-pop: 0 2px 6px rgba(20, 22, 42, 0.08), 0 24px 60px -18px rgba(20, 22, 42, 0.28);
   --waves: url("/img/waves-day.svg");
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --paper: #1c1916;
-  --paper-2: #221e1b;
-  --surface: #282320;
-  --surface-2: #2e2925;
-  --ink: #efe9e1;
-  --ink-2: #d1c7bd;
-  --ink-3: #ac9c8d;
-  --ink-rev: #1c1916;
-  --line: rgba(239, 233, 225, 0.16);
-  --line-soft: rgba(239, 233, 225, 0.09);
-  --rule-strong: #efe9e1;
-  --navy: #a3b6df;
-  --navy-2: #bccbea;
-  --navy-soft: rgba(163, 182, 223, 0.12);
-  --navy-line: rgba(163, 182, 223, 0.38);
-  --link: #b3c3e6;
-  --red: #c9949a;
-  --red-deep: #d9aeb3;
-  --red-soft: rgba(201, 148, 154, 0.14);
-  --success: #7fbd97;
-  --success-soft: rgba(127, 189, 151, 0.13);
-  --danger: #e0857a;
-  --danger-soft: rgba(224, 133, 122, 0.13);
-  --warn: #d4a962;
-  --warn-soft: rgba(212, 169, 98, 0.14);
-  --band: #141210;
-  --band-2: #1c1916;
-  --band-ink: #efe9e1;
-  --band-ink-2: #d1c7bd;
-  --band-ink-3: #ac9c8d;
-  --band-line: rgba(239, 233, 225, 0.14);
-  --band-accent: #c9949a;
-  --btn-fill: #efe9e1;
-  --btn-fill-hover: #fffdfa;
-  --btn-ink: #1c1916;
-  --on-fill: #1c1916;
-  --focus-ring: rgba(163, 182, 223, 0.7);
+  --paper: #0d0e17;
+  --paper-2: #12141f;
+  --surface: #161826;
+  --surface-2: #1b1d2e;
+  --ink: #e8e9f0;
+  --ink-2: #a4a7bb;
+  --ink-3: #717490;
+  --ink-rev: #0d0e17;
+  --line: rgba(232, 233, 240, 0.16);
+  --line-soft: rgba(232, 233, 240, 0.09);
+  --rule-strong: #e8e9f0;
+  --navy: #8e99c9;
+  --navy-2: #a5aed4;
+  --navy-soft: rgba(142, 153, 201, 0.12);
+  --navy-line: rgba(142, 153, 201, 0.38);
+  --link: #9aa4cf;
+  --red: #7fb2e6;
+  --red-deep: #a3c8ee;
+  --red-soft: rgba(127, 178, 230, 0.14);
+  --success: #8e99c9;
+  --success-soft: rgba(142, 153, 201, 0.13);
+  --danger: #a3c8ee;
+  --danger-soft: rgba(163, 200, 238, 0.13);
+  --warn: #7fb2e6;
+  --warn-soft: rgba(127, 178, 230, 0.14);
+  --band: #060520;
+  --band-2: #0a0930;
+  --band-ink: #e8e9f0;
+  --band-ink-2: #b9bfe0;
+  --band-ink-3: #8a90bb;
+  --band-line: rgba(232, 233, 240, 0.14);
+  --band-accent: #7fb2e6;
+  --btn-fill: #e8e9f0;
+  --btn-fill-hover: #ffffff;
+  --btn-ink: #0d0e17;
+  --on-fill: #0d0e17;
+  --focus-ring: rgba(127, 178, 230, 0.7);
   --shadow-pop: 0 2px 6px rgba(0, 0, 0, 0.4), 0 24px 60px -18px rgba(0, 0, 0, 0.65);
   --waves: url("/img/waves-night.svg");
 }
@@ -538,8 +538,8 @@
   .btn-outline { background: transparent; border-color: var(--ink); color: var(--ink); }
   .btn-outline:hover { background: var(--ink); border-color: var(--ink); color: var(--paper); }
   .btn-cream { background: var(--band-ink); border-color: var(--band-ink); color: var(--band); }
-  .btn-cream:hover { background: #fffdfa; border-color: #fffdfa; color: var(--band); }
-  .btn-cream-outline { background: transparent; border-color: rgba(239, 233, 225, 0.4); color: var(--band-ink); }
+  .btn-cream:hover { background: #ffffff; border-color: #ffffff; color: var(--band); }
+  .btn-cream-outline { background: transparent; border-color: rgba(247, 247, 244, 0.4); color: var(--band-ink); }
   .btn-cream-outline:hover { background: transparent; border-color: var(--band-ink); color: var(--band-ink); }
   .btn-quiet { background: transparent; border-color: var(--line); color: var(--ink-2); }
   .btn-quiet:hover { background: transparent; border-color: var(--ink); color: var(--ink); }

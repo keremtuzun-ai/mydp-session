@@ -53,35 +53,53 @@ export default async function LandingPage() {
           </div>
         </div>
       </header>
-      <main className="main-area">
-        <div className="main-inner">
-          <section className="front-hero">
-            <div>
-              <p className="front-hero-kicker">{schoolName} · Model United Nations</p>
-              <h1 className="front-hero-title">
-                The weekly <span className="accent-line">session</span> hub.
-              </h1>
-              <p className="front-hero-standfirst">Sessions, tasks, materials and announcements for the Koç MUN Club.</p>
-              <div className="front-hero-actions">
-                <Link href="/welcome" className="btn btn-lg">
-                  Create account
-                </Link>
-                <Link href="/login" className="btn btn-outline btn-lg">
-                  Already have an account
-                </Link>
-              </div>
+      <section className="front-band">
+        <div className="front-band-inner">
+          <div>
+            <p className="front-hero-kicker">{schoolName} · Model United Nations</p>
+            <h1 className="front-hero-title">
+              Where the session <span className="accent-line">happens.</span>
+            </h1>
+            <p className="front-hero-standfirst">
+              Sessions, tasks, materials, resolutions and votes for the <strong>Koç MUN Club</strong>, in one place.
+            </p>
+            <div className="front-hero-actions">
+              <Link href="/welcome" className="btn btn-cream btn-lg">
+                Create account
+              </Link>
+              <Link href="/login" className="btn btn-cream-outline btn-lg">
+                Sign in
+              </Link>
             </div>
-            <div className="front-hero-logo"><BrandLogo height={150} wordmark={false} /></div>
-          </section>
-
+          </div>
+          <div className="front-hero-logo"><BrandLogo height={150} wordmark={false} /></div>
+        </div>
+      </section>
+      <main className="main-area">
+        <div className="front-facts">
+          <div className="front-fact">
+            <p className="front-fact-label">When</p>
+            <p className="front-fact-value">Every Tuesday, 10:55 and 15:10</p>
+          </div>
+          <div className="front-fact">
+            <p className="front-fact-label">Where</p>
+            <p className="front-fact-value">1S in the morning, the Library in the afternoon</p>
+          </div>
+          <div className="front-fact">
+            <p className="front-fact-label">Next up</p>
+            <p className="front-fact-value">{fmt(next, "EEEE d MMMM, HH:mm")}</p>
+          </div>
+        </div>
+        <div className="main-inner">
           <section className="front-countdown">
-            <p className="countdown-label">Next weekly session · {fmt(next, "EEEE d MMMM, HH:mm")}</p>
+            <p className="countdown-label">Countdown to the next session</p>
             <Countdown target={next.toISOString()} />
           </section>
         </div>
       </main>
-      <footer className="main-inner !pt-0 !pb-8 flex items-center justify-between label-caps">
+      <footer className="front-foot label-caps">
         <span>{appName}</span>
+        <span className="muted">{schoolName}</span>
       </footer>
     </>
   );

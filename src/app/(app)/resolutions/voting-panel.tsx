@@ -38,14 +38,15 @@ export function VotingPanel({ delegationKey, delegation, canManage, canVote, com
 
   useEffect(() => {
     let alive = true;
-    // First load always; later polls pause while the tab is hidden and resume on visibilitychange.
-    void load();
+    let first = true;
+    // The first load always runs; later polls pause while the tab is hidden and resume on visibilitychange.
     const tick = () => {
       if (!alive) return;
-      if (!document.hidden) void load();
+      if (first || !document.hidden) void load();
+      first = false;
       timer.current = window.setTimeout(tick, POLL_MS);
     };
-    timer.current = window.setTimeout(tick, POLL_MS);
+    timer.current = window.setTimeout(tick, 0);
     const onVisible = () => !document.hidden && void load();
     document.addEventListener("visibilitychange", onVisible);
     return () => {

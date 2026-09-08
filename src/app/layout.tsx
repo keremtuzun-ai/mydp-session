@@ -18,7 +18,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" suppressHydrationWarning className={`h-full ${manrope.variable} ${playfair.variable}`}>
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange value={{ light: "light", dark: "dark" }}>
-          <div className="ambient-waves" aria-hidden />
           {children}
           <Toaster />
         </ThemeProvider>

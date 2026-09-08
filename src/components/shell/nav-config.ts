@@ -15,6 +15,9 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/settings", label: "Settings", icon: "settings" },
 ];
 
+/** The four tabs that get their own slot in the phone bar; everything else sits behind "More". */
+export const MOBILE_TABS = ["/dashboard", "/calendar", "/sessions", "/resolutions"];
+
 /** Everything the executive desk does, as one row of pills under the desk header. */
 export const EXEC_SECTIONS: { href: string; label: string; exact?: boolean }[] = [
   { href: "/exec", label: "Tasks & progress", exact: true },

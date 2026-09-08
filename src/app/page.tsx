@@ -4,7 +4,7 @@ import { ThemeToggle } from "@/components/shell/theme-toggle";
 import { appName, schoolName } from "@/lib/env";
 import { fmt, zonedNow, zonedInstant } from "@/lib/utils";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { ensureUpcomingSessions } from "@/lib/data/rolling-sessions";
+import { ensureUpcomingSessions, PROGRAMME_START } from "@/lib/data/rolling-sessions";
 import { Countdown } from "./countdown";
 
 /** Sessions meet every Tuesday at 10:55 and 15:10 (programme timezone). */
@@ -13,6 +13,7 @@ const SLOTS: [number, number][] = [
   [15, 10],
 ];
 function nextSessionStart() {
+  if (Date.now() < PROGRAMME_START.getTime()) return PROGRAMME_START;
   const z = zonedNow();
   for (let offset = 0; offset < 8; offset++) {
     const day = new Date(z.getFullYear(), z.getMonth(), z.getDate() + offset);
@@ -27,7 +28,8 @@ function nextSessionStart() {
 
 async function nextPublishedSession(): Promise<Date | null> {
   try {
-    const { data } = await createAdminClient().from("weekly_sessions").select("starts_at").eq("status", "published").gt("starts_at", new Date().toISOString()).order("starts_at").limit(1).maybeSingle();
+    const cutoff = new Date(Math.max(Date.now(), PROGRAMME_START.getTime() - 1)).toISOString();
+    const { data } = await createAdminClient().from("weekly_sessions").select("starts_at").eq("status", "published").gte("starts_at", cutoff).order("starts_at").limit(1).maybeSingle();
     return data ? new Date(data.starts_at) : null;
   } catch {
     return null;
@@ -85,19 +87,20 @@ export default async function LandingPage() {
             <p className="front-fact-value">1S in the morning, the Library in the afternoon</p>
           </div>
           <div className="front-fact">
-            <p className="front-fact-label">Next up</p>
+            <p className="front-fact-label">{Date.now() < PROGRAMME_START.getTime() ? "First session" : "Next up"}</p>
             <p className="front-fact-value">{fmt(next, "EEEE d MMMM, HH:mm")}</p>
           </div>
         </div>
         <div className="main-inner">
           <section className="front-countdown">
-            <p className="countdown-label">Countdown to the next session</p>
+            <p className="countdown-label">{Date.now() < PROGRAMME_START.getTime() ? "Countdown to the first session" : "Countdown to the next session"}</p>
             <Countdown target={next.toISOString()} />
           </section>
         </div>
       </main>
       <footer className="front-foot label-caps">
         <span>{appName}</span>
+        <span className="muted">Carefully crafted by baristas</span>
         <span className="muted">{schoolName}</span>
       </footer>
     </>

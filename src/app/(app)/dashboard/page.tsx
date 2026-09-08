@@ -22,12 +22,11 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
   const now = new Date().toISOString();
   await ensureUpcomingSessions();
 
-  const [upcoming, { data: tasks }, { data: announcements }, { data: attendance }, { data: sessionsDone }] = await Promise.all([
+  const [upcoming, { data: tasks }, { data: announcements }, { data: attendance }] = await Promise.all([
     listSessionsWithCoverage(supabase, { from: now, order: "asc", limit: 1 }),
     supabase.from("tasks").select("*").not("status", "in", "(completed,reviewed)").order("created_at", { ascending: false }).limit(8),
     supabase.from("announcements").select("*").lte("published_at", now).order("pinned", { ascending: false }).order("published_at", { ascending: false }).limit(5),
     supabase.from("attendance_records").select("status, attended_on").eq("profile_id", viewer.userId),
-    supabase.from("weekly_sessions").select("id").eq("status", "completed"),
   ]);
 
   const nextSession = upcoming.find((s) => s.status === "published") ?? upcoming[0];
@@ -37,7 +36,6 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
 
   const attended = (attendance ?? []).filter((a) => a.status === "present" || a.status === "late").length;
   const recorded = (attendance ?? []).length;
-  const held = (sessionsDone ?? []).length;
   const rate = recorded ? Math.round((attended / recorded) * 100) : null;
 
   const firstName = viewer.profile.display_name?.split(" ")[0] ?? viewer.profile.username;
@@ -60,10 +58,9 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
       {sp.welcome === "1" ? <FormSuccess message="Your profile is complete. Welcome to the programme." /> : null}
       {sp.denied === "1" ? <div role="alert" className="flash flash-warning">That page is reserved for another role.</div> : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatTile label="Attendance" value={rate === null ? "—" : `${rate}%`} hint={recorded ? `${attended} of ${recorded} recorded` : `${held} session${held === 1 ? "" : "s"} held`} />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StatTile label="Attendance" value={rate === null ? "—" : `${rate}%`} hint={recorded ? `${attended} of ${recorded} recorded` : undefined} />
         <StatTile label="Open tasks" value={taskList.length} />
-        <StatTile label="Sessions held" value={held} />
         <StatTile label="Notices" value={(announcements ?? []).length} />
       </div>
 

@@ -34,3 +34,26 @@ export async function advancePublication(input: { uploadId: string; delegation: 
   await Promise.all([broadcast(RESOLUTIONS_TOPIC), broadcast(votingTopic(key))]);
   return { replaced: true, delegation: displayDelegation(pub.delegation) };
 }
+
+/**
+ * A new task starts a clean slate: every delegation's shared resolution is
+ * taken off the delegates' page and its voting round goes with it (cascade).
+ * The submissions themselves stay on the desk's board with file and link.
+ */
+export async function clearPublications(input: { actorId: string; taskId: string }): Promise<number> {
+  const admin = createAdminClient();
+  const { data: pubs } = await admin.from("resolution_publications").select("delegation_key, delegation");
+  const list = pubs ?? [];
+  if (list.length === 0) return 0;
+  const { error } = await admin
+    .from("resolution_publications")
+    .delete()
+    .in("delegation_key", list.map((p) => p.delegation_key));
+  if (error) {
+    console.error("[resolutions] could not clear the shared resolutions", error.message);
+    return 0;
+  }
+  await logAudit({ actorId: input.actorId, action: "resolutions.cleared_for_task", entityType: "task", entityId: input.taskId, metadata: { delegations: list.map((p) => p.delegation) } });
+  await Promise.all([broadcast(RESOLUTIONS_TOPIC), ...list.map((p) => broadcast(votingTopic(p.delegation_key)))]);
+  return list.length;
+}

@@ -13,7 +13,7 @@ import { describeDbError } from "@/lib/db-errors";
 import { logAudit } from "@/lib/audit";
 import type { Enums } from "@/lib/types/database";
 import { displayDelegation, isNoDelegation } from "@/lib/resolutions";
-import { advancePublication } from "@/lib/data/advance-publication";
+import { advancePublication, clearPublications } from "@/lib/data/advance-publication";
 
 function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
   const out: Record<string, string[]> = {};
@@ -64,8 +64,11 @@ export async function createTask(_prev: ActionResult | null, formData: FormData)
     .select("id")
     .single();
   if (error) return fail(describeDbError(error));
+  // A new task from the desk starts a clean resolutions page; earlier submissions stay on the board.
+  const cleared = isStaff(actor) ? await clearPublications({ actorId: actor.id, taskId: data.id }) : 0;
   revalidateTaskViews(data.id);
-  return ok({ id: data.id }, "Task created.");
+  if (cleared) revalidatePath("/resolutions", "layout");
+  return ok({ id: data.id }, cleared ? `Task created. ${cleared === 1 ? "The shared resolution was" : `${cleared} shared resolutions were`} taken off the delegates' page; the submissions stay on the desk.` : "Task created.");
 }
 
 export async function updateTask(taskId: string, _prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
@@ -162,7 +165,9 @@ export async function setTaskStatus(input: { taskId: string; status: Status; not
 }
 
 /** Submit work on a task: the file (PDF, PNG, JPG, DOCX) AND the document link (a Google Doc), for a delegation. */
-export async function uploadEvidence(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
+export type SubmissionReceipt = { delegation: string; fileName: string; replaced: boolean };
+
+export async function uploadEvidence(_prev: ActionResult<SubmissionReceipt> | null, formData: FormData): Promise<ActionResult<SubmissionReceipt>> {
   const { actor } = await getActor();
   const taskId = String(formData.get("task_id") ?? "");
   if (!uuid.safeParse(taskId).success) return fail("Invalid task.");
@@ -218,7 +223,7 @@ export async function uploadEvidence(_prev: ActionResult | null, formData: FormD
   }
   revalidateTaskViews(taskId);
   revalidatePath("/resolutions", "layout");
-  return ok(undefined, replaced ? `Submitted. This is now the resolution delegates see for ${delegation}; the previous one stays on the desk.` : "Submitted.");
+  return ok({ delegation, fileName: file.name, replaced }, replaced ? `Submitted. This is now the resolution delegates see for ${delegation}; the previous one stays on the desk.` : "Submitted.");
 }
 
 export async function deleteUpload(uploadId: string): Promise<ActionResult> {

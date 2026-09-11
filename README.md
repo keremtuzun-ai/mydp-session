@@ -142,6 +142,8 @@ There is no sign-up. The executive desk (Exec desk → Members) creates every ac
 
 A delegation's newest submission (file + link) is what delegates see on `/resolutions` once the desk has made that delegation visible: uploading a new resolution for a later task replaces the shown document automatically and clears the old voting round, since those votes were on the old text. Nothing is deleted. The desk's board lists every submission per delegation, latest first, with its task, file and link, and can put any earlier one back with "Show this one".
 
+Creating a task from the executive desk takes every shared resolution off the delegates' page (and ends its voting round), so each task starts clean; the submissions stay on the desk's board and can be shown again. A delegate who submits sees a confirmation with a tick, the delegation and the file name.
+
 ### Live voting
 
 When the desk opens, closes or clears a voting round, or a member votes, the server broadcasts on a Supabase Realtime channel (`voting:<delegation>` and `resolutions`). Every open page listening on that topic refetches through its own RLS-checked read: delegates see the tally and the "x of y voted" count update as votes land, the resolutions list and the dashboard's "Voting open" strip appear and disappear without a reload. Individual votes stay visible to the desk only. A 15-second fallback poll and a refetch on tab focus cover a dropped socket.

@@ -1099,6 +1099,10 @@
   .tally-num { font-family: var(--font-mono); font-size: 0.95rem; font-weight: 600; text-align: right; }
   .voting-live-strip { border-color: var(--warn); }
   .task-file.is-earlier { opacity: 0.78; }
+  /* Submission confirmation: a navy square with a tick, then the receipt */
+  .submit-done { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 8px 0 4px; }
+  .submit-done-tick { display: inline-flex; align-items: center; justify-content: center; width: 64px; height: 64px; background: var(--navy); color: var(--band-ink); animation: tick-pop 0.35s var(--ease) both; }
+  @keyframes tick-pop { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
   .voting-live-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
   .is-compact .tally li { grid-template-columns: 84px 1fr 32px; }
   .is-compact .tally-bar { height: 10px; }

@@ -24,7 +24,7 @@ src/
     (auth)/                   welcome, verify, login, reset-password
     onboarding/               profile completion (server-enforced)
     (app)/                    authenticated shell: dashboard, sessions, committees, calendar,
-                              attendance, analytics, settings, admin
+                              attendance, settings, admin
     auth/, api/               route handlers
   actions/                    server actions per domain (auth, onboarding, settings, tasks,
                               sessions, committees, attendance, feedback, admin)

@@ -225,29 +225,3 @@ export async function deleteUpload(uploadId: string): Promise<ActionResult> {
   revalidateTaskViews(upload.task_id);
   return ok(undefined, "Upload removed.");
 }
-
-export async function assignFromTemplate(input: { templateId: string; assigneeIds: string[]; committeeId: string | null; sessionId: string | null }): Promise<ActionResult> {
-  const { actor, viewer } = await getActor();
-  if (!canCreateTask(actor, input.committeeId)) return fail("You cannot assign tasks here.");
-  const supabase = await createClient();
-  const { data: template } = await supabase.from("task_templates").select("*").eq("id", input.templateId).maybeSingle();
-  if (!template) return fail("Template not found.");
-  const due = new Date();
-  due.setDate(due.getDate() + template.default_due_days);
-  const rows = input.assigneeIds.filter((id) => uuid.safeParse(id).success).map((id) => ({
-    title: template.title,
-    description: template.description,
-    priority: template.priority,
-    assigned_to_profile_id: id,
-    assigned_committee_id: input.committeeId,
-    session_id: input.sessionId,
-    due_at: due.toISOString(),
-    created_by: actor.id,
-    author_name: viewer.profile.display_name,
-  }));
-  if (rows.length === 0) return fail("Choose at least one member.");
-  const { error } = await supabase.from("tasks").insert(rows);
-  if (error) return fail(describeDbError(error));
-  revalidateTaskViews();
-  return ok(undefined, `${rows.length} task${rows.length === 1 ? "" : "s"} assigned.`);
-}

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Manrope, Playfair_Display } from "next/font/google";
 import { ThemeProvider } from "@/components/shell/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { AutoCapitalize } from "@/components/shell/auto-capitalize";
 import { appName, schoolName } from "@/lib/env";
 import "./globals.css";
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" suppressHydrationWarning className={`h-full ${manrope.variable} ${playfair.variable}`}>
       <body className="min-h-full flex flex-col">
         <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange value={{ light: "light", dark: "dark" }}>
+          <AutoCapitalize />
           {children}
           <Toaster />
         </ThemeProvider>

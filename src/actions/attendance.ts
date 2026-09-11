@@ -27,6 +27,6 @@ export async function bulkRecordAttendance(input: z.input<typeof bulkSchema>): P
     { onConflict: "attended_on,profile_id" },
   );
   if (error) return fail(describeDbError(error));
-  for (const p of ["/attendance", "/dashboard", "/analytics", "/exec/attendance"]) revalidatePath(p);
+  for (const p of ["/attendance", "/dashboard", "/exec/attendance"]) revalidatePath(p);
   return ok(undefined, `Attendance saved for ${parsed.data.entries.length} member${parsed.data.entries.length === 1 ? "" : "s"}.`);
 }

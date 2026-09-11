@@ -149,13 +149,6 @@ export const attendanceSchema = z.object({
   note: optionalText(500),
 });
 
-export const taskTemplateSchema = z.object({
-  title: z.string().trim().min(3).max(140),
-  description: optionalText(4000),
-  priority: z.enum(TASK_PRIORITIES),
-  default_due_days: z.coerce.number().int().min(0).max(365),
-});
-
 export const adminUserSchema = z.object({
   profile_id: uuid,
   role: z.enum(USER_ROLE_VALUES),

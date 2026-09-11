@@ -1,7 +1,7 @@
 import type { UserRole } from "@/lib/auth/roles";
 
 /** Icon names are resolved inside the client nav component (components cannot cross the server/client boundary). */
-export type NavIcon = "dashboard" | "exec" | "tasks" | "sessions" | "resolutions" | "attendance" | "analytics" | "admin" | "settings";
+export type NavIcon = "dashboard" | "exec" | "tasks" | "sessions" | "resolutions" | "attendance" | "admin" | "settings";
 export type NavItem = { href: string; label: string; icon: NavIcon; roles?: UserRole[] };
 
 export const NAV_ITEMS: NavItem[] = [
@@ -21,11 +21,7 @@ export const EXEC_SECTIONS: { href: string; label: string; exact?: boolean }[] =
   { href: "/exec", label: "Tasks & progress", exact: true },
   { href: "/exec/uploads", label: "Submissions" },
   { href: "/exec/attendance", label: "Attendance" },
-  { href: "/analytics", label: "Analytics" },
   { href: "/admin", label: "Members", exact: true },
-  { href: "/admin/sessions", label: "Session setup" },
-  { href: "/admin/templates", label: "Templates" },
-  { href: "/admin/audit", label: "Audit log" },
 ];
 
 export function navForRole(role: UserRole) {

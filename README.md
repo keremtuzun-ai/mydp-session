@@ -147,9 +147,8 @@ Authorization is enforced in the database (RLS + triggers) and again in server a
 | `/exec`, `/exec/uploads`, `/exec/attendance` | Executive desk: assign tasks with a free-text committee/clause, follow progress per delegate, review every file and document link, take attendance for everyone with history |
 | `/calendar`, `/calendar/new`, `/calendar/[id]`, `/calendar/[id]/edit` | Task list (table on desktop, cards on mobile), task detail with status, evidence uploads, activity log |
 | `/attendance` | Personal history and rate; roll call for chairs and staff |
-| `/analytics` | Staff-only metrics and charts |
 | `/settings` | Profile, photo, password, sessions; read-only email, username, role |
-| `/admin`, `/admin/sessions`, `/admin/templates`, `/admin/domains`, `/admin/audit` | Admin console |
+| `/admin` | Members: roles, temporary passwords, removal |
 | `/auth/signout` (POST) | Sign out |
 | `/api/username-available` | Live username check (requires verified session) |
 | `/api/files/[kind]/[id]` | RLS-checked redirect to a short-lived signed download URL |

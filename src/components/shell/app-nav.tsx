@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  BarChart3,
   CalendarDays,
   FileText,
   Gavel,
@@ -28,7 +27,6 @@ const ICONS: Record<NavIcon, React.ComponentType<{ className?: string; strokeWid
   resolutions: FileText,
   exec: Gavel,
   attendance: UserCheck,
-  analytics: BarChart3,
   admin: Users,
   settings: Settings,
 };

@@ -1098,6 +1098,7 @@
   .tally-against .tally-bar > span { background: var(--warn); }
   .tally-num { font-family: var(--font-mono); font-size: 0.95rem; font-weight: 600; text-align: right; }
   .voting-live-strip { border-color: var(--warn); }
+  .task-file.is-earlier { opacity: 0.78; }
   .voting-live-list { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
   .is-compact .tally li { grid-template-columns: 84px 1fr 32px; }
   .is-compact .tally-bar { height: 10px; }

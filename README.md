@@ -138,6 +138,10 @@ Authorization is enforced in the database (RLS + triggers) and again in server a
 
 There is no sign-up. The executive desk (Exec desk → Members) creates every account with a name, a surname and **junior** or **senior**. Each account is issued one 12-character access code (capital letters and digits, no I or O) that is generated automatically, shown to the desk, listed in the members table and can never be changed; a leaked code means deleting the account and creating a new one. Members sign in with that code on every visit. Under the hood the code is looked up with the service role and the browser is signed in by verifying a server-generated magic-link token, so no password exists for members; the account's email is a synthetic `<code>@members.example.com` that is never mailed. The shared executive desk still signs in through its secret link.
 
+### Resolutions follow the newest submission
+
+A delegation's newest submission (file + link) is what delegates see on `/resolutions` once the desk has made that delegation visible: uploading a new resolution for a later task replaces the shown document automatically and clears the old voting round, since those votes were on the old text. Nothing is deleted. The desk's board lists every submission per delegation, latest first, with its task, file and link, and can put any earlier one back with "Show this one".
+
 ### Live voting
 
 When the desk opens, closes or clears a voting round, or a member votes, the server broadcasts on a Supabase Realtime channel (`voting:<delegation>` and `resolutions`). Every open page listening on that topic refetches through its own RLS-checked read: delegates see the tally and the "x of y voted" count update as votes land, the resolutions list and the dashboard's "Voting open" strip appear and disappear without a reload. Individual votes stay visible to the desk only. A 15-second fallback poll and a refetch on tab focus cover a dropped socket.

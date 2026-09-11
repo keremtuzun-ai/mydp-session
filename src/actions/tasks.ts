@@ -13,6 +13,7 @@ import { describeDbError } from "@/lib/db-errors";
 import { logAudit } from "@/lib/audit";
 import type { Enums } from "@/lib/types/database";
 import { displayDelegation, isNoDelegation } from "@/lib/resolutions";
+import { advancePublication } from "@/lib/data/advance-publication";
 
 function fieldErrors(issues: { path: PropertyKey[]; message: string }[]) {
   const out: Record<string, string[]> = {};
@@ -187,28 +188,37 @@ export async function uploadEvidence(_prev: ActionResult | null, formData: FormD
   const { error: upErr } = await supabase.storage.from("task-evidence").upload(path, file, { contentType: file.type, upsert: false });
   if (upErr) return fail(`Upload failed: ${upErr.message}`);
 
-  const { error } = await supabase.from("task_uploads").insert({
-    task_id: taskId,
-    uploaded_by: actor.id,
-    title: meta.data.title || file.name,
-    delegation,
-    seniors,
-    notes: meta.data.notes || null,
-    storage_path: path,
-    external_url: link,
-    file_name: file.name,
-    mime_type: file.type,
-    size_bytes: file.size,
-  });
-  if (error) {
+  const { data: inserted, error } = await supabase
+    .from("task_uploads")
+    .insert({
+      task_id: taskId,
+      uploaded_by: actor.id,
+      title: meta.data.title || file.name,
+      delegation,
+      seniors,
+      notes: meta.data.notes || null,
+      storage_path: path,
+      external_url: link,
+      file_name: file.name,
+      mime_type: file.type,
+      size_bytes: file.size,
+    })
+    .select("id")
+    .single();
+  if (error || !inserted) {
     await supabase.storage.from("task-evidence").remove([path]);
-    return fail(describeDbError(error));
+    return fail(describeDbError(error ?? { message: "Could not record the submission." }));
   }
-  // Remember the delegation so the next submission is pre-filled.
-  if (delegation !== "N/A") await supabase.from("profiles").update({ delegation }).eq("id", actor.id);
+  // Remember the delegation so the next submission is pre-filled, and let the
+  // newest submission take over the resolution delegates see.
+  let replaced = false;
+  if (delegation !== "N/A") {
+    await supabase.from("profiles").update({ delegation }).eq("id", actor.id);
+    replaced = (await advancePublication({ uploadId: inserted.id, delegation, actorId: actor.id })).replaced;
+  }
   revalidateTaskViews(taskId);
   revalidatePath("/resolutions", "layout");
-  return ok(undefined, "Submitted.");
+  return ok(undefined, replaced ? `Submitted. This is now the resolution delegates see for ${delegation}; the previous one stays on the desk.` : "Submitted.");
 }
 
 export async function deleteUpload(uploadId: string): Promise<ActionResult> {

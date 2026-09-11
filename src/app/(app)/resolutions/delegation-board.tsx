@@ -4,15 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
-import { Eye, EyeOff } from "lucide-react";
+import { ExternalLink, Eye, EyeOff } from "lucide-react";
 import { publishResolution, unpublishResolution } from "@/actions/resolutions";
 import { fmt, cn } from "@/lib/utils";
 import { VotingPanel } from "./voting-panel";
 
-type Doc = { uploadId: string; title: string; fileName: string | null; createdAt: string; authorName: string; seniors: string[]; taskTitle: string };
+type Doc = { uploadId: string; title: string; fileName: string | null; externalUrl: string | null; createdAt: string; authorName: string; seniors: string[]; taskTitle: string };
 export type BoardGroup = { key: string; delegation: string; docs: Doc[]; published: Doc | null; publishedAt: string | null };
 
-/** The desk's list of delegations. Pressing a delegation shows its latest document to every member; pressing again hides it. */
+/**
+ * The desk's list of delegations. Pressing a delegation shows its latest
+ * document to every member; pressing again hides it. A newer submission
+ * replaces the shown one on its own; every earlier submission stays listed
+ * here with its file and its link.
+ */
 export function DelegationBoard({ groups }: { groups: BoardGroup[] }) {
   return (
     <div className="delegation-grid">
@@ -69,14 +74,27 @@ function DelegationCard({ group: g }: { group: BoardGroup }) {
             Submissions <span className="tab-count">{g.docs.length}</span>
           </summary>
           <ul className="task-file-list">
-            {g.docs.map((d) => {
+            {g.docs.map((d, i) => {
               const isShown = g.published?.uploadId === d.uploadId;
+              const isLatest = i === 0;
               return (
-                <li key={d.uploadId} className="task-file">
+                <li key={d.uploadId} className={cn("task-file", !isLatest && "is-earlier")}>
                   <div className="task-file-meta">
-                    <strong>{d.authorName}</strong>
+                    <span className="flex flex-wrap items-center gap-2">
+                      <strong>{d.authorName}</strong>
+                      <span className={cn("chip", isLatest ? "chip-navy" : "")}>{isLatest ? "Latest" : "Earlier"}</span>
+                    </span>
+                    <span className="muted small">
+                      {d.taskTitle} · {fmt(d.createdAt, "d MMM yyyy, HH:mm")}
+                    </span>
                     {d.seniors.length ? <span className="muted small">Seniors: {d.seniors.join(", ")}</span> : null}
-                    <span className="muted small">{fmt(d.createdAt, "d MMM yyyy, HH:mm")}</span>
+                    {d.fileName ? <span className="muted small mono">{d.fileName}</span> : null}
+                    {d.externalUrl ? (
+                      <a href={d.externalUrl} target="_blank" rel="noopener noreferrer" className="prose-link small break-all">
+                        <ExternalLink className="inline size-3.5 mr-1 align-[-2px]" aria-hidden />
+                        {d.externalUrl}
+                      </a>
+                    ) : null}
                   </div>
                   <div className="flex items-center gap-1">
                     <Link href={`/resolutions/${encodeURIComponent(g.key)}?upload=${d.uploadId}`} className="btn btn-quiet btn-sm">

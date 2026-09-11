@@ -74,6 +74,6 @@ export default async function ResolutionsPage() {
   );
 }
 
-function pick(d: { uploadId: string; title: string; fileName: string | null; createdAt: string; authorName: string; seniors: string[]; taskTitle: string }) {
-  return { uploadId: d.uploadId, title: d.title, fileName: d.fileName, createdAt: d.createdAt, authorName: d.authorName, seniors: d.seniors, taskTitle: d.taskTitle };
+function pick(d: { uploadId: string; title: string; fileName: string | null; externalUrl: string | null; createdAt: string; authorName: string; seniors: string[]; taskTitle: string }) {
+  return { uploadId: d.uploadId, title: d.title, fileName: d.fileName, externalUrl: d.externalUrl, createdAt: d.createdAt, authorName: d.authorName, seniors: d.seniors, taskTitle: d.taskTitle };
 }

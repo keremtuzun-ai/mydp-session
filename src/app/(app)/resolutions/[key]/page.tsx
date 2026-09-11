@@ -76,6 +76,11 @@ export default async function ResolutionPage({ params, searchParams }: PageProps
             {viewer.isStaff ? (
               <span className={isPublished ? "chip chip-navy" : "chip"}>{isPublished ? `Visible to delegates${shared ? ` since ${fmt(shared, "d MMM HH:mm")}` : ""}` : "Hidden from delegates"}</span>
             ) : null}
+            {viewer.isStaff && doc.externalUrl ? (
+              <a href={doc.externalUrl} target="_blank" rel="noopener noreferrer" className="btn btn-outline btn-sm">
+                Open link
+              </a>
+            ) : null}
             <Link href="/resolutions" className="btn btn-outline btn-sm">
               All resolutions
             </Link>

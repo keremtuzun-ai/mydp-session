@@ -12,6 +12,7 @@ export type ResolutionDoc = {
   externalUrl: string | null;
   createdAt: string;
   authorName: string;
+  seniors: string[];
   delegation: string;
   taskId: string;
   taskTitle: string;
@@ -32,6 +33,7 @@ type UploadRow = {
   uploaded_by: string;
   title: string;
   delegation: string | null;
+  seniors: string[];
   storage_path: string | null;
   external_url: string | null;
   file_name: string | null;
@@ -55,6 +57,7 @@ async function toDocs(db: Db, rows: UploadRow[]): Promise<ResolutionDoc[]> {
     externalUrl: r.external_url,
     createdAt: r.created_at,
     authorName: nameOf(names, r.uploaded_by),
+    seniors: r.seniors ?? [],
     delegation: displayDelegation(r.delegation ?? ""),
     taskId: r.task_id,
     taskTitle: taskTitle.get(r.task_id) ?? "Task",
@@ -69,7 +72,7 @@ async function toDocs(db: Db, rows: UploadRow[]): Promise<ResolutionDoc[]> {
  */
 export async function listDelegationGroups(db: Db): Promise<DelegationGroup[]> {
   const [{ data: uploads }, { data: pubs }, { data: votings }] = await Promise.all([
-    db.from("task_uploads").select("id, task_id, uploaded_by, title, delegation, storage_path, external_url, file_name, mime_type, size_bytes, created_at").not("storage_path", "is", null).order("created_at", { ascending: false }),
+    db.from("task_uploads").select("id, task_id, uploaded_by, title, delegation, seniors, storage_path, external_url, file_name, mime_type, size_bytes, created_at").not("storage_path", "is", null).order("created_at", { ascending: false }),
     db.from("resolution_publications").select("*"),
     db.from("resolution_votings").select("delegation_key, status"),
   ]);
@@ -106,7 +109,7 @@ export async function listPublishedResolutions(db: Db): Promise<PublishedResolut
   const [{ data: uploads }, { data: votings }] = await Promise.all([
     db
       .from("task_uploads")
-      .select("id, task_id, uploaded_by, title, delegation, storage_path, external_url, file_name, mime_type, size_bytes, created_at")
+      .select("id, task_id, uploaded_by, title, delegation, seniors, storage_path, external_url, file_name, mime_type, size_bytes, created_at")
       .in("id", list.map((p) => p.upload_id)),
     db.from("resolution_votings").select("delegation_key, status"),
   ]);
@@ -125,7 +128,7 @@ export async function listPublishedResolutions(db: Db): Promise<PublishedResolut
 export async function getResolutionDoc(db: Db, uploadId: string): Promise<ResolutionDoc | null> {
   const { data } = await db
     .from("task_uploads")
-    .select("id, task_id, uploaded_by, title, delegation, storage_path, external_url, file_name, mime_type, size_bytes, created_at")
+    .select("id, task_id, uploaded_by, title, delegation, seniors, storage_path, external_url, file_name, mime_type, size_bytes, created_at")
     .eq("id", uploadId)
     .maybeSingle();
   if (!data) return null;

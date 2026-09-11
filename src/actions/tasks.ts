@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getActor } from "@/lib/auth/actor";
 import { taskSchema, uuid, TASK_STATUSES } from "@/lib/validation/schemas";
 import { validateEvidenceFile, uploadMetaSchema, safeFileName } from "@/lib/validation/files";
+import { MAX_SENIORS, MIN_SENIORS, normalizeSeniors } from "@/lib/seniors";
 import { canCreateTask, canManageTask, canDelegateSetStatus, canUploadEvidence, canViewTask, isStaff } from "@/lib/policy";
 import { fail, ok, type ActionResult } from "@/lib/action-result";
 import { describeDbError } from "@/lib/db-errors";
@@ -173,6 +174,9 @@ export async function uploadEvidence(_prev: ActionResult | null, formData: FormD
   const valid = validateEvidenceFile({ name: file.name, type: file.type, size: file.size });
   if (!valid.ok) return fail(valid.error);
   const delegation = isNoDelegation(meta.data.delegation) ? "N/A" : displayDelegation(meta.data.delegation);
+  const seniors = normalizeSeniors(formData.getAll("seniors"));
+  if (seniors.length < MIN_SENIORS) return fail("Pick at least one senior.");
+  if (seniors.length > MAX_SENIORS) return fail(`Pick at most ${MAX_SENIORS} seniors.`);
 
   const supabase = await createClient();
   const { data: task } = await supabase.from("tasks").select("*").eq("id", taskId).maybeSingle();
@@ -188,6 +192,7 @@ export async function uploadEvidence(_prev: ActionResult | null, formData: FormD
     uploaded_by: actor.id,
     title: meta.data.title || file.name,
     delegation,
+    seniors,
     notes: meta.data.notes || null,
     storage_path: path,
     external_url: link,

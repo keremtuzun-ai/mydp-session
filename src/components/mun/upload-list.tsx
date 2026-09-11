@@ -6,6 +6,7 @@ export type UploadListItem = {
   title: string;
   notes: string | null;
   delegation?: string | null;
+  seniors?: string[];
   file_name: string | null;
   mime_type: string | null;
   size_bytes: number | null;
@@ -53,6 +54,7 @@ export function UploadList({ items, emptyTitle = "No uploads yet", emptyDescript
                 Submitted {formatDateTime(u.created_at)} · <strong className="text-ink">{u.authorName}</strong>
               </span>
               {u.delegation ? <span className="chip chip-navy">{u.delegation}</span> : null}
+              {u.seniors?.length ? <span>Seniors: <strong className="text-ink">{u.seniors.join(", ")}</strong></span> : null}
             </div>
             {u.notes ? <div className="small mt-1">{u.notes}</div> : null}
           </div>

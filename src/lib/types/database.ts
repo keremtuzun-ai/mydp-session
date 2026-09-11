@@ -303,6 +303,7 @@ export type Database = {
           title: string;
           notes: string | null;
           delegation: string | null;
+          seniors: string[];
           storage_path: string | null;
           external_url: string | null;
           file_name: string | null;
@@ -317,6 +318,7 @@ export type Database = {
           title: string;
           notes?: string | null;
           delegation?: string | null;
+          seniors?: string[];
           storage_path?: string | null;
           external_url?: string | null;
           file_name?: string | null;
@@ -331,6 +333,7 @@ export type Database = {
           title?: string;
           notes?: string | null;
           delegation?: string | null;
+          seniors?: string[];
           storage_path?: string | null;
           external_url?: string | null;
           file_name?: string | null;

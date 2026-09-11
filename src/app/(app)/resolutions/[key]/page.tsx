@@ -67,7 +67,7 @@ export default async function ResolutionPage({ params, searchParams }: PageProps
       <PageHeader
         eyebrow="Resolution"
         title={delegation}
-        description={`${doc.authorName} · ${fmt(doc.createdAt, "d MMMM yyyy, HH:mm")}`}
+        description={`${doc.authorName}${doc.seniors.length ? ` · Seniors: ${doc.seniors.join(", ")}` : ""} · ${fmt(doc.createdAt, "d MMMM yyyy, HH:mm")}`}
         actions={
           <>
             {viewer.isStaff ? (

@@ -9,7 +9,7 @@ import { publishResolution, unpublishResolution } from "@/actions/resolutions";
 import { fmt, cn } from "@/lib/utils";
 import { VotingPanel } from "./voting-panel";
 
-type Doc = { uploadId: string; title: string; fileName: string | null; createdAt: string; authorName: string; taskTitle: string };
+type Doc = { uploadId: string; title: string; fileName: string | null; createdAt: string; authorName: string; seniors: string[]; taskTitle: string };
 export type BoardGroup = { key: string; delegation: string; docs: Doc[]; published: Doc | null; publishedAt: string | null };
 
 /** The desk's list of delegations. Pressing a delegation shows its latest document to every member; pressing again hides it. */
@@ -51,6 +51,7 @@ function DelegationCard({ group: g }: { group: BoardGroup }) {
           <>
             <p className="m-0 small">
               <strong>{g.published.authorName}</strong>
+              {g.published.seniors.length ? <span className="muted"> · Seniors: {g.published.seniors.join(", ")}</span> : null}
               {g.publishedAt ? <span className="muted"> · shared {fmt(g.publishedAt, "d MMM HH:mm")}</span> : null}
             </p>
             <div className="mt-3">
@@ -58,7 +59,10 @@ function DelegationCard({ group: g }: { group: BoardGroup }) {
             </div>
           </>
         ) : (
-          <p className="m-0 small muted">{g.docs[0]!.authorName}</p>
+          <p className="m-0 small muted">
+            {g.docs[0]!.authorName}
+            {g.docs[0]!.seniors.length ? ` · Seniors: ${g.docs[0]!.seniors.join(", ")}` : ""}
+          </p>
         )}
         <details className="task-files mt-2">
           <summary>
@@ -71,6 +75,7 @@ function DelegationCard({ group: g }: { group: BoardGroup }) {
                 <li key={d.uploadId} className="task-file">
                   <div className="task-file-meta">
                     <strong>{d.authorName}</strong>
+                    {d.seniors.length ? <span className="muted small">Seniors: {d.seniors.join(", ")}</span> : null}
                     <span className="muted small">{fmt(d.createdAt, "d MMM yyyy, HH:mm")}</span>
                   </div>
                   <div className="flex items-center gap-1">

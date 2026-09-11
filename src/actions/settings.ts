@@ -4,14 +4,14 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getViewer } from "@/lib/auth/session";
-import { profileUpdateSchema, changePasswordSchema } from "@/lib/validation/schemas";
+import { profileUpdateSchema } from "@/lib/validation/schemas";
 import { AVATAR_TYPES, MAX_AVATAR_BYTES } from "@/lib/validation/files";
 import { fail, ok, type ActionResult } from "@/lib/action-result";
 import { describeDbError } from "@/lib/db-errors";
 import { logAudit } from "@/lib/audit";
 import { isSharedExecAccount } from "@/lib/auth/shared-exec";
 
-const SHARED_MSG = "The shared executive account is managed by the admin. Its profile and password cannot be changed here.";
+const SHARED_MSG = "The shared executive account is managed by the admin. Its profile cannot be changed here.";
 async function isSharedViewer() {
   const viewer = await getViewer();
   return isSharedExecAccount(viewer.profile);
@@ -53,18 +53,6 @@ export async function updateAvatar(_prev: ActionResult | null, formData: FormDat
   if (error) return fail(describeDbError(error));
   revalidatePath("/", "layout");
   return ok(undefined, "Photo updated.");
-}
-
-export async function changePassword(_prev: ActionResult | null, formData: FormData): Promise<ActionResult> {
-  if (await isSharedViewer()) return fail(SHARED_MSG);
-  const viewer = await getViewer();
-  const parsed = changePasswordSchema.safeParse({ password: formData.get("password"), confirm_password: formData.get("confirm_password") });
-  if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "Check the password fields.");
-  const supabase = await createClient();
-  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
-  if (error) return fail(error.message);
-  await logAudit({ actorId: viewer.userId, action: "password.changed", entityType: "profile", entityId: viewer.userId });
-  return ok(undefined, "Password changed.");
 }
 
 export async function signOutOtherSessions(): Promise<ActionResult> {

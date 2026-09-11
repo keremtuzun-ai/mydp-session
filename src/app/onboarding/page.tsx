@@ -10,7 +10,7 @@ export const metadata: Metadata = { title: "Complete your profile" };
 
 export default async function OnboardingPage() {
   const { user, profile } = await getAuthState();
-  if (!user) redirect("/welcome");
+  if (!user) redirect("/login");
   if (profile?.onboarding_completed_at) redirect("/dashboard");
 
   return (

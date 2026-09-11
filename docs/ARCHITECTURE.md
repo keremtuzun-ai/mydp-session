@@ -13,7 +13,7 @@ Browser ──► Next.js 16 (App Router)
               Supabase: Postgres (RLS, triggers, SECURITY DEFINER helpers), Auth (email OTP + password), Storage
 ```
 
-Everything the app reads or writes on behalf of a user goes through `@supabase/ssr` clients bound to the request cookies, so Postgres sees `auth.uid()` and applies Row Level Security. The service-role client (`src/lib/supabase/admin.ts`, `server-only`) is used in exactly four places: resolving a username to its email during password sign-in, minting signed download URLs after an RLS-checked read, writing audit entries, and admin user deletion.
+Everything the app reads or writes on behalf of a user goes through `@supabase/ssr` clients bound to the request cookies, so Postgres sees `auth.uid()` and applies Row Level Security. The service-role client (`src/lib/supabase/admin.ts`, `server-only`) is used in a narrow set of places: resolving an access code to its account and minting the one-time sign-in token, creating accounts from the executive desk, minting signed download URLs after an RLS-checked read, writing audit entries, broadcasting live-update pings, and admin user deletion.
 
 ## Directory map
 
@@ -50,13 +50,17 @@ tests/                        unit tests + opt-in live RLS tests
 
 ## Authentication flow
 
-1. **Create account** (`/welcome`): school email + password. The server rejects domains outside `ALLOWED_SCHOOL_DOMAINS`, refuses duplicates, and creates the user with the service-role admin API already confirmed, so no verification email is needed. A `before insert` trigger on `auth.users` refuses domains missing from `allowed_email_domains`, so the rule also holds for direct API calls.
-2. **Onboarding** (`/onboarding`): reachable only with a session whose profile has `onboarding_completed_at IS NULL`; collects name, grade, phone, unique username (live check via `/api/username-available`, unique index) and photo.
+1. **Accounts** are created only by the executive desk (`createMemberAccount`): name, surname, junior or senior. The server generates a unique 12-character access code (`src/lib/auth/access-code.ts`), creates the auth user with the service role under a synthetic `<code>@members.example.com` address (never mailed), completes the profile (username derived from the name, onboarding already done) and stores the code in `access_codes`, a table only the service role writes and a trigger keeps immutable. Members read their own code; staff read every code.
+2. **Sign-in** (`/login`, `signInWithAccessCode`): the code is normalised and looked up with the service role; the server then calls `auth.admin.generateLink({ type: "magiclink" })` and verifies the returned token hash through the user's cookie-bound client, which sets the session. No password exists for members. **Onboarding** (`/onboarding`) remains only for accounts created before access codes.
 3. **Gate**: `lib/auth/gate.ts` is a pure function used by `proxy.ts` and by `getViewer()`. Signed out → `/login?next=`; signed in but not onboarded → `/onboarding`; onboarded → cannot revisit onboarding or the sign-in pages.
-4. **Every visit**: auth cookies are session cookies (`lib/supabase/cookies.ts` strips max-age/expires in the server, proxy and browser clients), so closing the browser ends the session and members sign in again with email + password. All progress lives in Postgres, never in the cookie.
+4. **Every visit**: auth cookies are session cookies (`lib/supabase/cookies.ts` strips max-age/expires in the server, proxy and browser clients), so closing the browser ends the session and members sign in again with their access code. All progress lives in Postgres, never in the cookie.
 5. **Visibility**: since migration 0009 every signed-in member can read every task and every announcement (`using (true)`); the calendar defaults to "All tasks" and the dashboard lists the newest open tasks. Administration is open to executives; the `protect_profile_columns` trigger lets staff manage members but reserves granting/removing `admin` to admins.
 6. **Executive desk** (`/exec-invite/<EXEC_INVITE_TOKEN>`): the page renders only when the path segment matches the env token (constant-time compare). It asks for `EXEC_SHARED_PASSWORD` and, on a match, signs the browser in to the single shared executive account (`scripts/exec-account.ts` creates it with role `executive` and onboarding complete). Because the account is shared, tasks and announcements carry a required `author_name` (name and surname) typed by whoever publishes them; the shared account cannot change its profile or password in Settings. Admins see the link and the password on the executive desk.
-6. **Forgotten passwords**: executives and admins set a temporary password from the admin console (`setTemporaryPassword`, audited); members change it in Settings.
+7. **Lost codes**: a code is never changed. The desk deletes the account and creates a new one.
+
+## Live updates
+
+Server actions that change what other people see (publishing or hiding a resolution, opening, closing or clearing a voting round, casting a vote) call `broadcast(topic)` (`src/lib/realtime/server.ts`), which POSTs to Supabase Realtime's broadcast endpoint with the service role on a public channel. The message carries nothing but a timestamp. In the browser, `useLiveChannel(topic, onChange)` subscribes with the shared browser client and runs `onChange` on every message, on (re)subscribe, on tab focus and on a 15-second fallback poll. The voting panel refetches `/api/votes/[key]` (RLS decides what the caller sees: the tally for everyone, the voter list for the desk only); list pages mount `<LiveRefresh topic>` and call `router.refresh()`. Topics live in `src/lib/realtime/topics.ts`.
 
 ## Permission model
 
@@ -81,6 +85,7 @@ SQL helpers (`SECURITY DEFINER`, pinned `search_path`): `is_admin()`, `is_staff(
 | session_feedback | subject; author; staff; chairs for their members | staff; chairs for their members |
 | committee_submissions | own; staff; chairs of the committee | members while `submissions_enabled` |
 | resolution_links | own; committee members; chairs of the committee; staff | members insert their own; owner, chairs or staff update/delete |
+| access_codes | own row; staff all | service role only; a trigger rejects every update |
 | audit_logs | admin | staff (also written with the service role) |
 | allowed_email_domains | all members | admin |
 

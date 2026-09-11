@@ -12,8 +12,12 @@ const SLOTS: [number, number][] = [
   [10, 55],
   [15, 10],
 ];
+/** True until the first session of the programme has started. */
+function beforeProgrammeStart() {
+  return Date.now() < PROGRAMME_START.getTime();
+}
 function nextSessionStart() {
-  if (Date.now() < PROGRAMME_START.getTime()) return PROGRAMME_START;
+  if (beforeProgrammeStart()) return PROGRAMME_START;
   const z = zonedNow();
   for (let offset = 0; offset < 8; offset++) {
     const day = new Date(z.getFullYear(), z.getMonth(), z.getDate() + offset);
@@ -65,11 +69,8 @@ export default async function LandingPage() {
               Where the session <span className="accent-line">happens.</span>
             </h1>
             <div className="front-hero-actions">
-              <Link href="/welcome" className="btn btn-cream btn-lg">
-                Create account
-              </Link>
-              <Link href="/login" className="btn btn-cream-outline btn-lg">
-                Sign in
+              <Link href="/login" className="btn btn-cream btn-lg">
+                Sign in with your access code
               </Link>
             </div>
           </div>
@@ -87,13 +88,13 @@ export default async function LandingPage() {
             <p className="front-fact-value">1S in the morning, the Library in the afternoon</p>
           </div>
           <div className="front-fact">
-            <p className="front-fact-label">{Date.now() < PROGRAMME_START.getTime() ? "First session" : "Next up"}</p>
+            <p className="front-fact-label">{beforeProgrammeStart() ? "First session" : "Next up"}</p>
             <p className="front-fact-value">{fmt(next, "EEEE d MMMM, HH:mm")}</p>
           </div>
         </div>
         <div className="main-inner">
           <section className="front-countdown">
-            <p className="countdown-label">{Date.now() < PROGRAMME_START.getTime() ? "Countdown to the first session" : "Countdown to the next session"}</p>
+            <p className="countdown-label">{beforeProgrammeStart() ? "Countdown to the first session" : "Countdown to the next session"}</p>
             <Countdown target={next.toISOString()} />
           </section>
         </div>

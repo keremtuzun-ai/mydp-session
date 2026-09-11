@@ -1,6 +1,7 @@
 "use client";
 
 import { createBrowserClient } from "@supabase/ssr";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
 import { sessionOnly } from "@/lib/supabase/cookies";
 
@@ -27,4 +28,12 @@ export function createClient() {
       },
     },
   });
+}
+
+let shared: SupabaseClient<Database> | null = null;
+
+/** One client per page, so every live subscription shares a single websocket. */
+export function getBrowserClient() {
+  shared ??= createClient();
+  return shared;
 }

@@ -26,7 +26,7 @@ export async function completeOnboarding(_prev: ActionResult | null, formData: F
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/welcome");
+  if (!user) redirect("/login");
 
 
   const { data: profile } = await supabase.from("profiles").select("onboarding_completed_at").eq("id", user.id).maybeSingle();

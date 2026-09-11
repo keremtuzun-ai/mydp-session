@@ -9,7 +9,7 @@ import { SubmitButton } from "@/components/forms/submit-button";
 import { ActionButton } from "@/components/forms/action-button";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { updateProfile, updateAvatar, changePassword, signOutOtherSessions } from "@/actions/settings";
+import { updateProfile, updateAvatar, signOutOtherSessions } from "@/actions/settings";
 import { useActionFeedback } from "@/hooks/use-action-feedback";
 import { GRADES } from "@/lib/validation/schemas";
 import { initials } from "@/lib/utils";
@@ -64,27 +64,6 @@ export function AvatarForm({ avatarUrl, name }: { avatarUrl: string | null; name
         <SubmitButton size="sm" variant="outline" pendingText="Uploading…">
           Update photo
         </SubmitButton>
-      </div>
-    </form>
-  );
-}
-
-export function PasswordForm() {
-  const [state, action] = useActionState(changePassword, null);
-  useActionFeedback(state);
-  return (
-    <form action={action} className="flex flex-col gap-4">
-      <div className="form-grid">
-        <Field label="New password" htmlFor="password" hint="8+ characters, a letter and a number.">
-          <Input id="password" name="password" type="password" autoComplete="new-password" required />
-        </Field>
-        <Field label="Confirm" htmlFor="confirm_password">
-          <Input id="confirm_password" name="confirm_password" type="password" autoComplete="new-password" required />
-        </Field>
-      </div>
-      <FormError message={state && !state.ok ? state.error : null} />
-      <div className="form-actions">
-        <SubmitButton>Change password</SubmitButton>
       </div>
     </form>
   );

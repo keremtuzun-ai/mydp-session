@@ -1,17 +1,17 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { castVote, clearVoting, closeVoting, openVoting } from "@/actions/voting";
 import { VOTE_CHOICES, VOTE_LABEL, percent, voteOutcome, type VoteChoice, type VotingSnapshot } from "@/lib/voting";
+import { votingTopic } from "@/lib/realtime/topics";
+import { useLiveChannel } from "@/hooks/use-live-channel";
 import { cn, fmt } from "@/lib/utils";
-
-const POLL_MS = 2000;
 
 type Props = {
   delegationKey: string;
   delegation: string;
-  /** The desk: opens, closes and clears the round and sees the live tally. */
+  /** The desk: opens, closes and clears the round and sees who voted. */
   canManage: boolean;
   /** Members: cast a vote while the round is open. */
   canVote: boolean;
@@ -19,42 +19,25 @@ type Props = {
 };
 
 /**
- * Kahoot-style voting panel. Polls the tally every two seconds while mounted
- * (paused when the tab is hidden), so the desk watches votes arrive live.
+ * Kahoot-style voting panel. Everyone sees the live tally: the server
+ * broadcasts on the resolution's topic whenever the round changes or a vote
+ * lands, and the panel refetches the snapshot (individual votes stay with the
+ * desk, RLS decides). A slow fallback poll covers a dropped socket.
  */
 export function VotingPanel({ delegationKey, delegation, canManage, canVote, compact }: Props) {
   const [snap, setSnap] = useState<VotingSnapshot | null>(null);
   const [pending, start] = useTransition();
-  const timer = useRef<number | null>(null);
 
   const load = useCallback(async () => {
     try {
       const res = await fetch(`/api/votes/${encodeURIComponent(delegationKey)}`, { cache: "no-store" });
       if (res.ok) setSnap((await res.json()) as VotingSnapshot);
     } catch {
-      /* keep the last snapshot; the next tick retries */
+      /* keep the last snapshot; the next event or poll retries */
     }
   }, [delegationKey]);
 
-  useEffect(() => {
-    let alive = true;
-    let first = true;
-    // The first load always runs; later polls pause while the tab is hidden and resume on visibilitychange.
-    const tick = () => {
-      if (!alive) return;
-      if (first || !document.hidden) void load();
-      first = false;
-      timer.current = window.setTimeout(tick, POLL_MS);
-    };
-    timer.current = window.setTimeout(tick, 0);
-    const onVisible = () => !document.hidden && void load();
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      alive = false;
-      if (timer.current) window.clearTimeout(timer.current);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [load]);
+  useLiveChannel(votingTopic(delegationKey), load);
 
   const run = (fn: () => Promise<{ ok: boolean; error?: string; message?: string }>, quiet = false) =>
     start(async () => {
@@ -65,7 +48,7 @@ export function VotingPanel({ delegationKey, delegation, canManage, canVote, com
       } else toast.error(r.error ?? "Something went wrong.");
     });
 
-  if (!snap) return canManage || canVote ? <p className="doc-status">Checking voting…</p> : null;
+  if (!snap) return <p className="doc-status">Checking voting…</p>;
   const { status, counts } = snap;
 
   if (status === "none") {
@@ -78,11 +61,10 @@ export function VotingPanel({ delegationKey, delegation, canManage, canVote, com
         </div>
       );
     }
-    return null;
+    return <p className="m-0 small muted">Voting has not been opened yet. This page updates on its own when it is.</p>;
   }
 
   const outcome = voteOutcome(counts);
-  const showTally = canManage || status === "closed";
 
   return (
     <div className={cn("voting-panel", status === "open" && "is-open", compact && "is-compact")} aria-live="polite">
@@ -91,11 +73,9 @@ export function VotingPanel({ delegationKey, delegation, canManage, canVote, com
           {status === "open" ? <span className="voting-dot" aria-hidden /> : null}
           {status === "open" ? "Voting open" : "Voting closed"}
         </span>
-        {canManage ? (
-          <span className="voting-count">
-            <strong>{counts.total}</strong> of {snap.eligible} voted
-          </span>
-        ) : null}
+        <span className="voting-count">
+          <strong>{counts.total}</strong> of {snap.eligible} voted
+        </span>
         {status === "closed" ? (
           <span className="small muted">
             {outcome === "adopted" ? "Adopted" : outcome === "rejected" ? "Rejected" : outcome === "tied" ? "Tied" : "No votes cast"}
@@ -125,19 +105,17 @@ export function VotingPanel({ delegationKey, delegation, canManage, canVote, com
       ) : null}
       {canVote && status === "closed" && snap.myVote ? <p className="m-0 small muted">Your vote: {VOTE_LABEL[snap.myVote]}.</p> : null}
 
-      {showTally ? (
-        <ul className="tally">
-          {VOTE_CHOICES.map((c) => (
-            <li key={c} className={`tally-${c}`}>
-              <span className="tally-label">{VOTE_LABEL[c]}</span>
-              <span className="tally-bar" aria-hidden>
-                <span style={{ width: `${percent(counts[c], counts.total)}%` }} />
-              </span>
-              <span className="tally-num">{counts[c]}</span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      <ul className="tally" aria-label="Live tally">
+        {VOTE_CHOICES.map((c) => (
+          <li key={c} className={`tally-${c}`}>
+            <span className="tally-label">{VOTE_LABEL[c]}</span>
+            <span className="tally-bar" aria-hidden>
+              <span style={{ width: `${percent(counts[c], counts.total)}%` }} />
+            </span>
+            <span className="tally-num">{counts[c]}</span>
+          </li>
+        ))}
+      </ul>
 
       {canManage ? (
         <div className="flex flex-wrap items-center gap-2">

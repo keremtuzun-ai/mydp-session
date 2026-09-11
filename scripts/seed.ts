@@ -5,6 +5,7 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import type { Database, Enums, TablesInsert } from "../src/lib/types/database";
+import { generateAccessCode } from "../src/lib/auth/access-code";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -87,6 +88,11 @@ async function ensureUser(u: SeedUser): Promise<string> {
     .update({ username: u.username, display_name: u.name, grade: u.grade, phone: u.phone ?? null, role: u.role, onboarding_completed_at: new Date().toISOString() })
     .eq("id", id);
   if (error) throw new Error(`profile ${u.email}: ${error.message}`);
+  const { data: issued } = await db.from("access_codes").select("code").eq("profile_id", id).maybeSingle();
+  if (!issued) {
+    const { error: codeError } = await db.from("access_codes").insert({ code: generateAccessCode(), profile_id: id });
+    if (codeError) throw new Error(`access code ${u.email}: ${codeError.message}`);
+  }
   return id;
 }
 
@@ -304,8 +310,10 @@ async function main() {
 
   await db.from("audit_logs").insert({ actor_id: id("admin"), action: "seed.applied", entity_type: "system", metadata: { users: USERS.length, committees: COMMITTEES.length } });
 
-  console.log("\nDevelopment accounts (password: %s)", password);
-  for (const u of USERS) console.log(`  ${u.role.padEnd(9)} ${u.username.padEnd(14)} ${u.email}`);
+  const { data: codes } = await db.from("access_codes").select("code, profile_id");
+  const codeOf = new Map((codes ?? []).map((c) => [c.profile_id, c.code]));
+  console.log("\nDevelopment accounts (sign in with the access code; %s is the Supabase password behind them)", password);
+  for (const u of USERS) console.log(`  ${u.role.padEnd(9)} ${u.username.padEnd(14)} ${(codeOf.get(ids[u.key]!) ?? "?").padEnd(13)} ${u.email}`);
   console.log("\nDone.");
 }
 

@@ -9,9 +9,17 @@ import { describeDbError } from "@/lib/db-errors";
 import { delegationKey } from "@/lib/resolutions";
 import { isVoteChoice } from "@/lib/voting";
 import { logAudit } from "@/lib/audit";
+import { broadcast } from "@/lib/realtime/server";
+import { RESOLUTIONS_TOPIC, votingTopic } from "@/lib/realtime/topics";
 
 function revalidate() {
   revalidatePath("/resolutions", "layout");
+  revalidatePath("/dashboard");
+}
+
+/** Every open page hears about the round: the panel on this resolution and the lists that show its status. */
+async function announceRound(key: string) {
+  await Promise.all([broadcast(votingTopic(key)), broadcast(RESOLUTIONS_TOPIC)]);
 }
 
 /** The desk opens (or reopens) voting on a shared resolution. Reopening keeps the votes already cast. */
@@ -28,6 +36,7 @@ export async function openVoting(input: { key: string }): Promise<ActionResult> 
   if (error) return fail(describeDbError(error));
   await logAudit({ actorId: actor.id, action: "voting.opened", entityType: "resolution_voting", entityId: null, metadata: { delegation: pub.delegation } });
   revalidate();
+  await announceRound(key);
   return ok(undefined, `Voting on ${pub.delegation}'s resolution is open.`);
 }
 
@@ -40,6 +49,7 @@ export async function closeVoting(input: { key: string }): Promise<ActionResult>
   if (error) return fail(describeDbError(error));
   await logAudit({ actorId: actor.id, action: "voting.closed", entityType: "resolution_voting", entityId: null, metadata: { delegation_key: key } });
   revalidate();
+  await announceRound(key);
   return ok(undefined, "Voting closed.");
 }
 
@@ -53,6 +63,7 @@ export async function clearVoting(input: { key: string }): Promise<ActionResult>
   if (error) return fail(describeDbError(error));
   await logAudit({ actorId: actor.id, action: "voting.cleared", entityType: "resolution_voting", entityId: null, metadata: { delegation_key: key } });
   revalidate();
+  await announceRound(key);
   return ok(undefined, "Votes cleared.");
 }
 
@@ -70,5 +81,6 @@ export async function castVote(input: { key: string; choice: string }): Promise<
     .from("resolution_votes")
     .upsert({ delegation_key: key, profile_id: actor.id, choice: input.choice, voter_delegation: viewer.profile.delegation, voted_at: new Date().toISOString() }, { onConflict: "delegation_key,profile_id" });
   if (error) return fail(describeDbError(error));
+  await broadcast(votingTopic(key));
   return ok(undefined, "Vote recorded.");
 }

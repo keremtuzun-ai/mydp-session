@@ -6,6 +6,8 @@ import { listDelegationGroups, listPublishedResolutions } from "@/lib/data/resol
 import { PageHeader } from "@/components/mun/page-header";
 import { EmptyState } from "@/components/mun/empty-state";
 import { DelegationBoard } from "./delegation-board";
+import { LiveRefresh } from "@/components/mun/live-refresh";
+import { RESOLUTIONS_TOPIC } from "@/lib/realtime/topics";
 import { fmt } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Resolutions" };
@@ -19,6 +21,7 @@ export default async function ResolutionsPage() {
     const visible = groups.filter((g) => g.published).length;
     return (
       <div className="flex flex-col gap-6">
+        <LiveRefresh topic={RESOLUTIONS_TOPIC} />
         <PageHeader eyebrow="Secretariat" title="Resolutions" actions={<span className="chip chip-navy">{visible} of {groups.length} visible</span>} />
         {groups.length === 0 ? (
           <section className="card">
@@ -42,6 +45,7 @@ export default async function ResolutionsPage() {
   const published = await listPublishedResolutions(supabase);
   return (
     <div className="flex flex-col gap-6">
+      <LiveRefresh topic={RESOLUTIONS_TOPIC} />
       <PageHeader eyebrow="Committee" title="Resolutions" />
       {published.length === 0 ? (
         <section className="card">
@@ -52,7 +56,14 @@ export default async function ResolutionsPage() {
           {published.map((p) => (
             <Link key={p.key} href={`/resolutions/${encodeURIComponent(p.key)}`} className="card delegation-card delegation-link">
               <span className="delegation-name">{p.delegation}</span>
-              {p.voting === "open" ? <span className="chip chip-red self-start">Voting open</span> : p.voting === "closed" ? <span className="chip chip-navy self-start">Voting closed</span> : null}
+              {p.voting === "open" ? (
+                <span className="chip chip-red self-start">
+                  <span className="voting-dot" aria-hidden />
+                  Voting open
+                </span>
+              ) : p.voting === "closed" ? (
+                <span className="chip chip-navy self-start">Voting closed</span>
+              ) : null}
               <span className="small">{p.doc.authorName}</span>
               <span className="small muted">Shared {fmt(p.publishedAt, "d MMM yyyy, HH:mm")}</span>
             </Link>

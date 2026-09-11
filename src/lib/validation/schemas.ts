@@ -3,31 +3,9 @@ import { usernameSchema } from "@/lib/auth/username";
 
 export const emailSchema = z.string().trim().toLowerCase().email("Enter a valid email address");
 
-export const otpSchema = z.object({
-  email: emailSchema,
-  token: z.string().trim().regex(/^\d{6}$/, "Enter the 6-digit code from your email"),
-});
-
-export const passwordSchema = z
-  .string()
-  .min(8, "Use at least 8 characters")
-  .max(128)
-  .refine((v) => /[a-zA-Z]/.test(v) && /\d/.test(v), "Include at least one letter and one number");
-
-export const passwordLoginSchema = z.object({
-  username: z.string().trim().toLowerCase().min(1, "Enter your username"),
-  password: z.string().min(1, "Enter your password"),
-});
-
 export const GRADES = ["9", "10", "11", "12"] as const;
 
-export const signUpSchema = z
-  .object({ email: emailSchema, password: passwordSchema, confirm_password: z.string() })
-  .refine((v) => v.password === v.confirm_password, { path: ["confirm_password"], message: "Passwords do not match" });
-
-export const emailPasswordLoginSchema = z.object({ email: emailSchema, password: z.string().min(1, "Enter your password") });
-
-/** One part of a person's name, as typed at sign-in. */
+/** One part of a person's name, as typed by the desk when creating the account. */
 export const namePartSchema = (what: string) =>
   z
     .string()
@@ -35,9 +13,6 @@ export const namePartSchema = (what: string) =>
     .min(1, `Enter your ${what}`)
     .max(60, `Your ${what} is too long`)
     .refine((v) => /\p{L}/u.test(v), `Enter your ${what}`);
-
-/** Sign-in asks for the member's name and surname, kept on the profile per account. */
-export const signInNameSchema = z.object({ first_name: namePartSchema("name"), last_name: namePartSchema("surname") });
 
 export const onboardingSchema = z.object({
   display_name: z.string().trim().min(2, "Enter your full name").max(80),
@@ -56,10 +31,6 @@ export const profileUpdateSchema = z.object({
   grade: z.enum(GRADES),
   phone: z.string().trim().regex(/^[+\d][\d\s()-]{6,20}$/, "Enter a valid phone number").optional().or(z.literal("")),
 });
-
-export const changePasswordSchema = z
-  .object({ password: passwordSchema, confirm_password: z.string() })
-  .refine((v) => v.password === v.confirm_password, { path: ["confirm_password"], message: "Passwords do not match" });
 
 export const uuid = z.string().uuid();
 

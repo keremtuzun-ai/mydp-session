@@ -1,17 +1,22 @@
 import type { Metadata } from "next";
 import { getViewer } from "@/lib/auth/session";
+import { createClient } from "@/lib/supabase/server";
 import { isSharedExecAccount } from "@/lib/auth/shared-exec";
+import { formatAccessCode, isMemberEmail, isMemberTier, TIER_LABEL } from "@/lib/auth/access-code";
 import { getExecSharedPassword } from "@/lib/env";
 import { PageHeader } from "@/components/mun/page-header";
 import { RoleBadge } from "@/components/mun/role-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ProfileForm, AvatarForm, PasswordForm, SessionControls } from "./settings-forms";
+import { ProfileForm, AvatarForm, SessionControls } from "./settings-forms";
 
 export const metadata: Metadata = { title: "Settings" };
 
 export default async function SettingsPage() {
   const viewer = await getViewer();
   const shared = isSharedExecAccount(viewer.profile);
+  const supabase = await createClient();
+  const { data: issued } = shared ? { data: null } : await supabase.from("access_codes").select("code").eq("profile_id", viewer.userId).maybeSingle();
+  const tier = isMemberTier(viewer.profile.tier) ? TIER_LABEL[viewer.profile.tier] : null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -53,11 +58,11 @@ export default async function SettingsPage() {
           {shared ? null : (
           <Card id="security">
             <CardHeader>
-              <CardTitle>Password</CardTitle>
-              <CardDescription>Forgot it? An executive can set a temporary one.</CardDescription>
+              <CardTitle>Access code</CardTitle>
+              <CardDescription>You sign in with this code every time. It was issued with your account and cannot be changed.</CardDescription>
             </CardHeader>
             <CardContent>
-              <PasswordForm />
+              {issued ? <span className="code-pill access-code-pill">{formatAccessCode(issued.code)}</span> : <p className="m-0 small muted">No access code has been issued for this account yet. Ask an executive.</p>}
             </CardContent>
           </Card>
           )}
@@ -90,14 +95,22 @@ export default async function SettingsPage() {
             </CardHeader>
             <CardContent>
               <dl className="m-0">
-                <div className="settings-row">
-                  <dt>Email</dt>
-                  <dd className="break-all">{viewer.profile.school_email} <span className="muted small">read-only · contact an admin to correct</span></dd>
-                </div>
+                {isMemberEmail(viewer.profile.school_email) ? null : (
+                  <div className="settings-row">
+                    <dt>Email</dt>
+                    <dd className="break-all">{viewer.profile.school_email} <span className="muted small">read-only · contact an admin to correct</span></dd>
+                  </div>
+                )}
                 <div className="settings-row">
                   <dt>Username</dt>
                   <dd><span className="code-pill">{viewer.profile.username}</span></dd>
                 </div>
+                {tier ? (
+                  <div className="settings-row">
+                    <dt>Member</dt>
+                    <dd>{tier}</dd>
+                  </div>
+                ) : null}
                 <div className="settings-row !border-b-0">
                   <dt>Role</dt>
                   <dd>

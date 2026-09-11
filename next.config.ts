@@ -22,6 +22,8 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "20mb" },
   },
   turbopack: { root: import.meta.dirname },
+  // A second local origin (127.0.0.1) lets a delegate and the desk be signed in side by side while developing.
+  allowedDevOrigins: ["127.0.0.1"],
 };
 
 export default nextConfig;

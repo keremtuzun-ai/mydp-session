@@ -6,7 +6,7 @@
 export type GateUser = { id: string; email: string | null; emailConfirmed: boolean } | null;
 export type GateProfile = { onboardingCompletedAt: string | null } | null;
 
-export const PUBLIC_PATHS = ["/", "/login", "/welcome", "/reset-password", "/auth", "/exec-invite"];
+export const PUBLIC_PATHS = ["/", "/login", "/auth", "/exec-invite"];
 export const ONBOARDING_PATH = "/onboarding";
 
 export function isPublicPath(pathname: string) {
@@ -36,7 +36,7 @@ export function decideGate(pathname: string, user: GateUser, profile: GateProfil
   }
 
   if (onboardingPath) return { kind: "redirect", to: "/dashboard", reason: "already-onboarded" };
-  if (pathname === "/login" || pathname === "/welcome" || pathname === "/verify") {
+  if (pathname === "/login") {
     return { kind: "redirect", to: "/dashboard", reason: "already-signed-in" };
   }
   return { kind: "allow" };

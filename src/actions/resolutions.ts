@@ -9,6 +9,8 @@ import { fail, ok, type ActionResult } from "@/lib/action-result";
 import { describeDbError } from "@/lib/db-errors";
 import { delegationKey, displayDelegation, isNoDelegation } from "@/lib/resolutions";
 import { logAudit } from "@/lib/audit";
+import { broadcast } from "@/lib/realtime/server";
+import { RESOLUTIONS_TOPIC } from "@/lib/realtime/topics";
 
 function revalidate() {
   revalidatePath("/resolutions", "layout");
@@ -33,6 +35,7 @@ export async function publishResolution(input: { uploadId: string }): Promise<Ac
   if (error) return fail(describeDbError(error));
   await logAudit({ actorId: actor.id, action: "resolution.published", entityType: "task_upload", entityId: upload.id, metadata: { delegation } });
   revalidate();
+  await broadcast(RESOLUTIONS_TOPIC);
   return ok(undefined, `${delegation}'s resolution is now visible to delegates.`);
 }
 
@@ -48,5 +51,6 @@ export async function unpublishResolution(input: { key: string }): Promise<Actio
   if (error) return fail(describeDbError(error));
   await logAudit({ actorId: actor.id, action: "resolution.hidden", entityType: "resolution_publication", entityId: null, metadata: { delegation: existing?.delegation ?? key } });
   revalidate();
+  await broadcast(RESOLUTIONS_TOPIC);
   return ok(undefined, `${existing?.delegation ?? "The"} resolution is hidden from delegates.`);
 }

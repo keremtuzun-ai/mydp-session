@@ -10,6 +10,8 @@ import { uuid } from "@/lib/validation/schemas";
 import { PageHeader } from "@/components/mun/page-header";
 import { DocumentViewer } from "../document-viewer";
 import { VotingPanel } from "../voting-panel";
+import { LiveRefresh } from "@/components/mun/live-refresh";
+import { RESOLUTIONS_TOPIC } from "@/lib/realtime/topics";
 import { fmt } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Resolution" };
@@ -64,6 +66,7 @@ export default async function ResolutionPage({ params, searchParams }: PageProps
 
   return (
     <div className="flex flex-col gap-6">
+      {viewer.isStaff ? null : <LiveRefresh topic={RESOLUTIONS_TOPIC} />}
       <PageHeader
         eyebrow="Resolution"
         title={delegation}

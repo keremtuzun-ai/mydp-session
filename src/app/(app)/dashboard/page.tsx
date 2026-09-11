@@ -12,6 +12,7 @@ import { PriorityBadge } from "@/components/mun/priority-badge";
 import { StatTile } from "@/components/mun/stat-tile";
 import { FormSuccess } from "@/components/ui/field";
 import { relativeDue, fmt } from "@/lib/utils";
+import { LiveVoting } from "./live-voting";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -56,6 +57,10 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
       />
       {sp.welcome === "1" ? <FormSuccess message="Your profile is complete. Welcome to the programme." /> : null}
       {sp.denied === "1" ? <div role="alert" className="flash flash-warning">That page is reserved for another role.</div> : null}
+
+      <div className="mb-5">
+        <LiveVoting db={supabase} />
+      </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <StatTile label="Attendance" value={rate === null ? "—" : `${rate}%`} hint={recorded ? `${attended} of ${recorded} recorded` : undefined} />

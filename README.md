@@ -54,7 +54,7 @@ npm run dev
 1. Create a project (or run `supabase start`).
 2. Copy the project URL, anon key and service-role key into `.env.local`.
 3. Authentication → URL configuration: set the Site URL to your app origin and add `<origin>/auth/callback` to the redirect allow-list.
-4. Authentication → Email: keep "Confirm email" on. The app uses **email OTP** for first-time verification and code sign-in. Customize the "Magic Link" and "Reset password" templates so they include the six-digit code, `{{ .Token }}` (see [Email templates](#email-templates)). `supabase/config.toml` already does this for the local stack.
+4. Authentication → Email: nothing to configure. Members never receive email: the executive desk creates every account and hands over a 12-character access code, and sign-in verifies a server-generated one-time token (see [Roles](#roles)). Realtime must be enabled (it is by default): live voting uses Broadcast over public channels.
 5. Apply migrations (`supabase db reset` locally or `supabase db push` for hosted).
 6. Seed (`npm run db:seed`). The seed also writes your `ALLOWED_SCHOOL_DOMAINS` into the `allowed_email_domains` table, which the database uses to refuse sign-ups from other domains.
 
@@ -66,7 +66,7 @@ Storage buckets (`task-evidence`, `materials`, `committee-submissions`, `avatars
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | browser + server | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | browser + server | Public anon key; every query through it is subject to RLS |
-| `SUPABASE_SERVICE_ROLE_KEY` | **server only** | Username → email lookup at sign-in, signed download URLs, audit log, seed, admin user deletion. Never shipped to the browser. |
+| `SUPABASE_SERVICE_ROLE_KEY` | **server only** | Access-code lookup and one-time sign-in token at sign-in, account creation from the desk, signed download URLs, audit log, live-update broadcasts, seed, admin user deletion. Never shipped to the browser. |
 | `EXEC_INVITE_TOKEN` | server | Secret path segment of the executive link `/exec-invite/<token>`. Rotate to revoke. Empty disables the link. |
 | `EXEC_SHARED_PASSWORD` | server | Password asked for on the executive link. The whole Secretariat shares one executive account (`secretariat@<first domain>`, or `EXEC_ACCOUNT_EMAIL`); create or update it with `npm run exec:account` after setting or rotating this. |
 | `ALLOWED_SCHOOL_DOMAINS` | server | Only used to derive the shared executive account's address (`secretariat@<first domain>`). Sign-up accepts any email since migration 0012. |
@@ -88,6 +88,9 @@ supabase/
   migrations/0008_shared_exec_account.sql  drops the allow-list; author_name on tasks and announcements
   migrations/0009_visible_to_everyone.sql  every member reads every task/announcement; admin section for staff
   migrations/0010_attendance_by_date_delegation.sql  attendance keyed by a typed date; delegation on submissions; no meeting links
+  migrations/0013_resolutions.sql  shared resolutions per delegation
+  migrations/0014_voting.sql  voting rounds and votes
+  migrations/0017_access_codes.sql  junior/senior tier; immutable 12-character access codes (backfilled for existing members)
   templates/*.html              email templates for the local stack
   config.toml                   local CLI config (OTP length, template paths)
 scripts/seed.ts                 development data (idempotent)
@@ -103,7 +106,7 @@ supabase gen types typescript --local > src/lib/types/database.ts
 
 ## Test accounts (local development only)
 
-Created by the seed under the first domain in `ALLOWED_SCHOOL_DOMAINS` (shown here as `school.edu`). Password for all: the value of `SEED_PASSWORD` (default `MunHub!2026`). Sign in with **school email + password**.
+Created by the seed under the first domain in `ALLOWED_SCHOOL_DOMAINS` (shown here as `school.edu`). Every seeded account gets an access code; the seed prints them at the end. Sign in with the **access code** (the `SEED_PASSWORD` value is only the Supabase password behind the accounts and is never typed into the app).
 
 | Role | Username | Email | Committees |
 | --- | --- | --- | --- |
@@ -127,18 +130,24 @@ Never run the seed against a production project.
 | **Admin** | Everything: users and roles, committees, sessions, tasks, materials, announcements, attendance, analytics, allowed domains, audit log. |
 | **Executive** | Create and manage sessions, committees, announcements (any audience), materials, tasks for anyone, attendance for anyone, analytics. Cannot change roles, delete users, delete committees or manage domains. |
 | **Chair** | Only for committees they chair: tasks, agenda block and chair notes, announcements, materials, attendance, feedback, members (add or remove delegates). Sees private contact details of their own members only. |
-| **Delegate** | Own profile, own committees and their content, own tasks (status: not started → in progress → submitted, plus evidence uploads), own attendance and feedback, published sessions, announcements addressed to them. |
+| **Delegate** | Own profile, own committees and their content, own tasks (status: not started → in progress → submitted, plus evidence uploads), own attendance and feedback, published sessions, announcements addressed to them, shared resolutions and their live voting tally. |
 
 Authorization is enforced in the database (RLS + triggers) and again in server actions. The UI only decides what to show.
+
+### Accounts and access codes
+
+There is no sign-up. The executive desk (Exec desk → Members) creates every account with a name, a surname and **junior** or **senior**. Each account is issued one 12-character access code (capital letters and digits, no I or O) that is generated automatically, shown to the desk, listed in the members table and can never be changed; a leaked code means deleting the account and creating a new one. Members sign in with that code on every visit. Under the hood the code is looked up with the service role and the browser is signed in by verifying a server-generated magic-link token, so no password exists for members; the account's email is a synthetic `<code>@members.example.com` that is never mailed. The shared executive desk still signs in through its secret link.
+
+### Live voting
+
+When the desk opens, closes or clears a voting round, or a member votes, the server broadcasts on a Supabase Realtime channel (`voting:<delegation>` and `resolutions`). Every open page listening on that topic refetches through its own RLS-checked read: delegates see the tally and the "x of y voted" count update as votes land, the resolutions list and the dashboard's "Voting open" strip appear and disappear without a reload. Individual votes stay visible to the desk only. A 15-second fallback poll and a refetch on tab focus cover a dropped socket.
 
 ## Routes
 
 | Route | Purpose |
 | --- | --- |
-| `/` | Landing page with "First-time setup" and "Sign in" |
-| `/welcome` | Create an account: school email + password (no verification email) |
-| `/login` | Name and surname, school email + password, required on every visit (session ends when the browser closes) |
-| `/reset-password` | Explains that executives/admins set temporary passwords from the admin console |
+| `/` | Landing page with "Sign in" |
+| `/login` | Access code, required on every visit (session ends when the browser closes) |
 | `/admin` | Users & roles, sessions, templates, domains, audit: the admin and the executive desk (only admins grant or remove the admin role) |
 | `/exec-invite/[token]` | Secret executive link: enter the shared executive password (`EXEC_SHARED_PASSWORD`) to open the shared executive desk |
 | `/onboarding` | Name, grade, phone, unique username, password, photo (only after email verification) |
@@ -147,8 +156,8 @@ Authorization is enforced in the database (RLS + triggers) and again in server a
 | `/exec`, `/exec/uploads`, `/exec/attendance` | Executive desk: assign tasks with a free-text committee/clause, follow progress per delegate, review every file and document link, take attendance for everyone with history |
 | `/calendar`, `/calendar/new`, `/calendar/[id]`, `/calendar/[id]/edit` | Task list (table on desktop, cards on mobile), task detail with status, evidence uploads, activity log |
 | `/attendance` | Personal history and rate; roll call for chairs and staff |
-| `/settings` | Profile, photo, password, sessions; read-only email, username, role |
-| `/admin` | Members: roles, temporary passwords, removal |
+| `/settings` | Profile, photo, sessions; read-only access code, username, junior/senior, role |
+| `/admin` | Members: create accounts (name, surname, junior/senior → access code), junior/senior and roles, removal |
 | `/auth/signout` (POST) | Sign out |
 | `/api/username-available` | Live username check (requires verified session) |
 | `/api/files/[kind]/[id]` | RLS-checked redirect to a short-lived signed download URL |
@@ -195,13 +204,13 @@ The app is a standard Next.js application. On any Vercel project:
 2. Add the environment variables from `.env.example` (set `NEXT_PUBLIC_SITE_URL` to the production URL).
 3. In Supabase, add `https://<your-domain>/auth/callback` to the auth redirect allow-list and set the Site URL.
 4. Apply migrations to the production project with `supabase db push`. Do **not** run the seed.
-5. Create the first admin: register through the app, then in the SQL editor run `update public.profiles set role = 'admin' where school_email = 'you@school.edu';`
+5. Create the first admin: open the executive desk through its secret link, create your own account under Members, then in the SQL editor run `update public.profiles set role = 'admin' where username = 'your-username';`
 
 Any Node 20.9+ host works the same way (`npm run build && npm start`).
 
 ## Email
 
-No emails are sent. Accounts are created directly with a school email and password (the domain allow-list is still enforced by the app and by the database trigger), and forgotten passwords are reset by executives or admins from Admin → Users & roles, which generates a temporary password shown once. The branded templates in `supabase/templates/` are kept for a future email-based flow.
+No emails are sent. Accounts are created by the executive desk and members sign in with their access code; there are no passwords to forget. The branded templates in `supabase/templates/` are kept for a future email-based flow.
 
 ## Troubleshooting
 

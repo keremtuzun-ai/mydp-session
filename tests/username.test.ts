@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { usernameSchema, isValidUsernameFormat, RESERVED_USERNAMES } from "@/lib/auth/username";
-import { onboardingSchema, signUpSchema } from "@/lib/validation/schemas";
+import { onboardingSchema } from "@/lib/validation/schemas";
 
 describe("username rules", () => {
   it("accepts lowercase letters, numbers and hyphens between 3 and 24 chars", () => {
@@ -30,12 +30,4 @@ describe("username rules", () => {
     expect(onboardingSchema.safeParse({ ...base, username: "" }).success).toBe(false);
   });
 
-  it("sign-up requires a strong, confirmed password", () => {
-    expect(signUpSchema.safeParse({ email: "a@school.edu", password: "Delegate2026", confirm_password: "Delegate2026" }).success).toBe(true);
-    expect(signUpSchema.safeParse({ email: "a@school.edu", password: "Delegate2026", confirm_password: "other" }).success).toBe(false);
-    expect(signUpSchema.safeParse({ email: "a@school.edu", password: "short", confirm_password: "short" }).success).toBe(false);
-    expect(signUpSchema.safeParse({ email: "a@school.edu", password: "Mun2027x", confirm_password: "Mun2027x" }).success).toBe(true);
-    expect(signUpSchema.safeParse({ email: "a@school.edu", password: "Mun2027", confirm_password: "Mun2027" }).success).toBe(false);
-    expect(signUpSchema.safeParse({ email: "not-an-email", password: "Delegate2026", confirm_password: "Delegate2026" }).success).toBe(false);
-  });
 });

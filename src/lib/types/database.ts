@@ -25,6 +25,7 @@ export type Database = {
           first_name: string | null;
           last_name: string | null;
           delegation: string | null;
+          tier: string | null;
           grade: string | null;
           phone: string | null;
           avatar_url: string | null;
@@ -41,6 +42,7 @@ export type Database = {
           first_name?: string | null;
           last_name?: string | null;
           delegation?: string | null;
+          tier?: string | null;
           grade?: string | null;
           phone?: string | null;
           avatar_url?: string | null;
@@ -57,6 +59,7 @@ export type Database = {
           first_name?: string | null;
           last_name?: string | null;
           delegation?: string | null;
+          tier?: string | null;
           grade?: string | null;
           phone?: string | null;
           avatar_url?: string | null;
@@ -719,6 +722,14 @@ export type Database = {
           { foreignKeyName: "resolution_votes_profile_id_fkey"; columns: ["profile_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
         ];
       };
+      access_codes: {
+        Row: { code: string; profile_id: string; created_by: string | null; created_at: string };
+        Insert: { code: string; profile_id: string; created_by?: string | null; created_at?: string };
+        Update: { code?: string; profile_id?: string; created_by?: string | null; created_at?: string };
+        Relationships: [
+          { foreignKeyName: "access_codes_profile_id_fkey"; columns: ["profile_id"]; isOneToOne: true; referencedRelation: "profiles"; referencedColumns: ["id"] },
+        ];
+      };
     };
     Views: {
       public_profiles: {
@@ -732,6 +743,7 @@ export type Database = {
           first_name: string | null;
           last_name: string | null;
           delegation: string | null;
+          tier: string | null;
         };
         Relationships: [];
       };

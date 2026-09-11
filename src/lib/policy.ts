@@ -78,16 +78,6 @@ export function canRecordAttendance(a: Actor, memberCommitteeIdsOfSubject: reado
   return memberCommitteeIdsOfSubject.some((c) => chairs(a, c));
 }
 
-export function canPostAnnouncement(a: Actor, targetCommitteeId: string | null): boolean {
-  if (isStaff(a)) return true;
-  return chairs(a, targetCommitteeId);
-}
-
-export function canUploadMaterial(a: Actor, committeeId: string | null): boolean {
-  if (isStaff(a)) return true;
-  return chairs(a, committeeId);
-}
-
 export function canSubmitToCommittee(a: Actor, c: Pick<Committee, "id" | "submissions_enabled">): boolean {
   return c.submissions_enabled && memberOf(a, c.id);
 }

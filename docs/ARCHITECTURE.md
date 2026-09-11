@@ -24,10 +24,10 @@ src/
     (auth)/                   welcome, verify, login, reset-password
     onboarding/               profile completion (server-enforced)
     (app)/                    authenticated shell: dashboard, sessions, committees, calendar,
-                              materials, announcements, attendance, analytics, settings, admin
+                              attendance, analytics, settings, admin
     auth/, api/               route handlers
   actions/                    server actions per domain (auth, onboarding, settings, tasks,
-                              sessions, committees, announcements, attendance, materials, feedback, admin)
+                              sessions, committees, attendance, feedback, admin)
   lib/
     auth/                     domains.ts (allow-list), username.ts, gate.ts (pure routing rules),
                               session.ts (getViewer, server-only), roles.ts, actor.ts

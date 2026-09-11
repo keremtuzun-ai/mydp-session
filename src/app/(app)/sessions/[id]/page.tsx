@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { CalendarDays, MapPin, Shirt, Pencil, Megaphone, ListChecks, Library, MessageSquare } from "lucide-react";
+import { CalendarDays, MapPin, Shirt, Pencil, ListChecks, MessageSquare } from "lucide-react";
 import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { getNameMap, nameOf, getUploadCounts } from "@/lib/data/queries";
@@ -11,8 +11,7 @@ import { TaskStatusBadge } from "@/components/mun/task-status-badge";
 import { PriorityBadge } from "@/components/mun/priority-badge";
 import { EmptyState } from "@/components/mun/empty-state";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { formatDate, formatTimeRange, relativeDue, formatDateTime, humanize } from "@/lib/utils";
+import { formatDate, formatTimeRange, relativeDue, formatDateTime } from "@/lib/utils";
 import { SessionStatusControls, FeedbackForm } from "./session-controls";
 
 export const metadata: Metadata = { title: "Session" };
@@ -24,10 +23,8 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
   const { data: session } = await supabase.from("weekly_sessions").select("*").eq("id", id).maybeSingle();
   if (!session) notFound();
 
-  const [{ data: announcements }, { data: tasks }, { data: materials }, { data: feedback }] = await Promise.all([
-    supabase.from("announcements").select("*").eq("target_session_id", id).order("pinned", { ascending: false }).order("published_at", { ascending: false }),
+  const [{ data: tasks }, { data: feedback }] = await Promise.all([
     supabase.from("tasks").select("*").eq("session_id", id).order("due_at", { ascending: true, nullsFirst: false }),
-    supabase.from("materials").select("*").eq("session_id", id).order("created_at", { ascending: false }),
     supabase.from("session_feedback").select("*").eq("session_id", id).order("created_at", { ascending: false }),
   ]);
 
@@ -37,7 +34,6 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
   const names = await getNameMap(supabase, [
     ...taskList.map((t) => t.created_by),
     ...taskList.map((t) => t.assigned_to_profile_id),
-    ...(announcements ?? []).map((a) => a.author_id),
     ...(feedback ?? []).flatMap((f) => [f.author_id, f.profile_id]),
   ]);
 
@@ -99,8 +95,7 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
         </Card>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <section aria-labelledby="session-tasks">
+      <section aria-labelledby="session-tasks">
           <div className="section-head">
             <h2 id="session-tasks">Tasks for this session</h2>
             {viewer.isStaff || viewer.isChair ? (
@@ -132,47 +127,6 @@ export default async function SessionDetailPage({ params }: PageProps<"/sessions
           ) : (
             <EmptyState icon={ListChecks} title="No tasks linked" className="empty-state-sm" />
           )}
-        </section>
-
-        <section aria-labelledby="session-materials">
-          <div className="section-head"><h2 id="session-materials">Resources</h2></div>
-          {materials && materials.length ? (
-            <ul className="ledger">
-              {materials.map((m) => (
-                <li key={m.id} className="flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="m-0 font-[650]">{m.title}</p>
-                    <p className="m-0 row-sub">{humanize(m.category)}</p>
-                  </div>
-                  <Button asChild size="sm" variant="outline">
-                    <a href={`/api/files/materials/${m.id}`} target="_blank" rel="noopener noreferrer">
-                      Open
-                    </a>
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EmptyState icon={Library} title="No resources attached" className="empty-state-sm" />
-          )}
-        </section>
-      </div>
-
-      <section aria-labelledby="session-announcements">
-        <div className="section-head"><h2 id="session-announcements">Announcements for this session</h2></div>
-        {announcements && announcements.length ? (
-          <div className="grid gap-3 md:grid-cols-2">
-            {announcements.map((a) => (
-              <Card key={a.id} className="card-tight">
-                <p className="m-0 font-[650]">{a.title}</p>
-                <p className="m-0 mt-1 whitespace-pre-wrap small muted">{a.body}</p>
-                <p className="m-0 mt-2 dateline">{a.author_name ?? nameOf(names, a.author_id, "Secretariat")} · {formatDateTime(a.published_at)}</p>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <EmptyState icon={Megaphone} title="Nothing announced for this session" className="empty-state-sm" />
-        )}
       </section>
 
       <section aria-labelledby="session-feedback">

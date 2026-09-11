@@ -67,16 +67,6 @@ export const TASK_PRIORITIES = ["low", "normal", "high", "urgent"] as const;
 export const TASK_STATUSES = ["not_started", "in_progress", "submitted", "reviewed", "completed", "overdue"] as const;
 export const SESSION_STATUSES = ["draft", "published", "completed", "cancelled"] as const;
 export const ATTENDANCE_STATUSES = ["present", "late", "excused", "absent"] as const;
-export const MATERIAL_CATEGORIES = [
-  "study_guide",
-  "rules_of_procedure",
-  "topic_brief",
-  "research_source",
-  "template",
-  "slide_deck",
-  "recording",
-] as const;
-export const MATERIAL_VISIBILITIES = ["everyone", "committee", "staff"] as const;
 export const USER_ROLE_VALUES = ["admin", "executive", "chair", "delegate"] as const;
 export const MEMBERSHIP_ROLE_VALUES = ["delegate", "chair", "co_chair", "executive"] as const;
 
@@ -152,31 +142,11 @@ export const membershipSchema = z.object({
   delegation: optionalText(80),
 });
 
-export const announcementSchema = z.object({
-  title: z.string().trim().min(3).max(140),
-  author_name: authorNameSchema,
-  body: z.string().trim().min(3).max(8000),
-  pinned: z.boolean(),
-  target_role: z.union([z.enum(USER_ROLE_VALUES), z.literal("")]).transform((v) => (v === "" ? null : v)),
-  target_committee_id: optionalUuid,
-  target_session_id: optionalUuid,
-});
-
 export const attendanceSchema = z.object({
   session_id: uuid,
   profile_id: uuid,
   status: z.enum(ATTENDANCE_STATUSES),
   note: optionalText(500),
-});
-
-export const materialSchema = z.object({
-  title: z.string().trim().min(3).max(140),
-  description: optionalText(2000),
-  category: z.enum(MATERIAL_CATEGORIES),
-  committee_id: optionalUuid,
-  session_id: optionalUuid,
-  visibility: z.enum(MATERIAL_VISIBILITIES),
-  external_url: z.union([z.string().trim().url("Enter a valid link"), z.literal("")]).transform((v) => v || null),
 });
 
 export const taskTemplateSchema = z.object({

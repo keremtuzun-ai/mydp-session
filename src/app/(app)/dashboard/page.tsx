@@ -11,7 +11,7 @@ import { TaskStatusBadge } from "@/components/mun/task-status-badge";
 import { PriorityBadge } from "@/components/mun/priority-badge";
 import { StatTile } from "@/components/mun/stat-tile";
 import { FormSuccess } from "@/components/ui/field";
-import { relativeDue, formatDate, fmt } from "@/lib/utils";
+import { relativeDue, fmt } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -22,17 +22,16 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
   const now = new Date().toISOString();
   await ensureUpcomingSessions();
 
-  const [upcoming, { data: tasks }, { data: announcements }, { data: attendance }] = await Promise.all([
+  const [upcoming, { data: tasks }, { data: attendance }] = await Promise.all([
     listSessionsWithCoverage(supabase, { from: now, order: "asc", limit: 1 }),
     supabase.from("tasks").select("*").not("status", "in", "(completed,reviewed)").order("created_at", { ascending: false }).limit(8),
-    supabase.from("announcements").select("*").lte("published_at", now).order("pinned", { ascending: false }).order("published_at", { ascending: false }).limit(5),
     supabase.from("attendance_records").select("status, attended_on").eq("profile_id", viewer.userId),
   ]);
 
   const nextSession = upcoming.find((s) => s.status === "published") ?? upcoming[0];
   const taskList = tasks ?? [];
   const uploadCounts = await getUploadCounts(supabase, taskList.map((t) => t.id));
-  const names = await getNameMap(supabase, [...taskList.map((t) => t.created_by), ...(announcements ?? []).map((a) => a.author_id)]);
+  const names = await getNameMap(supabase, taskList.map((t) => t.created_by));
 
   const attended = (attendance ?? []).filter((a) => a.status === "present" || a.status === "late").length;
   const recorded = (attendance ?? []).length;
@@ -58,10 +57,9 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
       {sp.welcome === "1" ? <FormSuccess message="Your profile is complete. Welcome to the programme." /> : null}
       {sp.denied === "1" ? <div role="alert" className="flash flash-warning">That page is reserved for another role.</div> : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <StatTile label="Attendance" value={rate === null ? "—" : `${rate}%`} hint={recorded ? `${attended} of ${recorded} recorded` : undefined} />
         <StatTile label="Open tasks" value={taskList.length} />
-        <StatTile label="Notices" value={(announcements ?? []).length} />
       </div>
 
       <div className="mt-5">
@@ -83,7 +81,7 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
 
       </div>
 
-      <div className="two-col-wide grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] mt-5">
+      <div className="mt-5">
         <section className="card">
           <div className="section-head">
             <h2>Latest tasks</h2>
@@ -129,33 +127,6 @@ export default async function DashboardPage({ searchParams }: PageProps<"/dashbo
             </div>
           ) : (
             <EmptyState title="No open tasks" className="empty-state-sm" />
-          )}
-        </section>
-
-        <section className="card">
-          <div className="section-head">
-            <h2>Announcements</h2>
-            <Link href="/announcements" className="section-tail prose-link">
-              All notices
-            </Link>
-          </div>
-          {announcements && announcements.length ? (
-            <ul className="ledger">
-              {announcements.map((a) => (
-                <li key={a.id}>
-                  <div className="flex items-baseline justify-between gap-3">
-                    <strong>{a.title}</strong>
-                    {a.pinned ? <span className="chip chip-red">Pinned</span> : null}
-                  </div>
-                  <p className="m-0 mt-1 small muted line-clamp-3">{a.body}</p>
-                  <div className="dateline mt-2">
-                    {a.author_name ?? nameOf(names, a.author_id, "Secretariat")} · {formatDate(a.published_at)}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <EmptyState title="No announcements" className="empty-state-sm" />
           )}
         </section>
       </div>

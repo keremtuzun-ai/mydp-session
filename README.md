@@ -142,12 +142,10 @@ Authorization is enforced in the database (RLS + triggers) and again in server a
 | `/admin` | Users & roles, sessions, templates, domains, audit: the admin and the executive desk (only admins grant or remove the admin role) |
 | `/exec-invite/[token]` | Secret executive link: enter the shared executive password (`EXEC_SHARED_PASSWORD`) to open the shared executive desk |
 | `/onboarding` | Name, grade, phone, unique username, password, photo (only after email verification) |
-| `/dashboard` | Next session, committee, upcoming tasks, announcements, attendance, quick links |
-| `/sessions`, `/sessions/new`, `/sessions/[id]`, `/sessions/[id]/edit` | Weekly session archive, detail with committee blocks, tasks, resources, feedback |
+| `/dashboard` | Next session, committee, upcoming tasks, attendance, quick links |
+| `/sessions`, `/sessions/new`, `/sessions/[id]`, `/sessions/[id]/edit` | Weekly session archive, detail with committee blocks, tasks, feedback |
 | `/exec`, `/exec/uploads`, `/exec/attendance` | Executive desk: assign tasks with a free-text committee/clause, follow progress per delegate, review every file and document link, take attendance for everyone with history |
 | `/calendar`, `/calendar/new`, `/calendar/[id]`, `/calendar/[id]/edit` | Task list (table on desktop, cards on mobile), task detail with status, evidence uploads, activity log |
-| `/materials` | Searchable library with committee / session / category / type filters |
-| `/announcements` | Notice board with audience targeting, pinning and read status |
 | `/attendance` | Personal history and rate; roll call for chairs and staff |
 | `/analytics` | Staff-only metrics and charts |
 | `/settings` | Profile, photo, password, sessions; read-only email, username, role |

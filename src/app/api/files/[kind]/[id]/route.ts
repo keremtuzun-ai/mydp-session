@@ -4,7 +4,6 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 const KINDS = {
   "task-uploads": { table: "task_uploads", bucket: "task-evidence" },
-  materials: { table: "materials", bucket: "materials" },
   submissions: { table: "committee_submissions", bucket: "committee-submissions" },
 } as const;
 
@@ -28,11 +27,6 @@ export async function GET(_request: NextRequest, ctx: RouteContext<"/api/files/[
   let fileName: string | null = null;
   if (def.table === "task_uploads") {
     const { data } = await supabase.from("task_uploads").select("storage_path, file_name, external_url").eq("id", id).maybeSingle();
-    if (data?.external_url && !data.storage_path) return NextResponse.redirect(data.external_url);
-    storagePath = data?.storage_path ?? null;
-    fileName = data?.file_name ?? null;
-  } else if (def.table === "materials") {
-    const { data } = await supabase.from("materials").select("storage_path, file_name, external_url").eq("id", id).maybeSingle();
     if (data?.external_url && !data.storage_path) return NextResponse.redirect(data.external_url);
     storagePath = data?.storage_path ?? null;
     fileName = data?.file_name ?? null;

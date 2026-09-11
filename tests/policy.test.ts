@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   canViewTask, canManageTask, canCreateTask, canDelegateSetStatus, canUploadEvidence, canRecordAttendance,
-  canPostAnnouncement, canManageCommittee, canSubmitToCommittee, canPostResolution, canManageResolution, type Actor,
+  canManageCommittee, canSubmitToCommittee, canPostResolution, canManageResolution, type Actor,
 } from "@/lib/policy";
 
 const UNSC = "c-unsc";
@@ -55,14 +55,11 @@ describe("chair scope", () => {
     expect(canViewTask(unscChair, aysesTask)).toBe(true);
     expect(canViewTask(unscChair, whoTask)).toBe(false);
   });
-  it("chairs manage only their own committee, attendance and announcements", () => {
+  it("chairs manage only their own committee and attendance", () => {
     expect(canManageCommittee(unscChair, UNSC)).toBe(true);
     expect(canManageCommittee(unscChair, WHO)).toBe(false);
     expect(canRecordAttendance(unscChair, [UNSC])).toBe(true);
     expect(canRecordAttendance(unscChair, [WHO])).toBe(false);
-    expect(canPostAnnouncement(unscChair, UNSC)).toBe(true);
-    expect(canPostAnnouncement(unscChair, null)).toBe(false);
-    expect(canPostAnnouncement(unscChair, WHO)).toBe(false);
   });
 });
 
@@ -75,7 +72,6 @@ describe("admin and executive access", () => {
     expect(canCreateTask(admin, null)).toBe(true);
     expect(canManageCommittee(admin, WHO)).toBe(true);
     expect(canRecordAttendance(admin, [])).toBe(true);
-    expect(canPostAnnouncement(admin, null)).toBe(true);
   });
   it("executives have the same operational reach", () => {
     expect(canManageTask(exec, whoTask)).toBe(true);

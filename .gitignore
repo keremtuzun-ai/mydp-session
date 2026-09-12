@@ -14,3 +14,6 @@ supabase/.temp
 tsconfig.tsbuildinfo
 .claude/
 .env*
+
+# Stress-test reports are attached to the run that produced them
+scripts/stress/report-*.md

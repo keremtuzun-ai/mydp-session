@@ -35,11 +35,17 @@ export async function signInWithAccessCode(_prev: ActionResult | null, formData:
 
   const { data: link, error: linkError } = await admin.auth.admin.generateLink({ type: "magiclink", email: profile.school_email });
   const tokenHash = link?.properties?.hashed_token;
-  if (linkError || !tokenHash) return fail("Could not sign you in right now. Try again in a moment.");
+  if (linkError || !tokenHash) {
+    console.error("[auth] generateLink failed for code sign-in", linkError?.status ?? "", linkError?.message ?? "no token");
+    return fail("Could not sign you in right now. Try again in a moment.");
+  }
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.verifyOtp({ token_hash: tokenHash, type: "magiclink" });
-  if (error || !data.user) return fail("Could not sign you in right now. Try again in a moment.");
+  if (error || !data.user) {
+    console.error("[auth] verifyOtp failed for code sign-in", error?.status ?? "", error?.code ?? "", error?.message ?? "no user");
+    return fail("Could not sign you in right now. Try again in a moment.");
+  }
 
   await logAudit({ actorId: data.user.id, action: "member.code_signin", entityType: "profile", entityId: data.user.id });
   redirect(profile.onboarding_completed_at ? next : "/onboarding");

@@ -707,6 +707,14 @@ export type Database = {
           { foreignKeyName: "task_tallies_task_id_fkey"; columns: ["task_id"]; isOneToOne: false; referencedRelation: "tasks"; referencedColumns: ["id"] },
         ];
       };
+      task_tally_events: {
+        Row: { id: number; task_id: string; country_key: string; country: string; kind: string; delta: number; total_after: number; recorded_by: string | null; recorded_at: string };
+        Insert: { task_id: string; country_key: string; country: string; kind: string; delta: number; total_after: number; recorded_by?: string | null; recorded_at?: string };
+        Update: { task_id?: string; country_key?: string; country?: string; kind?: string; delta?: number; total_after?: number; recorded_by?: string | null; recorded_at?: string };
+        Relationships: [
+          { foreignKeyName: "task_tally_events_task_id_fkey"; columns: ["task_id"]; isOneToOne: false; referencedRelation: "tasks"; referencedColumns: ["id"] },
+        ];
+      };
       resolution_publications: {
         Row: { delegation_key: string; delegation: string; upload_id: string; published_by: string | null; published_at: string };
         Insert: { delegation_key: string; delegation: string; upload_id: string; published_by?: string | null; published_at?: string };

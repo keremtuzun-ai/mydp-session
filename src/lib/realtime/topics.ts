@@ -10,3 +10,8 @@ export function votingTopic(delegationKey: string) {
 
 /** The single event name; listeners refetch on it, the payload carries nothing sensitive. */
 export const LIVE_EVENT = "changed";
+
+/** The exec desk's speech tally for one task: a count changed. */
+export function tallyTopic(taskId: string) {
+  return `tally:${taskId}`;
+}

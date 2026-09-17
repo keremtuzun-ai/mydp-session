@@ -21,6 +21,7 @@ export const EXEC_SECTIONS: { href: string; label: string; exact?: boolean }[] =
   { href: "/exec", label: "Tasks & progress", exact: true },
   { href: "/exec/uploads", label: "Submissions" },
   { href: "/exec/attendance", label: "Attendance" },
+  { href: "/exec/tally", label: "Tally" },
   { href: "/admin", label: "Members", exact: true },
 ];
 

@@ -33,6 +33,7 @@ function taskFormInput(formData: FormData) {
     session_id: formData.get("session_id") ?? "",
     due_at: formData.get("due_at") ?? "",
     priority: formData.get("priority") ?? "normal",
+    countries: formData.get("countries") ?? "",
   };
 }
 
@@ -67,6 +68,7 @@ export async function createTask(_prev: ActionResult | null, formData: FormData)
   // A new task from the desk starts a clean resolutions page; earlier submissions stay on the board.
   const cleared = isStaff(actor) ? await clearPublications({ actorId: actor.id, taskId: data.id }) : 0;
   revalidateTaskViews(data.id);
+  revalidatePath("/exec/tally");
   if (cleared) revalidatePath("/resolutions", "layout");
   return ok({ id: data.id }, cleared ? `Task created. ${cleared === 1 ? "The shared resolution was" : `${cleared} shared resolutions were`} taken off the delegates' page; the submissions stay on the desk.` : "Task created.");
 }
@@ -82,9 +84,12 @@ export async function updateTask(taskId: string, _prev: ActionResult | null, for
   if (!canManageTask(actor, existing) || !canCreateTask(actor, parsed.data.assigned_committee_id)) {
     return fail("You can only edit tasks for a committee you manage.");
   }
-  const { error } = await supabase.from("tasks").update(parsed.data).eq("id", taskId);
+  // Only the desk sees the countries field; a chair's edit keeps the list as it was.
+  const patch = isStaff(actor) ? parsed.data : { ...parsed.data, countries: existing.countries };
+  const { error } = await supabase.from("tasks").update(patch).eq("id", taskId);
   if (error) return fail(describeDbError(error));
   revalidateTaskViews(taskId);
+  revalidatePath("/exec/tally");
   return ok(undefined, "Task updated.");
 }
 

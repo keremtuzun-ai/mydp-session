@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { MAX_COUNTRIES, parseCountries } from "@/lib/tally";
 import { usernameSchema } from "@/lib/auth/username";
 
 export const emailSchema = z.string().trim().toLowerCase().email("Enter a valid email address");
@@ -64,6 +65,7 @@ export const taskSchema = z.object({
   session_id: optionalUuid,
   due_at: optionalDate,
   priority: z.enum(TASK_PRIORITIES),
+  countries: z.string().max(4000).optional().transform((v) => parseCountries(v ?? "")).refine((v) => v.length <= MAX_COUNTRIES, `List at most ${MAX_COUNTRIES} countries`),
 });
 
 export const taskStatusSchema = z.object({

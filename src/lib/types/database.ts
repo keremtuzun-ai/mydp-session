@@ -244,6 +244,7 @@ export type Database = {
           review_note: string | null;
           committee_label: string | null;
           author_name: string | null;
+          countries: string[];
           created_at: string;
           updated_at: string;
         };
@@ -253,6 +254,7 @@ export type Database = {
           description?: string | null;
           committee_label?: string | null;
           author_name?: string | null;
+          countries?: string[];
           assigned_to_profile_id?: string | null;
           assigned_role?: Database["public"]["Enums"]["user_role"] | null;
           assigned_committee_id?: string | null;
@@ -273,6 +275,7 @@ export type Database = {
           description?: string | null;
           committee_label?: string | null;
           author_name?: string | null;
+          countries?: string[];
           assigned_to_profile_id?: string | null;
           assigned_role?: Database["public"]["Enums"]["user_role"] | null;
           assigned_committee_id?: string | null;
@@ -696,6 +699,14 @@ export type Database = {
           { foreignKeyName: "task_completions_profile_id_fkey"; columns: ["profile_id"]; isOneToOne: false; referencedRelation: "profiles"; referencedColumns: ["id"] },
         ];
       };
+      task_tallies: {
+        Row: { task_id: string; country_key: string; country: string; speeches: number; pois: number; objections: number; updated_at: string };
+        Insert: { task_id: string; country_key: string; country: string; speeches?: number; pois?: number; objections?: number; updated_at?: string };
+        Update: { task_id?: string; country_key?: string; country?: string; speeches?: number; pois?: number; objections?: number; updated_at?: string };
+        Relationships: [
+          { foreignKeyName: "task_tallies_task_id_fkey"; columns: ["task_id"]; isOneToOne: false; referencedRelation: "tasks"; referencedColumns: ["id"] },
+        ];
+      };
       resolution_publications: {
         Row: { delegation_key: string; delegation: string; upload_id: string; published_by: string | null; published_at: string };
         Insert: { delegation_key: string; delegation: string; upload_id: string; published_by?: string | null; published_at?: string };
@@ -761,6 +772,7 @@ export type Database = {
       mark_overdue_tasks: { Args: Record<string, never>; Returns: number };
       session_chair_notes: { Args: { sc: string }; Returns: string | null };
       resolution_vote_counts: { Args: { k: string }; Returns: { favour: number; against: number; abstain: number; total: number }[] };
+      bump_tally: { Args: { t: string; k: string; label: string; kind: string; delta: number }; Returns: Database["public"]["Tables"]["task_tallies"]["Row"] };
     };
     Enums: {
       user_role: "admin" | "executive" | "chair" | "delegate";

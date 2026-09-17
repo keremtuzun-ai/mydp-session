@@ -27,6 +27,7 @@ const clientSchema = z.object({
   session_id: z.string(),
   due_at: z.string(),
   priority: z.enum(["low", "normal", "high", "urgent"]),
+  countries: z.string().max(4000),
 });
 type Values = z.infer<typeof clientSchema>;
 
@@ -63,6 +64,7 @@ export function TaskForm({ task, committees, sessions, members, isStaff, recentL
       session_id: task?.session_id ?? defaults?.session ?? "",
       due_at: toDatetimeLocal(task?.due_at),
       priority: task?.priority ?? "normal",
+      countries: task?.countries?.join(", ") ?? "",
     },
   });
   const { formRef, onSubmit } = useRhfAction(form.handleSubmit, dispatch);
@@ -83,6 +85,13 @@ export function TaskForm({ task, committees, sessions, members, isStaff, recentL
       <Field label="Instructions" htmlFor="description" optional error={err("description")}>
         <Textarea id="description" rows={4} {...register("description")} />
       </Field>
+      {isStaff ? (
+        <Field label="Countries" htmlFor="countries" optional error={err("countries")}>
+          <Textarea id="countries" rows={2} placeholder="France, Germany, Japan" {...register("countries")} />
+        </Field>
+      ) : (
+        <input type="hidden" value="" {...register("countries")} />
+      )}
       <div className="form-grid">
         <Field label="Committee / clause" htmlFor="committee_label" optional error={err("committee_label")}>
           <Input id="committee_label" list="recent-labels" placeholder="e.g. UNHCR · Clause 3" {...register("committee_label")} />

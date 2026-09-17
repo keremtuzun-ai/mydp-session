@@ -13,7 +13,8 @@
     "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
     "exec:account": "tsx --env-file=.env.local scripts/exec-account.ts",
     "db:reset": "supabase db reset",
-    "check": "npm run lint && npm run typecheck && npm run test && npm run build"
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "members:create": "tsx --env-file=.env.local scripts/create-members.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",

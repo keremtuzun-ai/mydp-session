@@ -8,6 +8,7 @@ import { TaskTable, type TaskRow } from "../calendar/task-table";
 import { TASK_STATUS_LABEL } from "@/components/mun/task-status-badge";
 import { Progress } from "@/components/ui/progress";
 import { execOrigin, getExecInviteToken, getExecSharedPassword, siteUrl } from "@/lib/env";
+import { boardTitle } from "@/lib/board";
 
 export const metadata: Metadata = { title: "Executive desk" };
 
@@ -57,7 +58,7 @@ export default async function ExecPage({ searchParams }: PageProps<"/exec">) {
     const mine = all.filter((t) => t.assigned_to_profile_id === d.id || (t.assigned_to_profile_id === null && (t.assigned_role === null || t.assigned_role === "delegate")));
     const isDone = (t: (typeof all)[number]) => doneKeys.has(`${t.id}:${d.id}`) || (t.assigned_to_profile_id === d.id && t.status === "completed");
     const doneMine = mine.filter(isDone).length;
-    return { id: d.id, name: d.display_name ?? d.username ?? "?", total: mine.length, done: doneMine, open: mine.filter((t) => !isDone(t) && t.status !== "submitted").length, waiting: mine.filter((t) => !isDone(t) && t.status === "submitted").length };
+    return { id: d.id, name: d.display_name ?? d.username ?? "?", title: boardTitle(d.username), total: mine.length, done: doneMine, open: mine.filter((t) => !isDone(t) && t.status !== "submitted").length, waiting: mine.filter((t) => !isDone(t) && t.status === "submitted").length };
   });
 
   return (
@@ -101,7 +102,10 @@ export default async function ExecPage({ searchParams }: PageProps<"/exec">) {
               <tbody>
                 {perDelegate.map((d) => (
                   <tr key={d.id}>
-                    <td data-label="Delegate" className="font-[650]">{d.name}</td>
+                    <td data-label="Delegate" className="font-[650]">
+                      {d.name}
+                      {d.title ? <span className="board-title block">{d.title}</span> : null}
+                    </td>
                     <td data-label="Assigned" className="num">{d.total}</td>
                     <td data-label="Done" className="num">{d.done}</td>
                     <td data-label="Awaiting review" className="num">{d.waiting}</td>

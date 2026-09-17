@@ -269,6 +269,14 @@
     text-transform: uppercase;
     color: var(--ink-2);
   }
+  /* Club board title, printed under the member's name wherever members are listed. */
+  .board-title {
+    font-family: var(--font-label);
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: var(--navy);
+  }
   .rule { border: 0; border-top: 1px solid var(--line); margin: 2rem 0; }
 
   /* ── Masthead ── */

@@ -1,7 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { boardTitle } from "@/lib/board";
 import { initials } from "@/lib/utils";
 
 export function UserChip({ name, username, avatarUrl, size = "sm" }: { name: string | null; username?: string | null; avatarUrl?: string | null; size?: "sm" | "md" }) {
+  const title = boardTitle(username);
   return (
     <span className="inline-flex items-center gap-2.5">
       <Avatar className={size === "sm" ? "size-7" : "size-9"}>
@@ -10,6 +12,7 @@ export function UserChip({ name, username, avatarUrl, size = "sm" }: { name: str
       </Avatar>
       <span className="leading-tight">
         <span className="block font-[650] text-[0.9rem]">{name ?? "Unnamed"}</span>
+        {title ? <span className="board-title block">{title}</span> : null}
         {username ? <span className="block mono text-[0.72rem] faint">{username}</span> : null}
       </span>
     </span>

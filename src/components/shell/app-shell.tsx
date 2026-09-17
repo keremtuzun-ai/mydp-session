@@ -4,11 +4,14 @@ import { AppNav } from "@/components/shell/app-nav";
 import { navForRole } from "@/components/shell/nav-config";
 import type { Viewer } from "@/lib/auth/session";
 import { ROLE_LABEL } from "@/lib/auth/roles";
+import { boardTitle } from "@/lib/board";
 
 /** Left sidebar on desktop, bottom tab bar on phones, editorial main column. */
 export function AppShell({ viewer, children }: { viewer: Viewer; children: React.ReactNode }) {
   const items = navForRole(viewer.role);
-  const who = `${ROLE_LABEL[viewer.role]} · ${viewer.profile.username ?? viewer.profile.display_name ?? ""}`;
+  // Board members are introduced by their title rather than by their role.
+  const standing = boardTitle(viewer.profile.username) ?? ROLE_LABEL[viewer.role];
+  const who = `${standing} · ${viewer.profile.username ?? viewer.profile.display_name ?? ""}`;
   const today = fmt(new Date(), "EEEE, d MMMM yyyy");
   return (
     <div className="shell">

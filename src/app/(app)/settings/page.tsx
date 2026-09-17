@@ -3,6 +3,7 @@ import { getViewer } from "@/lib/auth/session";
 import { createClient } from "@/lib/supabase/server";
 import { isSharedExecAccount } from "@/lib/auth/shared-exec";
 import { formatAccessCode, isMemberEmail, isMemberTier, TIER_LABEL } from "@/lib/auth/access-code";
+import { boardTitle } from "@/lib/board";
 import { getExecSharedPassword } from "@/lib/env";
 import { PageHeader } from "@/components/mun/page-header";
 import { RoleBadge } from "@/components/mun/role-badge";
@@ -17,6 +18,7 @@ export default async function SettingsPage() {
   const supabase = await createClient();
   const { data: issued } = shared ? { data: null } : await supabase.from("access_codes").select("code").eq("profile_id", viewer.userId).maybeSingle();
   const tier = isMemberTier(viewer.profile.tier) ? TIER_LABEL[viewer.profile.tier] : null;
+  const title = boardTitle(viewer.profile.username);
 
   return (
     <div className="flex flex-col gap-6">
@@ -109,6 +111,12 @@ export default async function SettingsPage() {
                   <div className="settings-row">
                     <dt>Member</dt>
                     <dd>{tier}</dd>
+                  </div>
+                ) : null}
+                {title ? (
+                  <div className="settings-row">
+                    <dt>Board</dt>
+                    <dd className="board-title">{title}</dd>
                   </div>
                 ) : null}
                 <div className="settings-row !border-b-0">
